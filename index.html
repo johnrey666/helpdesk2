@@ -11,11 +11,44 @@
         * { margin:0; padding:0; box-sizing:border-box; }
         html, body {
             height: 100%;
-            background: #ffffff;
             font-family: 'Inter', sans-serif;
             color: #334155;
             font-size: 13px;
             line-height: 1.4;
+            transition: all 0.3s ease;
+        }
+
+        /* Light mode (default) */
+        :root {
+            --bg-color: #ffffff;
+            --surface-color: #ffffff;
+            --text-primary: #334155;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --border-color: #e2e8f0;
+            --hover-color: #f8fafc;
+            --header-bg: #f8fafc;
+            --shadow: 0 1px 3px rgba(0,0,0,0.05);
+            --modal-bg: rgba(0,0,0,0.5);
+        }
+
+        /* Dark mode */
+        .dark-mode {
+            --bg-color: #0f172a;
+            --surface-color: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --hover-color: #1e293b;
+            --header-bg: #1e293b;
+            --shadow: 0 1px 3px rgba(0,0,0,0.3);
+            --modal-bg: rgba(0,0,0,0.7);
+        }
+
+        body {
+            background: var(--bg-color);
+            color: var(--text-primary);
         }
 
         .container {
@@ -26,28 +59,44 @@
             gap: 12px;
         }
 
+        /* Theme Toggle */
+        .theme-toggle {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.2s;
+        }
+
+        .theme-toggle:hover {
+            background: var(--hover-color);
+        }
+
         /* Login Page */
         .login-container {
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: #f8fafc;
+            background: var(--header-bg);
         }
 
         .login-box {
-            background: white;
+            background: var(--surface-color);
             padding: 32px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: var(--shadow);
             width: 100%;
             max-width: 380px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border-color);
         }
 
         .login-box h1 {
             text-align: center;
-            color: #1e293b;
+            color: var(--text-primary);
             margin-bottom: 24px;
             font-size: 1.4rem;
             font-weight: 600;
@@ -60,7 +109,7 @@
         .form-group label {
             display: block;
             margin-bottom: 6px;
-            color: #475569;
+            color: var(--text-secondary);
             font-weight: 500;
             font-size: 12px;
         }
@@ -68,10 +117,11 @@
         .form-group select {
             width: 100%;
             padding: 10px 12px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border-color);
             border-radius: 6px;
             font-size: 13px;
-            background: white;
+            background: var(--surface-color);
+            color: var(--text-primary);
             transition: all 0.2s;
         }
 
@@ -105,14 +155,14 @@
             justify-content: space-between;
             align-items: center;
             padding: 16px 0;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid var(--border-color);
             margin-bottom: 12px;
         }
 
         .header h2 {
             font-size: 1.3rem;
             font-weight: 600;
-            color: #1e293b;
+            color: var(--text-primary);
         }
 
         .header-right {
@@ -123,14 +173,14 @@
         }
 
         .user-info { 
-            color: #64748b;
+            color: var(--text-secondary);
             font-weight: 500;
         }
 
         .logout-btn {
-            background: #f1f5f9;
-            color: #64748b;
-            border: 1px solid #e2e8f0;
+            background: var(--hover-color);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
             padding: 6px 12px;
             border-radius: 4px;
             font-size: 11px;
@@ -139,8 +189,8 @@
             transition: all 0.2s;
         }
         .logout-btn:hover { 
-            background: #e2e8f0;
-            color: #475569;
+            background: var(--border-color);
+            color: var(--text-primary);
         }
 
         /* Top Controls */
@@ -163,10 +213,11 @@
             flex: 1;
             min-width: 200px;
             padding: 8px 12px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border-color);
             border-radius: 6px;
             font-size: 12.5px;
-            background: white;
+            background: var(--surface-color);
+            color: var(--text-primary);
             transition: all 0.2s;
         }
 
@@ -178,10 +229,11 @@
 
         #userFilter {
             padding: 8px 12px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border-color);
             border-radius: 6px;
             font-size: 12.5px;
-            background: white;
+            background: var(--surface-color);
+            color: var(--text-primary);
             min-width: 140px;
             transition: all 0.2s;
         }
@@ -223,9 +275,9 @@
             align-items: center; 
             gap: 6px; 
             padding: 8px 16px; 
-            background: white;
-            color: #475569;
-            border: 1px solid #e2e8f0;
+            background: var(--surface-color);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
             border-radius: 6px; 
             font-weight: 500; 
             cursor: pointer; 
@@ -234,8 +286,8 @@
         }
         
         #exportBtn:hover, #printBtn:hover {
-            background: #f8fafc;
-            border-color: #cbd5e1;
+            background: var(--hover-color);
+            border-color: var(--border-color);
         }
         
         .export-options, .print-options { 
@@ -243,16 +295,16 @@
             position: absolute; 
             top: calc(100% + 4px); 
             right: 0; 
-            background: white; 
+            background: var(--surface-color); 
             border-radius: 6px; 
-            box-shadow: 0 4px 12px rgba(0,0,0,.1); 
+            box-shadow: 0 4px 12px rgba(0,0,0,.2); 
             overflow: hidden; 
             min-width: 180px; 
             z-index: 1000; 
             opacity: 0; 
             transform: translateY(-8px); 
             transition: all .2s ease; 
-            border: 1px solid #e2e8f0; 
+            border: 1px solid var(--border-color); 
         }
         
         /* Show dropdown when active class is added */
@@ -276,7 +328,7 @@
             cursor:pointer; 
             font-size:12px; 
             font-weight:500; 
-            color:#475569; 
+            color:var(--text-secondary); 
             transition:all .15s; 
         }
         
@@ -289,18 +341,18 @@
         
         .export-options button:hover,
         .print-options button:hover { 
-            background:#f1f5f9; 
-            color:#1e293b; 
+            background:var(--hover-color); 
+            color:var(--text-primary); 
         }
 
         /* Table */
         .table-wrapper {
             flex: 1;
-            background: white;
+            background: var(--surface-color);
             border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            border: 1px solid #e2e8f0;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
         }
@@ -312,12 +364,12 @@
         }
 
         .main-table th {
-            background: #f8fafc;
+            background: var(--header-bg);
             padding: 10px 12px;
             text-align: left;
             font-weight: 600;
-            color: #475569;
-            border-bottom: 1px solid #e2e8f0;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border-color);
             font-size: 11px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -328,7 +380,7 @@
         }
 
         .main-table th:hover {
-            background: #f1f5f9;
+            background: var(--hover-color);
         }
 
         .main-table th.sortable {
@@ -341,7 +393,7 @@
             top: 50%;
             transform: translateY(-50%);
             font-size: 10px;
-            color: #94a3b8;
+            color: var(--text-muted);
             transition: all 0.2s;
         }
 
@@ -360,44 +412,76 @@
 
         .main-table td {
             padding: 10px 12px;
-            border-bottom: 1px solid #f1f5f9;
+            border-bottom: 1px solid var(--border-color);
             vertical-align: top;
             line-height: 1.35;
         }
 
-        .main-table tr:hover { background: #f8fafc; }
+        .main-table tr:hover { background: var(--hover-color); }
 
-        /* Prevent line breaks for specific columns */
-        .main-table td:nth-child(1), /* Date */
-        .main-table td:nth-child(2), /* Location */
-        .main-table td:nth-child(3), /* Ticket ID */
-        .main-table td:nth-child(5), /* Requester */
-        .main-table td:nth-child(6), /* Assigned To */
-        .main-table td:nth-child(7), /* Category */
-        .main-table td:nth-child(9) { /* Actions */
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 150px;
-        }
-
-        /* Allow line breaks for Status column */
-        .main-table td:nth-child(8) {
+        /* Allow line breaks for ALL columns */
+        .main-table td {
             white-space: normal;
             word-wrap: break-word;
-            max-width: 200px;
+            max-width: none;
+        }
+
+        /* Specific column widths */
+        .main-table th:nth-child(1), /* Date */
+        .main-table td:nth-child(1) {
+            width: 100px;
+        }
+
+        .main-table th:nth-child(2), /* Location */
+        .main-table td:nth-child(2) {
+            width: 120px;
+        }
+
+        .main-table th:nth-child(3), /* Ticket ID */
+        .main-table td:nth-child(3) {
+            width: 100px;
+        }
+
+        .main-table th:nth-child(4), /* Title & Description */
+        .main-table td:nth-child(4) {
+            width: 200px;
+        }
+
+        .main-table th:nth-child(5), /* Requester */
+        .main-table td:nth-child(5) {
+            width: 120px;
+        }
+
+        .main-table th:nth-child(6), /* Assigned To */
+        .main-table td:nth-child(6) {
+            width: 120px;
+        }
+
+        .main-table th:nth-child(7), /* Category */
+        .main-table td:nth-child(7) {
+            width: 100px;
+        }
+
+        .main-table th:nth-child(8), /* Status */
+        .main-table td:nth-child(8) {
+            width: 150px;
+        }
+
+        .main-table th:nth-child(9), /* Actions */
+        .main-table td:nth-child(9) {
+            width: 100px;
         }
 
         .main-table td:nth-child(4) strong {
             font-size: 12.5px;
             display: block;
             margin-bottom: 2px;
-            color: #1e293b;
+            color: var(--text-primary);
         }
 
         .main-table td:nth-child(4) div:last-child {
             font-size: 11px;
-            color: #64748b;
+            color: var(--text-secondary);
             line-height: 1.4;
         }
 
@@ -408,9 +492,9 @@
 
         .actions button {
             padding: 4px 8px;
-            background: white;
-            border: 1px solid #e2e8f0;
-            color: #475569;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
             border-radius: 4px;
             font-size: 11px;
             font-weight: 500;
@@ -418,8 +502,8 @@
             transition: all 0.2s;
         }
         .actions button:hover { 
-            background: #f1f5f9;
-            border-color: #cbd5e1;
+            background: var(--hover-color);
+            border-color: var(--border-color);
         }
 
         .actions button.delete-btn {
@@ -427,9 +511,18 @@
             border-color: #fecaca;
             color: #dc2626;
         }
+        .dark-mode .actions button.delete-btn {
+            background: #7f1d1d;
+            border-color: #991b1b;
+            color: #fecaca;
+        }
         .actions button.delete-btn:hover { 
             background: #fecaca;
             color: #b91c1c;
+        }
+        .dark-mode .actions button.delete-btn:hover { 
+            background: #991b1b;
+            color: #fecaca;
         }
 
         /* Pagination */
@@ -438,14 +531,14 @@
             justify-content: space-between;
             align-items: center;
             padding: 12px 16px;
-            background: #f8fafc;
-            border-top: 1px solid #e2e8f0;
+            background: var(--header-bg);
+            border-top: 1px solid var(--border-color);
             flex-shrink: 0;
         }
 
         .pagination-info {
             font-size: 12px;
-            color: #64748b;
+            color: var(--text-secondary);
         }
 
         .pagination-controls {
@@ -456,18 +549,18 @@
 
         .pagination-btn {
             padding: 6px 10px;
-            background: white;
-            border: 1px solid #e2e8f0;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
             border-radius: 4px;
             font-size: 11px;
             cursor: pointer;
             transition: all 0.2s;
-            color: #475569;
+            color: var(--text-secondary);
         }
 
         .pagination-btn:hover {
-            background: #f1f5f9;
-            border-color: #cbd5e1;
+            background: var(--hover-color);
+            border-color: var(--border-color);
         }
 
         .pagination-btn.active {
@@ -487,7 +580,7 @@
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.5);
+            background: var(--modal-bg);
             justify-content: center;
             align-items: center;
             z-index: 1000;
@@ -499,7 +592,7 @@
         }
 
         .modal-content {
-            background: white;
+            background: var(--surface-color);
             width: 100%;
             max-width: 600px;
             max-height: 90vh;
@@ -517,7 +610,7 @@
         }
 
         .modal-header {
-            background: #f8fafc;
+            background: var(--header-bg);
             padding: 16px 20px;
             font-size: 1.2rem;
             font-weight: 600;
@@ -525,18 +618,18 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid var(--border-color);
         }
 
         .close-btn {
             font-size: 24px;
             cursor: pointer;
             opacity: 0.6;
-            color: #64748b;
+            color: var(--text-secondary);
         }
         .close-btn:hover { 
             opacity: 1;
-            color: #475569;
+            color: var(--text-primary);
         }
 
         .modal-body {
@@ -560,7 +653,7 @@
         .form-field label {
             font-size: 11.5px;
             font-weight: 600;
-            color: #475569;
+            color: var(--text-secondary);
             margin-bottom: 4px;
         }
 
@@ -571,10 +664,11 @@
         .form-field textarea {
             width: 100%;
             padding: 8px 10px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border-color);
             border-radius: 6px;
             font-size: 13px;
-            background: white;
+            background: var(--surface-color);
+            color: var(--text-primary);
             transition: all 0.2s;
         }
 
@@ -603,8 +697,8 @@
 
         .modal-footer {
             padding: 16px 20px;
-            background: white;
-            border-top: 1px solid #e2e8f0;
+            background: var(--surface-color);
+            border-top: 1px solid var(--border-color);
             display: flex;
             justify-content: flex-end;
             gap: 10px;
@@ -621,13 +715,13 @@
         }
 
         .btn-cancel {
-            background: white;
-            border: 1px solid #e2e8f0;
-            color: #64748b;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
         }
         .btn-cancel:hover { 
-            background: #f8fafc;
-            border-color: #cbd5e1;
+            background: var(--hover-color);
+            border-color: var(--border-color);
         }
 
         .btn-save {
@@ -650,14 +744,21 @@
         }
 
         .status-pending { background: #fef3c7; color: #d97706; }
+        .dark-mode .status-pending { background: #78350f; color: #fbbf24; }
+        
         .status-in-progress { background: #dbeafe; color: #1d4ed8; }
+        .dark-mode .status-in-progress { background: #1e3a8a; color: #60a5fa; }
+        
         .status-done { background: #dcfce7; color: #15803d; }
+        .dark-mode .status-done { background: #14532d; color: #4ade80; }
+        
         .status-cancelled { background: #fee2e2; color: #dc2626; }
+        .dark-mode .status-cancelled { background: #7f1d1d; color: #fca5a5; }
 
         /* Status note styling */
         .status-note {
             font-size: 11px;
-            color: #64748b;
+            color: var(--text-secondary);
             margin-top: 4px;
             line-height: 1.4;
             word-wrap: break-word;
@@ -670,8 +771,8 @@
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background: #1e293b;
-            color: white;
+            background: var(--surface-color);
+            color: var(--text-primary);
             padding: 10px 20px;
             border-radius: 6px;
             font-weight: 500;
@@ -680,6 +781,7 @@
             opacity: 0;
             transition: all 0.3s ease;
             box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            border: 1px solid var(--border-color);
         }
 
         .snackbar.show {
@@ -687,16 +789,17 @@
             transform: translateX(-50%) translateY(-8px);
         }
 
-        .snackbar.error { background: #ef4444; }
-        .snackbar.success { background: #10b981; }
+        .snackbar.error { background: #ef4444; color: white; }
+        .snackbar.success { background: #10b981; color: white; }
 
         /* Status filter in search row */
         .status-filter {
             padding: 8px 12px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border-color);
             border-radius: 6px;
             font-size: 12.5px;
-            background: white;
+            background: var(--surface-color);
+            color: var(--text-primary);
             min-width: 140px;
             transition: all 0.2s;
         }
@@ -736,6 +839,9 @@
             <div class="header">
                 <h2>Helpdesk Monitoring</h2>
                 <div class="header-right">
+                    <button id="themeToggle" class="theme-toggle">
+                        <i class="fas fa-moon"></i> Dark Mode
+                    </button>
                     <span class="user-info">Logged in as: <strong id="currentUser"></strong></span>
                     <button onclick="logout()" class="logout-btn">Logout</button>
                 </div>
@@ -821,7 +927,7 @@
                                 Title & Description <i class="fas fa-sort sort-icon"></i>
                             </th>
                             <th>Requester</th>
-                            <th>Reqiest To</th>
+                            <th>Request To</th>
                             <th>Category</th>
                             <th>Status</th>
                             <th>Actions</th>
@@ -877,13 +983,7 @@
                         </div>
                         <div class="form-field">
                             <label>Category <span class="required">*</span></label>
-                            <select id="category" required>
-                                <option>Hardware</option>
-                                <option>Software</option>
-                                <option>Network</option>
-                                <option>Access</option>
-                                <option>General</option>
-                            </select>
+                            <input type="text" id="category" placeholder="e.g. Hardware, Software" required>
                         </div>
                     </div>
 
@@ -948,6 +1048,29 @@
             field: 'date',
             direction: 'desc'
         };
+
+        // Theme functionality
+        function setupTheme() {
+            const themeToggle = document.getElementById('themeToggle');
+            const isDarkMode = localStorage.getItem('darkMode') === 'true';
+            
+            if (isDarkMode) {
+                document.body.classList.add('dark-mode');
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
+            }
+            
+            themeToggle.addEventListener('click', () => {
+                document.body.classList.toggle('dark-mode');
+                const isDark = document.body.classList.contains('dark-mode');
+                localStorage.setItem('darkMode', isDark);
+                
+                if (isDark) {
+                    themeToggle.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
+                } else {
+                    themeToggle.innerHTML = '<i class="fas fa-moon"></i> Dark Mode';
+                }
+            });
+        }
 
         // Enhanced Export & Print Dropdown Functionality
         function setupExportDropdown() {
@@ -1176,7 +1299,7 @@
         window.openModal = async (id = null) => {
             editingTicketId = id;
             document.getElementById('modal').classList.add('show');
-            document.getElementById('modalTitle').textContent = id ? 'Edit Ticket' : 'New Ticket';
+            document.getElementById('modalTitle').textContent = id ? 'Update Ticket' : 'New Ticket';
             document.getElementById('saveBtnText').textContent = id ? 'Update' : 'Save';
 
             if (id) {
@@ -1188,7 +1311,7 @@
                     document.getElementById('titleDesc').value = data.title_description || '';
                     document.getElementById('requester').value = data.requester || '';
                     document.getElementById('assigned').value = data.assigned_to || '';
-                    document.getElementById('category').value = data.category || 'Hardware';
+                    document.getElementById('category').value = data.category || '';
                     document.getElementById('statusSelect').value = data.status || 'Pending';
                     document.getElementById('statusNote').value = data.status_note || '';
                 }
@@ -1217,7 +1340,7 @@
                 title, description: desc,
                 requester: document.getElementById('requester').value.trim(),
                 assigned_to: document.getElementById('assigned').value.trim() || null,
-                category: document.getElementById('category').value,
+                category: document.getElementById('category').value.trim(),
                 status: document.getElementById('statusSelect').value,
                 status_note: document.getElementById('statusNote').value.trim() || null,
                 created_by: currentUser
@@ -1247,7 +1370,7 @@
 
         async function loadTickets() {
             const tbody = document.getElementById('tableBody');
-            tbody.innerHTML = '<tr><td colspan="9" style="padding:40px;text-align:center;color:#888;">Loading...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="9" style="padding:40px;text-align:center;color:var(--text-secondary);">Loading...</td></tr>';
 
             let query = supabase.from('tickets').select('*', { count: 'exact' }).order('date', { ascending: false });
 
@@ -1281,7 +1404,7 @@
             const pageTickets = filteredTickets.slice(startIndex, endIndex);
 
             tbody.innerHTML = pageTickets.length === 0
-                ? '<tr><td colspan="9" style="padding:60px;text-align:center;color:#888;">No tickets found</td></tr>'
+                ? '<tr><td colspan="9" style="padding:60px;text-align:center;color:var(--text-secondary);">No tickets found</td></tr>'
                 : '';
 
             pageTickets.forEach(t => {
@@ -1298,16 +1421,16 @@
 
                 const row = tbody.insertRow();
                 row.innerHTML = 
-                    `<td title="${t.date}">${t.date}</td>
-                    <td title="${t.location || '-'}">${t.location || '-'}</td>
-                    <td title="${t.ticket_id || '-'}">${t.ticket_id || '-'}</td>
+                    `<td>${t.date}</td>
+                    <td>${t.location || '-'}</td>
+                    <td>${t.ticket_id || '-'}</td>
                     <td><strong>${title}</strong><div>${desc}</div></td>
-                    <td title="${t.requester}">${t.requester}</td>
-                    <td title="${t.assigned_to || '-'}">${t.assigned_to || '-'}</td>
-                    <td title="${t.category}">${t.category}</td>
+                    <td>${t.requester}</td>
+                    <td>${t.assigned_to || '-'}</td>
+                    <td>${t.category}</td>
                     <td>${statusDisplay}</td>
                     <td class="actions">
-                        <button onclick="openModal(${t.id})">Edit</button>
+                        <button onclick="openModal(${t.id})">Update</button>
                         <button class="delete-btn" onclick="deleteTicket(${t.id})">Delete</button>
                     </td>`;
             });
@@ -1566,6 +1689,7 @@
 
         // Initialize functionality
         document.addEventListener('DOMContentLoaded', function() {
+            setupTheme();
             setupExportDropdown();
             setupPrintDropdown();
             setupDropdownCloseHandlers();
