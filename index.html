@@ -1,0 +1,1583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Helpdesk Monitoring System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        html, body {
+            height: 100%;
+            background: #ffffff;
+            font-family: 'Inter', sans-serif;
+            color: #334155;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .container {
+            min-height: 100vh;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* Login Page */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #f8fafc;
+        }
+
+        .login-box {
+            background: white;
+            padding: 32px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            width: 100%;
+            max-width: 380px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .login-box h1 {
+            text-align: center;
+            color: #1e293b;
+            margin-bottom: 24px;
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: #475569;
+            font-weight: 500;
+            font-size: 12px;
+        }
+
+        .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 13px;
+            background: white;
+            transition: all 0.2s;
+        }
+
+        .form-group select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 10px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-login:hover { 
+            background: #2563eb;
+        }
+
+        /* Dashboard */
+        .dashboard { display: none; }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid #e2e8f0;
+            margin-bottom: 12px;
+        }
+
+        .header h2 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 11.5px;
+        }
+
+        .user-info { 
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .logout-btn {
+            background: #f1f5f9;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .logout-btn:hover { 
+            background: #e2e8f0;
+            color: #475569;
+        }
+
+        /* Top Controls */
+        .top-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .left-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex: 1;
+        }
+
+        #searchInput {
+            flex: 1;
+            min-width: 200px;
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 12.5px;
+            background: white;
+            transition: all 0.2s;
+        }
+
+        #searchInput:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        #userFilter {
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 12.5px;
+            background: white;
+            min-width: 140px;
+            transition: all 0.2s;
+        }
+
+        #userFilter:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        #addBtn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+            background: #3b82f6;
+            color: white;
+        }
+        #addBtn:hover { 
+            background: #2563eb;
+        }
+
+        /* Export & Print Dropdowns */
+        .export-dropdown, .print-dropdown { 
+            position: relative; 
+            display: inline-block; 
+        }
+        
+        #exportBtn, #printBtn { 
+            display: flex; 
+            align-items: center; 
+            gap: 6px; 
+            padding: 8px 16px; 
+            background: white;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px; 
+            font-weight: 500; 
+            cursor: pointer; 
+            font-size: 12px;
+            transition: all 0.2s; 
+        }
+        
+        #exportBtn:hover, #printBtn:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+        }
+        
+        .export-options, .print-options { 
+            display: none; 
+            position: absolute; 
+            top: calc(100% + 4px); 
+            right: 0; 
+            background: white; 
+            border-radius: 6px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,.1); 
+            overflow: hidden; 
+            min-width: 180px; 
+            z-index: 1000; 
+            opacity: 0; 
+            transform: translateY(-8px); 
+            transition: all .2s ease; 
+            border: 1px solid #e2e8f0; 
+        }
+        
+        /* Show dropdown when active class is added */
+        .export-dropdown.active .export-options,
+        .print-dropdown.active .print-options { 
+            display: block; 
+            opacity: 1; 
+            transform: translateY(0); 
+        }
+        
+        .export-options button,
+        .print-options button { 
+            display:flex; 
+            align-items:center; 
+            gap: 8px; 
+            width:100%; 
+            padding: 10px 12px; 
+            border:none; 
+            background:transparent; 
+            text-align:left; 
+            cursor:pointer; 
+            font-size:12px; 
+            font-weight:500; 
+            color:#475569; 
+            transition:all .15s; 
+        }
+        
+        .export-options button i,
+        .print-options button i { 
+            width:14px; 
+            font-size:12px; 
+            opacity:.7; 
+        }
+        
+        .export-options button:hover,
+        .print-options button:hover { 
+            background:#f1f5f9; 
+            color:#1e293b; 
+        }
+
+        /* Table */
+        .table-wrapper {
+            flex: 1;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12.5px;
+        }
+
+        .main-table th {
+            background: #f8fafc;
+            padding: 10px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #475569;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .main-table th:hover {
+            background: #f1f5f9;
+        }
+
+        .main-table th.sortable {
+            padding-right: 20px;
+        }
+
+        .sort-icon {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 10px;
+            color: #94a3b8;
+            transition: all 0.2s;
+        }
+
+        .main-table th.sort-asc .sort-icon,
+        .main-table th.sort-desc .sort-icon {
+            color: #3b82f6;
+        }
+
+        .main-table th.sort-asc .sort-icon {
+            transform: translateY(-50%);
+        }
+
+        .main-table th.sort-desc .sort-icon {
+            transform: translateY(-50%) rotate(180deg);
+        }
+
+        .main-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: top;
+            line-height: 1.35;
+        }
+
+        .main-table tr:hover { background: #f8fafc; }
+
+        /* Prevent line breaks for specific columns */
+        .main-table td:nth-child(1), /* Date */
+        .main-table td:nth-child(2), /* Location */
+        .main-table td:nth-child(3), /* Ticket ID */
+        .main-table td:nth-child(5), /* Requester */
+        .main-table td:nth-child(6), /* Assigned To */
+        .main-table td:nth-child(7), /* Category */
+        .main-table td:nth-child(9) { /* Actions */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 150px;
+        }
+
+        /* Allow line breaks for Status column */
+        .main-table td:nth-child(8) {
+            white-space: normal;
+            word-wrap: break-word;
+            max-width: 200px;
+        }
+
+        .main-table td:nth-child(4) strong {
+            font-size: 12.5px;
+            display: block;
+            margin-bottom: 2px;
+            color: #1e293b;
+        }
+
+        .main-table td:nth-child(4) div:last-child {
+            font-size: 11px;
+            color: #64748b;
+            line-height: 1.4;
+        }
+
+        .actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .actions button {
+            padding: 4px 8px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            color: #475569;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .actions button:hover { 
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+
+        .actions button.delete-btn {
+            background: #fef2f2;
+            border-color: #fecaca;
+            color: #dc2626;
+        }
+        .actions button.delete-btn:hover { 
+            background: #fecaca;
+            color: #b91c1c;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            flex-shrink: 0;
+        }
+
+        .pagination-info {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .pagination-controls {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .pagination-btn {
+            padding: 6px 10px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #475569;
+        }
+
+        .pagination-btn:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+
+        .pagination-btn.active {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            color: white;
+            font-weight: 500;
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ==================== MODAL ==================== */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 16px;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            animation: modalIn 0.3s ease-out;
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: translateY(-20px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .modal-header {
+            background: #f8fafc;
+            padding: 16px 20px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            flex-shrink: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .close-btn {
+            font-size: 24px;
+            cursor: pointer;
+            opacity: 0.6;
+            color: #64748b;
+        }
+        .close-btn:hover { 
+            opacity: 1;
+            color: #475569;
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+            max-height: calc(90vh - 140px);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .form-field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-field label {
+            font-size: 11.5px;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 4px;
+        }
+
+        .required { color: #ef4444; }
+
+        .form-field input,
+        .form-field select,
+        .form-field textarea {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 13px;
+            background: white;
+            transition: all 0.2s;
+        }
+
+        .form-field input:focus,
+        .form-field select:focus,
+        .form-field textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .full-width { grid-column: 1 / -1; margin-top: 8px; }
+
+        .status-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .status-row .form-field { flex: 1; }
+
+        .modal-footer {
+            padding: 16px 20px;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .btn-cancel, .btn-save {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 12.5px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-cancel {
+            background: white;
+            border: 1px solid #e2e8f0;
+            color: #64748b;
+        }
+        .btn-cancel:hover { 
+            background: #f8fafc;
+            border-color: #cbd5e1;
+        }
+
+        .btn-save {
+            background: #3b82f6;
+            border: 1px solid #3b82f6;
+            color: white;
+        }
+        .btn-save:hover {
+            background: #2563eb;
+        }
+
+        /* Status badges */
+        .status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 10.5px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-pending { background: #fef3c7; color: #d97706; }
+        .status-in-progress { background: #dbeafe; color: #1d4ed8; }
+        .status-done { background: #dcfce7; color: #15803d; }
+        .status-cancelled { background: #fee2e2; color: #dc2626; }
+
+        /* Status note styling */
+        .status-note {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 4px;
+            line-height: 1.4;
+            word-wrap: break-word;
+            white-space: normal;
+        }
+
+        /* Snackbar */
+        .snackbar {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e293b;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 12.5px;
+            z-index: 10000;
+            opacity: 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        .snackbar.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-8px);
+        }
+
+        .snackbar.error { background: #ef4444; }
+        .snackbar.success { background: #10b981; }
+
+        /* Status filter in search row */
+        .status-filter {
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 12.5px;
+            background: white;
+            min-width: 140px;
+            transition: all 0.2s;
+        }
+
+        .status-filter:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Login Page -->
+    <div id="loginPage" class="login-container">
+        <div class="login-box">
+            <h1>Helpdesk Monitor</h1>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Select Your Name</label>
+                    <select id="username" required>
+                        <option value="">-- Select User --</option>
+                        <option value="Admin">Admin</option>
+                        <option value="CTK">CTK</option>
+                        <option value="FO">FO</option>
+                        <option value="Concourse">Concourse</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-login">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard" class="dashboard">
+        <div class="container">
+            <div class="header">
+                <h2>Helpdesk Monitoring</h2>
+                <div class="header-right">
+                    <span class="user-info">Logged in as: <strong id="currentUser"></strong></span>
+                    <button onclick="logout()" class="logout-btn">Logout</button>
+                </div>
+            </div>
+
+            <div class="top-controls">
+                <div class="left-controls">
+                    <input type="text" id="searchInput" placeholder="Search tickets...">
+                    <select id="statusFilter" class="status-filter">
+                        <option value="">All Status</option>
+                        <option value="Pending">Pending</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Done">Done</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                    <select id="userFilter" style="display:none;">
+                        <option value="">All Users</option>
+                        <option value="CTK">CTK</option>
+                        <option value="FO">FO</option>
+                        <option value="Concourse">Concourse</option>
+                        <option value="Admin">Admin</option>
+                    </select>
+                </div>
+                <div class="action-buttons">
+                    <!-- Print Dropdown -->
+                    <div class="print-dropdown" id="printDropdown">
+                        <button id="printBtn">
+                            <i class="fas fa-print"></i> Print
+                        </button>
+                        <div class="print-options">
+                            <button data-print="all">
+                                <i class="fas fa-print"></i> Print All Data
+                            </button>
+                            <button data-print="pending">
+                                <i class="fas fa-clock"></i> Print Pending Only
+                            </button>
+                            <button data-print="in-progress">
+                                <i class="fas fa-spinner"></i> Print In Progress Only
+                            </button>
+                            <button data-print="done">
+                                <i class="fas fa-check"></i> Print Done Only
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Export Dropdown -->
+                    <div class="export-dropdown" id="exportDropdown">
+                        <button id="exportBtn">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                        <div class="export-options">
+                            <button data-export="all">
+                                <i class="fas fa-file-excel"></i> Export All Data
+                            </button>
+                            <button data-export="pending">
+                                <i class="fas fa-clock"></i> Export Pending Only
+                            </button>
+                            <button data-export="in-progress">
+                                <i class="fas fa-spinner"></i> Export In Progress Only
+                            </button>
+                            <button data-export="done">
+                                <i class="fas fa-check"></i> Export Done Only
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button id="addBtn" onclick="openModal()">+ New Ticket</button>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <table class="main-table">
+                    <thead>
+                        <tr>
+                            <th class="sortable" data-sort="date">
+                                Date <i class="fas fa-sort sort-icon"></i>
+                            </th>
+                            <th class="sortable" data-sort="location">
+                                Location <i class="fas fa-sort sort-icon"></i>
+                            </th>
+                            <th>ID</th>
+                            <th class="sortable" data-sort="title">
+                                Title & Description <i class="fas fa-sort sort-icon"></i>
+                            </th>
+                            <th>Requester</th>
+                            <th>Reqiest To</th>
+                            <th>Category</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+                
+                <div class="pagination">
+                    <div class="pagination-info" id="paginationInfo">Showing 0 of 0 tickets</div>
+                    <div class="pagination-controls">
+                        <button class="pagination-btn" id="firstPage" onclick="goToPage(1)">First</button>
+                        <button class="pagination-btn" id="prevPage" onclick="goToPage(currentPage - 1)">Previous</button>
+                        <span id="pageNumbers"></span>
+                        <button class="pagination-btn" id="nextPage" onclick="goToPage(currentPage + 1)">Next</button>
+                        <button class="pagination-btn" id="lastPage" onclick="goToPage(totalPages)">Last</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fixed Modal -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">New Ticket</h2>
+                <span class="close-btn" onclick="closeModal()">×</span>
+            </div>
+
+            <form id="ticketForm" onsubmit="event.preventDefault(); saveTicket();">
+                <div class="modal-body">
+                    <div class="form-grid">
+                        <div class="form-field">
+                            <label>Date <span class="required">*</span></label>
+                            <input type="date" id="date" required>
+                        </div>
+                        <div class="form-field">
+                            <label>Location <span class="required">*</span></label>
+                            <input type="text" id="location" placeholder="e.g. Room 301" required>
+                        </div>
+                        <div class="form-field">
+                            <label>Ticket ID</label>
+                            <input type="text" id="ticketId" placeholder="TKT-001">
+                        </div>
+                        <div class="form-field">
+                            <label>Requester <span class="required">*</span></label>
+                            <input type="text" id="requester" required>
+                        </div>
+                        <div class="form-field">
+                            <label>Request To</label>
+                            <input type="text" id="assigned" placeholder="Optional">
+                        </div>
+                        <div class="form-field">
+                            <label>Category <span class="required">*</span></label>
+                            <select id="category" required>
+                                <option>Hardware</option>
+                                <option>Software</option>
+                                <option>Network</option>
+                                <option>Access</option>
+                                <option>General</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-field full-width">
+                        <label>Title & Description <span class="required">*</span></label>
+                        <textarea id="titleDesc" rows="4" placeholder="Title on first line&#10;Full description below..." required></textarea>
+                    </div>
+
+                    <div class="status-row">
+                        <div class="form-field">
+                            <label>Status <span class="required">*</span></label>
+                            <select id="statusSelect" required>
+                                <option>Pending</option>
+                                <option>In Progress</option>
+                                <option>Done</option>
+                                <option>Cancelled</option>
+                            </select>
+                        </div>
+                        <div class="form-field">
+                            <label>Note (optional)</label>
+                            <input type="text" id="statusNote" placeholder="e.g. Waiting for approval">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn-save">
+                        <span id="saveBtnText">Save Ticket</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="snackbar" class="snackbar">Saved!</div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+        const SUPABASE_URL = 'https://crdevgfrptdhhgqnpqzk.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_nLYTInAlXEqxy6YbMIxKpw_ZacBlomD';
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let currentUser = localStorage.getItem('helpdeskUser') || '';
+        let editingTicketId = null;
+        let currentPage = 1;
+        const itemsPerPage = 10;
+        let totalTickets = 0;
+        let totalPages = 1;
+        let allTickets = [];
+        let filteredTickets = [];
+
+        // Filter state
+        let filterState = {
+            search: '',
+            status: ''
+        };
+
+        // Sort state
+        let sortState = {
+            field: 'date',
+            direction: 'desc'
+        };
+
+        // Enhanced Export & Print Dropdown Functionality
+        function setupExportDropdown() {
+            const exportDropdown = document.getElementById('exportDropdown');
+            const exportBtn = document.getElementById('exportBtn');
+            const exportOptions = document.querySelectorAll('.export-options button');
+            
+            // Toggle dropdown on button click
+            exportBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                exportDropdown.classList.toggle('active');
+            });
+            
+            // Handle export option clicks
+            exportOptions.forEach(option => {
+                option.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const exportType = this.getAttribute('data-export');
+                    exportToExcel(exportType);
+                    exportDropdown.classList.remove('active');
+                });
+            });
+        }
+
+        function setupPrintDropdown() {
+            const printDropdown = document.getElementById('printDropdown');
+            const printBtn = document.getElementById('printBtn');
+            const printOptions = document.querySelectorAll('.print-options button');
+            
+            // Toggle dropdown on button click
+            printBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                printDropdown.classList.toggle('active');
+            });
+            
+            // Handle print option clicks
+            printOptions.forEach(option => {
+                option.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const printType = this.getAttribute('data-print');
+                    handlePrint(printType);
+                    printDropdown.classList.remove('active');
+                });
+            });
+        }
+
+        // Close dropdowns when clicking outside
+        function setupDropdownCloseHandlers() {
+            document.addEventListener('click', function() {
+                document.getElementById('exportDropdown').classList.remove('active');
+                document.getElementById('printDropdown').classList.remove('active');
+            });
+            
+            // Prevent dropdowns from closing when clicking inside
+            document.getElementById('exportDropdown').addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+            
+            document.getElementById('printDropdown').addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+        }
+
+        // Sort functionality
+        function setupSorting() {
+            const sortableHeaders = document.querySelectorAll('th.sortable');
+            
+            sortableHeaders.forEach(header => {
+                header.addEventListener('click', function() {
+                    const field = this.dataset.sort;
+                    
+                    // If clicking the same field, toggle direction
+                    if (sortState.field === field) {
+                        sortState.direction = sortState.direction === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        // If clicking a different field, set to default descending
+                        sortState.field = field;
+                        sortState.direction = 'desc';
+                    }
+                    
+                    // Update UI
+                    updateSortIcons();
+                    
+                    // Apply sorting
+                    applySorting();
+                });
+            });
+        }
+
+        function updateSortIcons() {
+            // Remove all sort classes
+            document.querySelectorAll('th.sortable').forEach(header => {
+                header.classList.remove('sort-asc', 'sort-desc');
+            });
+            
+            // Add appropriate class to active sort header
+            const activeHeader = document.querySelector(`th[data-sort="${sortState.field}"]`);
+            if (activeHeader) {
+                activeHeader.classList.add(sortState.direction === 'asc' ? 'sort-asc' : 'sort-desc');
+            }
+        }
+
+        function applySorting() {
+            filteredTickets.sort((a, b) => {
+                let valueA, valueB;
+                
+                switch (sortState.field) {
+                    case 'date':
+                        valueA = a.date;
+                        valueB = b.date;
+                        break;
+                    case 'location':
+                        valueA = (a.location || '').toLowerCase();
+                        valueB = (b.location || '').toLowerCase();
+                        break;
+                    case 'title':
+                        valueA = (a.title_description || '').toLowerCase();
+                        valueB = (b.title_description || '').toLowerCase();
+                        break;
+                    default:
+                        return 0;
+                }
+                
+                // Handle empty values
+                if (!valueA) valueA = '';
+                if (!valueB) valueB = '';
+                
+                let result = 0;
+                if (valueA < valueB) result = -1;
+                if (valueA > valueB) result = 1;
+                
+                // Reverse for descending order
+                return sortState.direction === 'desc' ? -result : result;
+            });
+            
+            currentPage = 1;
+            renderTable();
+            updatePagination();
+        }
+
+        // Filter functionality
+        function setupFilters() {
+            const statusFilter = document.getElementById('statusFilter');
+            const searchInput = document.getElementById('searchInput');
+
+            statusFilter.addEventListener('change', applyFilters);
+            searchInput.addEventListener('input', applyFilters);
+        }
+
+        function applyFilters() {
+            filterState = {
+                status: document.getElementById('statusFilter').value,
+                search: document.getElementById('searchInput').value.toLowerCase()
+            };
+
+            filteredTickets = allTickets.filter(ticket => {
+                // Status filter
+                if (filterState.status && ticket.status !== filterState.status) {
+                    return false;
+                }
+
+                // Global search
+                if (filterState.search) {
+                    const searchText = filterState.search;
+                    const searchableText = [
+                        ticket.date,
+                        ticket.location,
+                        ticket.ticket_id,
+                        ticket.title_description,
+                        ticket.requester,
+                        ticket.assigned_to,
+                        ticket.category,
+                        ticket.status,
+                        ticket.status_note
+                    ].join(' ').toLowerCase();
+
+                    if (!searchableText.includes(searchText)) {
+                        return false;
+                    }
+                }
+
+                return true;
+            });
+
+            // Apply current sorting to filtered results
+            applySorting();
+        }
+
+        function showSnackbar(msg, type = 'info') {
+            const s = document.getElementById('snackbar');
+            s.textContent = msg;
+            s.className = 'snackbar';
+            if (type === 'success') s.classList.add('success');
+            if (type === 'error') s.classList.add('error');
+            s.classList.add('show');
+            setTimeout(() => s.classList.remove('show'), 3000);
+        }
+
+        function checkLogin() {
+            if (currentUser) {
+                document.getElementById('currentUser').textContent = currentUser;
+                document.getElementById('loginPage').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                if (currentUser === 'Admin') {
+                    document.getElementById('userFilter').style.display = 'block';
+                }
+                loadTickets();
+            }
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', e => {
+            e.preventDefault();
+            currentUser = document.getElementById('username').value.trim();
+            if (!currentUser) return showSnackbar('Select a user', 'error');
+            localStorage.setItem('helpdeskUser', currentUser);
+            checkLogin();
+        });
+
+        window.logout = () => {
+            if (confirm('Log out?')) {
+                localStorage.removeItem('helpdeskUser');
+                location.reload();
+            }
+        };
+
+        window.openModal = async (id = null) => {
+            editingTicketId = id;
+            document.getElementById('modal').classList.add('show');
+            document.getElementById('modalTitle').textContent = id ? 'Edit Ticket' : 'New Ticket';
+            document.getElementById('saveBtnText').textContent = id ? 'Update' : 'Save';
+
+            if (id) {
+                const { data } = await supabase.from('tickets').select('*').eq('id', id).single();
+                if (data) {
+                    document.getElementById('date').value = data.date || '';
+                    document.getElementById('location').value = data.location || '';
+                    document.getElementById('ticketId').value = data.ticket_id || '';
+                    document.getElementById('titleDesc').value = data.title_description || '';
+                    document.getElementById('requester').value = data.requester || '';
+                    document.getElementById('assigned').value = data.assigned_to || '';
+                    document.getElementById('category').value = data.category || 'Hardware';
+                    document.getElementById('statusSelect').value = data.status || 'Pending';
+                    document.getElementById('statusNote').value = data.status_note || '';
+                }
+            } else {
+                document.getElementById('ticketForm').reset();
+                document.getElementById('date').value = new Date().toISOString().split('T')[0];
+                document.getElementById('requester').value = currentUser;
+            }
+        };
+
+        window.closeModal = () => document.getElementById('modal').classList.remove('show');
+
+        window.saveTicket = async () => {
+            const form = document.getElementById('ticketForm');
+            if (!form.checkValidity()) { form.reportValidity(); return; }
+
+            const lines = document.getElementById('titleDesc').value.trim().split('\n');
+            const title = lines[0] || '(No title)';
+            const desc = lines.slice(1).join('\n').trim();
+
+            const data = {
+                date: document.getElementById('date').value,
+                location: document.getElementById('location').value.trim(),
+                ticket_id: document.getElementById('ticketId').value.trim() || null,
+                title_description: document.getElementById('titleDesc').value.trim(),
+                title, description: desc,
+                requester: document.getElementById('requester').value.trim(),
+                assigned_to: document.getElementById('assigned').value.trim() || null,
+                category: document.getElementById('category').value,
+                status: document.getElementById('statusSelect').value,
+                status_note: document.getElementById('statusNote').value.trim() || null,
+                created_by: currentUser
+            };
+
+            try {
+                if (editingTicketId) {
+                    await supabase.from('tickets').update(data).eq('id', editingTicketId);
+                    showSnackbar('Updated!', 'success');
+                } else {
+                    await supabase.from('tickets').insert([data]);
+                    showSnackbar('Created!', 'success');
+                }
+                closeModal();
+                loadTickets();
+            } catch (err) {
+                showSnackbar('Error: ' + err.message, 'error');
+            }
+        };
+
+        window.deleteTicket = async id => {
+            if (!confirm('Delete permanently?')) return;
+            await supabase.from('tickets').delete().eq('id', id);
+            showSnackbar('Deleted', 'success');
+            loadTickets();
+        };
+
+        async function loadTickets() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '<tr><td colspan="9" style="padding:40px;text-align:center;color:#888;">Loading...</td></tr>';
+
+            let query = supabase.from('tickets').select('*', { count: 'exact' }).order('date', { ascending: false });
+
+            const filter = document.getElementById('userFilter').value;
+            if (currentUser !== 'Admin') {
+                query = query.eq('created_by', currentUser);
+            } else if (filter) {
+                query = query.eq('created_by', filter);
+            }
+
+            const { data: tickets, error, count } = await query;
+
+            if (error || !tickets) {
+                tbody.innerHTML = '<tr><td colspan="9" style="padding:40px;color:#ef4444;">Error loading tickets</td></tr>';
+                return;
+            }
+
+            allTickets = tickets;
+            filteredTickets = [...allTickets];
+            totalTickets = count;
+            totalPages = Math.ceil(totalTickets / itemsPerPage);
+            
+            // Apply initial sorting
+            applySorting();
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = Math.min(startIndex + itemsPerPage, filteredTickets.length);
+            const pageTickets = filteredTickets.slice(startIndex, endIndex);
+
+            tbody.innerHTML = pageTickets.length === 0
+                ? '<tr><td colspan="9" style="padding:60px;text-align:center;color:#888;">No tickets found</td></tr>'
+                : '';
+
+            pageTickets.forEach(t => {
+                const lines = (t.title_description || '').split('\n');
+                const title = lines[0] || '(No title)';
+                const desc = lines.slice(1).join('\n').trim();
+                const statusClass = `status-${t.status.toLowerCase().replace(' ', '-')}`;
+                
+                // Create status display with proper line breaks for status note
+                let statusDisplay = `<span class="status-badge ${statusClass}">${t.status}</span>`;
+                if (t.status_note) {
+                    statusDisplay += `<div class="status-note">${t.status_note}</div>`;
+                }
+
+                const row = tbody.insertRow();
+                row.innerHTML = 
+                    `<td title="${t.date}">${t.date}</td>
+                    <td title="${t.location || '-'}">${t.location || '-'}</td>
+                    <td title="${t.ticket_id || '-'}">${t.ticket_id || '-'}</td>
+                    <td><strong>${title}</strong><div>${desc}</div></td>
+                    <td title="${t.requester}">${t.requester}</td>
+                    <td title="${t.assigned_to || '-'}">${t.assigned_to || '-'}</td>
+                    <td title="${t.category}">${t.category}</td>
+                    <td>${statusDisplay}</td>
+                    <td class="actions">
+                        <button onclick="openModal(${t.id})">Edit</button>
+                        <button class="delete-btn" onclick="deleteTicket(${t.id})">Delete</button>
+                    </td>`;
+            });
+        }
+
+        function updatePagination() {
+            const startIndex = (currentPage - 1) * itemsPerPage + 1;
+            const endIndex = Math.min(currentPage * itemsPerPage, filteredTickets.length);
+            
+            document.getElementById('paginationInfo').textContent = 
+                `Showing ${startIndex} to ${endIndex} of ${filteredTickets.length} tickets`;
+            
+            // Update pagination buttons
+            document.getElementById('firstPage').disabled = currentPage === 1;
+            document.getElementById('prevPage').disabled = currentPage === 1;
+            document.getElementById('nextPage').disabled = currentPage === totalPages;
+            document.getElementById('lastPage').disabled = currentPage === totalPages;
+            
+            // Generate page number buttons
+            const pageNumbersContainer = document.getElementById('pageNumbers');
+            pageNumbersContainer.innerHTML = '';
+            
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            
+            if (endPage - startPage + 1 < maxVisiblePages) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.className = `pagination-btn ${i === currentPage ? 'active' : ''}`;
+                pageBtn.textContent = i;
+                pageBtn.onclick = () => goToPage(i);
+                pageNumbersContainer.appendChild(pageBtn);
+            }
+        }
+
+        function goToPage(page) {
+            if (page < 1 || page > totalPages) return;
+            currentPage = page;
+            renderTable();
+            updatePagination();
+        }
+
+        // Enhanced Export to Excel Functionality
+        window.exportToExcel = function(exportType = 'all') {
+            if (allTickets.length === 0) {
+                showSnackbar('No data to export', 'error');
+                return;
+            }
+
+            // Filter tickets based on export type
+            let ticketsToExport = [...allTickets];
+            if (exportType !== 'all') {
+                ticketsToExport = allTickets.filter(ticket => 
+                    ticket.status.toLowerCase().replace(' ', '-') === exportType
+                );
+            }
+
+            if (ticketsToExport.length === 0) {
+                showSnackbar(`No ${exportType} tickets to export`, 'error');
+                return;
+            }
+
+            // Prepare data for Excel
+            const data = [
+                ['Helpdesk Tickets Export'],
+                ['Generated', new Date().toLocaleString('en-PH')],
+                ['Export Type', getExportTypeDisplayName(exportType)],
+                ['Total Tickets', ticketsToExport.length],
+                [''],
+                ['Date', 'Location', 'Ticket ID', 'Title & Description', 'Requester', 'Request To', 'Category', 'Status']
+            ];
+
+            ticketsToExport.forEach(ticket => {
+                // Combine Title & Description in one cell
+                const titleDesc = ticket.title_description || '(No title)';
+                
+                // Combine Status with Status Note
+                let statusDisplay = ticket.status;
+                if (ticket.status_note) {
+                    statusDisplay += ` - ${ticket.status_note}`;
+                }
+
+                data.push([
+                    ticket.date,
+                    ticket.location || '',
+                    ticket.ticket_id || '',
+                    titleDesc,
+                    ticket.requester,
+                    ticket.assigned_to || '',
+                    ticket.category,
+                    statusDisplay
+                ]);
+            });
+
+            // Create worksheet
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            
+            // Set column widths
+            ws['!cols'] = [
+                {wch: 12}, // Date
+                {wch: 15}, // Location
+                {wch: 12}, // Ticket ID
+                {wch: 50}, // Title & Description (wider for combined content)
+                {wch: 15}, // Requester
+                {wch: 15}, // Assigned To
+                {wch: 12}, // Category
+                {wch: 25}  // Status (wider for status + note)
+            ];
+
+            // Style header row (row 5 is the column headers)
+            const range = XLSX.utils.decode_range(ws['!ref']);
+            for (let C = range.s.c; C <= range.e.c; ++C) {
+                const cell = ws[XLSX.utils.encode_cell({r: 5, c: C})];
+                if (cell) cell.s = { font: { bold: true } };
+            }
+
+            // Create workbook and save
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Helpdesk Tickets');
+            
+            const fileName = `Helpdesk_Tickets_${getExportTypeDisplayName(exportType).replace(/\s+/g, '_')}_${new Date().toISOString().slice(0,10)}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+            
+            showSnackbar(`Exported ${getExportTypeDisplayName(exportType).toLowerCase()} successfully!`, 'success');
+        };
+
+        function getExportTypeDisplayName(exportType) {
+            switch(exportType) {
+                case 'all': return 'All Data';
+                case 'pending': return 'Pending Only';
+                case 'in-progress': return 'In Progress Only';
+                case 'done': return 'Done Only';
+                default: return exportType;
+            }
+        }
+
+        // Print Functionality
+        window.handlePrint = function(printType = 'all') {
+            if (allTickets.length === 0) {
+                showSnackbar('No data to print', 'error');
+                return;
+            }
+
+            // Filter tickets based on print type
+            let ticketsToPrint = [...allTickets];
+            if (printType !== 'all') {
+                ticketsToPrint = allTickets.filter(ticket => 
+                    ticket.status.toLowerCase().replace(' ', '-') === printType
+                );
+            }
+
+            if (ticketsToPrint.length === 0) {
+                showSnackbar(`No ${printType} tickets to print`, 'error');
+                return;
+            }
+
+            // Create print window
+            const printWindow = window.open('', '_blank');
+            const printDate = new Date().toLocaleString('en-PH');
+            
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Helpdesk Tickets - ${getExportTypeDisplayName(printType)}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; color: #334155; }
+                        .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+                        .header h1 { margin: 0 0 5px 0; color: #1e293b; }
+                        .print-info { text-align: center; margin-bottom: 20px; font-size: 14px; color: #64748b; }
+                        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                        th, td { border: 1px solid #e2e8f0; padding: 10px; text-align: left; }
+                        th { background-color: #f8fafc; font-weight: bold; }
+                        .title-desc { max-width: 300px; white-space: pre-line; }
+                        .status-display { max-width: 200px; white-space: normal; }
+                        @media print {
+                            body { margin: 0; }
+                            .no-print { display: none; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>HELPDESK TICKETS</h1>
+                        <div class="print-info">
+                            <div>Generated: ${printDate}</div>
+                            <div>Print Type: ${getExportTypeDisplayName(printType)}</div>
+                            <div>Total Tickets: ${ticketsToPrint.length}</div>
+                        </div>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Location</th>
+                                <th>Ticket ID</th>
+                                <th>Title & Description</th>
+                                <th>Requester</th>
+                                <th>Request To</th>
+                                <th>Category</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `);
+
+            ticketsToPrint.forEach(ticket => {
+                // Combine Status with Status Note
+                let statusDisplay = ticket.status;
+                if (ticket.status_note) {
+                    statusDisplay += ` - ${ticket.status_note}`;
+                }
+                
+                printWindow.document.write(`
+                    <tr>
+                        <td>${ticket.date}</td>
+                        <td>${ticket.location || '-'}</td>
+                        <td>${ticket.ticket_id || '-'}</td>
+                        <td class="title-desc">${ticket.title_description || '(No title)'}</td>
+                        <td>${ticket.requester}</td>
+                        <td>${ticket.assigned_to || '-'}</td>
+                        <td>${ticket.category}</td>
+                        <td class="status-display">${statusDisplay}</td>
+                    </tr>
+                `);
+            });
+
+            printWindow.document.write(`
+                        </tbody>
+                    </table>
+                    <div style="margin-top: 30px; text-align: center; font-size: 12px; color: #64748b;">
+                        Printed from Helpdesk Monitoring System
+                    </div>
+                </body>
+                </html>
+            `);
+
+            printWindow.document.close();
+            
+            // Wait for content to load then print
+            printWindow.onload = function() {
+                printWindow.print();
+            };
+
+            showSnackbar(`Printing ${getExportTypeDisplayName(printType).toLowerCase()}...`, 'info');
+        };
+
+        document.getElementById('userFilter').addEventListener('change', () => {
+            currentPage = 1;
+            loadTickets();
+        });
+
+        // Initialize functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            setupExportDropdown();
+            setupPrintDropdown();
+            setupDropdownCloseHandlers();
+            setupFilters();
+            setupSorting();
+        });
+
+        supabase.channel('tickets')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'tickets' }, loadTickets)
+            .subscribe();
+
+        checkLogin();
+    </script>
+</body>
+</html>
