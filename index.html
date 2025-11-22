@@ -9,811 +9,105 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
-        html, body {
-            height: 100%;
-            font-family: 'Inter', sans-serif;
-            color: #334155;
-            font-size: 13px;
-            line-height: 1.4;
-            transition: all 0.3s ease;
-        }
-
-        /* Light mode (default) */
-        :root {
-            --bg-color: #ffffff;
-            --surface-color: #ffffff;
-            --text-primary: #334155;
-            --text-secondary: #64748b;
-            --text-muted: #94a3b8;
-            --border-color: #e2e8f0;
-            --hover-color: #f8fafc;
-            --header-bg: #f8fafc;
-            --shadow: 0 1px 3px rgba(0,0,0,0.05);
-            --modal-bg: rgba(0,0,0,0.5);
-        }
-
-        /* Dark mode */
-        .dark-mode {
-            --bg-color: #0f172a;
-            --surface-color: #1e293b;
-            --text-primary: #f1f5f9;
-            --text-secondary: #cbd5e1;
-            --text-muted: #94a3b8;
-            --border-color: #334155;
-            --hover-color: #1e293b;
-            --header-bg: #1e293b;
-            --shadow: 0 1px 3px rgba(0,0,0,0.3);
-            --modal-bg: rgba(0,0,0,0.7);
-        }
-
-        body {
-            background: var(--bg-color);
-            color: var(--text-primary);
-        }
-
-        .container {
-            min-height: 100vh;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        /* Theme Toggle */
-        .theme-toggle {
-            background: transparent;
-            border: 1px solid var(--border-color);
-            color: var(--text-secondary);
-            padding: 6px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 11px;
-            transition: all 0.2s;
-        }
-
-        .theme-toggle:hover {
-            background: var(--hover-color);
-        }
-
-        /* Login Page */
-        .login-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: var(--header-bg);
-        }
-
-        .login-box {
-            background: var(--surface-color);
-            padding: 32px;
-            border-radius: 8px;
-            box-shadow: var(--shadow);
-            width: 100%;
-            max-width: 380px;
-            border: 1px solid var(--border-color);
-        }
-
-        .login-box h1 {
-            text-align: center;
-            color: var(--text-primary);
-            margin-bottom: 24px;
-            font-size: 1.4rem;
-            font-weight: 600;
-        }
-
-        .form-group {
-            margin-bottom: 16px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 6px;
-            color: var(--text-secondary);
-            font-weight: 500;
-            font-size: 12px;
-        }
-
-        .form-group select {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 13px;
-            background: var(--surface-color);
-            color: var(--text-primary);
-            transition: all 0.2s;
-        }
-
-        .form-group select:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        .btn-login {
-            width: 100%;
-            padding: 10px;
-            background: #3b82f6;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .btn-login:hover { 
-            background: #2563eb;
-        }
-
-        /* Dashboard */
+        html, body { height: 100%; font-family: 'Inter', sans-serif; color: #334155; font-size: 13px; line-height: 1.4; transition: all 0.3s ease; }
+        :root { --bg-color: #fff; --surface-color: #fff; --text-primary: #334155; --text-secondary: #64748b; --text-muted: #94a3b8; --border-color: #e2e8f0; --hover-color: #f8fafc; --header-bg: #f8fafc; --shadow: 0 1px 3px rgba(0,0,0,0.05); --modal-bg: rgba(0,0,0,0.5); }
+        .dark-mode { --bg-color: #0f172a; --surface-color: #1e293b; --text-primary: #f1f5f9; --text-secondary: #cbd5e1; --text-muted: #94a3b8; --border-color: #334155; --hover-color: #1e293b; --header-bg: #1e293b; --shadow: 0 1px 3px rgba(0,0,0,0.3); --modal-bg: rgba(0,0,0,0.7); }
+        body { background: var(--bg-color); color: var(--text-primary); }
+        .container { min-height: 100vh; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+        .theme-toggle { background: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; }
+        .theme-toggle:hover { background: var(--hover-color); }
+        .login-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: var(--header-bg); }
+        .login-box { background: var(--surface-color); padding: 32px; border-radius: 8px; box-shadow: var(--shadow); width: 100%; max-width: 380px; border: 1px solid var(--border-color); }
+        .login-box h1 { text-align: center; color: var(--text-primary); margin-bottom: 24px; font-size: 1.4rem; font-weight: 600; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; margin-bottom: 6px; color: var(--text-secondary); font-weight: 500; font-size: 12px; }
+        .form-group select { width: 100%; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; background: var(--surface-color); color: var(--text-primary); }
+        .btn-login { width: 100%; padding: 10px; background: #3b82f6; color: white; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
+        .btn-login:hover { background: #2563eb; }
         .dashboard { display: none; }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px 0;
-            border-bottom: 1px solid var(--border-color);
-            margin-bottom: 12px;
-        }
-
-        .header h2 {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 11.5px;
-        }
-
-        .user-info { 
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-
-        .logout-btn {
-            background: var(--hover-color);
-            color: var(--text-secondary);
-            border: 1px solid var(--border-color);
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 11px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-        .logout-btn:hover { 
-            background: var(--border-color);
-            color: var(--text-primary);
-        }
-
-        /* Top Controls */
-        .top-controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 8px;
-        }
-
-        .left-controls {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            flex: 1;
-        }
-
-        #searchInput {
-            flex: 1;
-            min-width: 200px;
-            padding: 8px 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 12.5px;
-            background: var(--surface-color);
-            color: var(--text-primary);
-            transition: all 0.2s;
-        }
-
-        #searchInput:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        #userFilter {
-            padding: 8px 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 12.5px;
-            background: var(--surface-color);
-            color: var(--text-primary);
-            min-width: 140px;
-            transition: all 0.2s;
-        }
-
-        #userFilter:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 8px;
-        }
-
-        #addBtn {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 12px;
-            transition: all 0.2s;
-            background: #3b82f6;
-            color: white;
-        }
-        #addBtn:hover { 
-            background: #2563eb;
-        }
-
-        /* Export & Print Dropdowns */
-        .export-dropdown, .print-dropdown { 
-            position: relative; 
-            display: inline-block; 
-        }
-        
-        #exportBtn, #printBtn { 
-            display: flex; 
-            align-items: center; 
-            gap: 6px; 
-            padding: 8px 16px; 
-            background: var(--surface-color);
-            color: var(--text-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 6px; 
-            font-weight: 500; 
-            cursor: pointer; 
-            font-size: 12px;
-            transition: all 0.2s; 
-        }
-        
-        #exportBtn:hover, #printBtn:hover {
-            background: var(--hover-color);
-            border-color: var(--border-color);
-        }
-        
-        .export-options, .print-options { 
-            display: none; 
-            position: absolute; 
-            top: calc(100% + 4px); 
-            right: 0; 
-            background: var(--surface-color); 
-            border-radius: 6px; 
-            box-shadow: 0 4px 12px rgba(0,0,0,.2); 
-            overflow: hidden; 
-            min-width: 180px; 
-            z-index: 1000; 
-            opacity: 0; 
-            transform: translateY(-8px); 
-            transition: all .2s ease; 
-            border: 1px solid var(--border-color); 
-        }
-        
-        /* Show dropdown when active class is added */
-        .export-dropdown.active .export-options,
-        .print-dropdown.active .print-options { 
-            display: block; 
-            opacity: 1; 
-            transform: translateY(0); 
-        }
-        
-        .export-options button,
-        .print-options button { 
-            display:flex; 
-            align-items:center; 
-            gap: 8px; 
-            width:100%; 
-            padding: 10px 12px; 
-            border:none; 
-            background:transparent; 
-            text-align:left; 
-            cursor:pointer; 
-            font-size:12px; 
-            font-weight:500; 
-            color:var(--text-secondary); 
-            transition:all .15s; 
-        }
-        
-        .export-options button i,
-        .print-options button i { 
-            width:14px; 
-            font-size:12px; 
-            opacity:.7; 
-        }
-        
-        .export-options button:hover,
-        .print-options button:hover { 
-            background:var(--hover-color); 
-            color:var(--text-primary); 
-        }
-
-        /* Table */
-        .table-wrapper {
-            flex: 1;
-            background: var(--surface-color);
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .main-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 12.5px;
-        }
-
-        .main-table th {
-            background: var(--header-bg);
-            padding: 10px 12px;
-            text-align: left;
-            font-weight: 600;
-            color: var(--text-secondary);
-            border-bottom: 1px solid var(--border-color);
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            cursor: pointer;
-            user-select: none;
-            transition: all 0.2s;
-            position: relative;
-        }
-
-        .main-table th:hover {
-            background: var(--hover-color);
-        }
-
-        .main-table th.sortable {
-            padding-right: 20px;
-        }
-
-        .sort-icon {
-            position: absolute;
-            right: 8px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 10px;
-            color: var(--text-muted);
-            transition: all 0.2s;
-        }
-
-        .main-table th.sort-asc .sort-icon,
-        .main-table th.sort-desc .sort-icon {
-            color: #3b82f6;
-        }
-
-        .main-table th.sort-asc .sort-icon {
-            transform: translateY(-50%);
-        }
-
-        .main-table th.sort-desc .sort-icon {
-            transform: translateY(-50%) rotate(180deg);
-        }
-
-        .main-table td {
-            padding: 10px 12px;
-            border-bottom: 1px solid var(--border-color);
-            vertical-align: top;
-            line-height: 1.35;
-        }
-
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--border-color); margin-bottom: 12px; }
+        .header h2 { font-size: 1.3rem; font-weight: 600; }
+        .header-right { display: flex; align-items: center; gap: 12px; font-size: 11.5px; }
+        .user-info { color: var(--text-secondary); font-weight: 500; }
+        .logout-btn { background: var(--hover-color); color: var(--text-secondary); border: 1px solid var(--border-color); padding: 6px 12px; border-radius: 4px; font-size: 11px; cursor: pointer; font-weight: 500; }
+        .logout-btn:hover { background: var(--border-color); color: var(--text-primary); }
+        .top-controls { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 8px; }
+        .left-controls { display: flex; gap: 8px; align-items: center; flex: 1; }
+        #searchInput { flex: 1; min-width: 200px; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 12.5px; background: var(--surface-color); color: var(--text-primary); }
+        #searchInput:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+        #userFilter, .status-filter { padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 12.5px; background: var(--surface-color); color: var(--text-primary); min-width: 140px; }
+        .action-buttons { display: flex; gap: 8px; }
+        #addBtn { padding: 8px 16px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 12px; background: #3b82f6; color: white; }
+        #addBtn:hover { background: #2563eb; }
+        .export-dropdown, .print-dropdown { position: relative; display: inline-block; }
+        #exportBtn, #printBtn { display: flex; align-items: center; gap: 6px; padding: 8px 16px; background: var(--surface-color); color: var(--text-secondary); border: 1px solid var(--border-color); border-radius: 6px; font-weight: 500; cursor: pointer; font-size: 12px; }
+        #exportBtn:hover, #printBtn:hover { background: var(--hover-color); }
+        .export-options, .print-options { display: none; position: absolute; top: calc(100% + 4px); right: 0; background: var(--surface-color); border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,.2); min-width: 180px; z-index: 1000; border: 1px solid var(--border-color); }
+        .export-dropdown.active .export-options, .print-dropdown.active .print-options { display: block; }
+        .export-options button, .print-options button { display: flex; align-items: center; gap: 8px; width: 100%; padding: 10px 12px; border: none; background: transparent; text-align: left; cursor: pointer; font-size: 12px; font-weight: 500; color: var(--text-secondary); }
+        .export-options button:hover, .print-options button:hover { background: var(--hover-color); color: var(--text-primary); }
+        .table-wrapper { flex: 1; background: var(--surface-color); border-radius: 8px; overflow: hidden; box-shadow: var(--shadow); border: 1px solid var(--border-color); display: flex; flex-direction: column; }
+        .main-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+        .main-table th { background: var(--header-bg); padding: 10px 12px; text-align: left; font-weight: 600; color: var(--text-secondary); border-bottom: 1px solid var(--border-color); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; position: relative; }
+        .main-table th:hover { background: var(--hover-color); }
+        .sort-icon { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 10px; color: var(--text-muted); }
+        .main-table th.sort-asc .sort-icon, .main-table th.sort-desc .sort-icon { color: #3b82f6; }
+        .main-table th.sort-desc .sort-icon { transform: translateY(-50%) rotate(180deg); }
+        .main-table td { padding: 10px 12px; border-bottom: 1px solid var(--border-color); vertical-align: top; line-height: 1.35; white-space: normal; word-wrap: break-word; }
         .main-table tr:hover { background: var(--hover-color); }
-
-        /* Allow line breaks for ALL columns */
-        .main-table td {
-            white-space: normal;
-            word-wrap: break-word;
-            max-width: none;
-        }
-
-        /* Specific column widths */
-        .main-table th:nth-child(1), /* Date */
-        .main-table td:nth-child(1) {
-            width: 100px;
-        }
-
-        .main-table th:nth-child(2), /* Location */
-        .main-table td:nth-child(2) {
-            width: 120px;
-        }
-
-        .main-table th:nth-child(3), /* Ticket ID */
-        .main-table td:nth-child(3) {
-            width: 100px;
-        }
-
-        .main-table th:nth-child(4), /* Title & Description */
-        .main-table td:nth-child(4) {
-            width: 200px;
-        }
-
-        .main-table th:nth-child(5), /* Requester */
-        .main-table td:nth-child(5) {
-            width: 120px;
-        }
-
-        .main-table th:nth-child(6), /* Request To */
-        .main-table td:nth-child(6) {
-            width: 120px;
-        }
-
-        .main-table th:nth-child(7), /* Category */
-        .main-table td:nth-child(7) {
-            width: 100px;
-        }
-
-        .main-table th:nth-child(8), /* Status */
-        .main-table td:nth-child(8) {
-            width: 150px;
-        }
-
-        .main-table th:nth-child(9), /* Actions */
-        .main-table td:nth-child(9) {
-            width: 100px;
-        }
-
-        .main-table td:nth-child(4) strong {
-            font-size: 12.5px;
-            display: block;
-            margin-bottom: 2px;
-            color: var(--text-primary);
-        }
-
-        .main-table td:nth-child(4) div:last-child {
-            font-size: 11px;
-            color: var(--text-secondary);
-            line-height: 1.4;
-        }
-
-        .actions {
-            display: flex;
-            gap: 4px;
-        }
-
-        .actions button {
-            padding: 4px 8px;
-            background: var(--surface-color);
-            border: 1px solid var(--border-color);
-            color: var(--text-secondary);
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .actions button:hover { 
-            background: var(--hover-color);
-            border-color: var(--border-color);
-        }
-
-        .actions button.delete-btn {
-            background: #fef2f2;
-            border-color: #fecaca;
-            color: #dc2626;
-        }
-        .dark-mode .actions button.delete-btn {
-            background: #7f1d1d;
-            border-color: #991b1b;
-            color: #fecaca;
-        }
-        .actions button.delete-btn:hover { 
-            background: #fecaca;
-            color: #b91c1c;
-        }
-        .dark-mode .actions button.delete-btn:hover { 
-            background: #991b1b;
-            color: #fecaca;
-        }
-
-        /* Pagination */
-        .pagination {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 16px;
-            background: var(--header-bg);
-            border-top: 1px solid var(--border-color);
-            flex-shrink: 0;
-        }
-
-        .pagination-info {
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-
-        .pagination-controls {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-        }
-
-        .pagination-btn {
-            padding: 6px 10px;
-            background: var(--surface-color);
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            font-size: 11px;
-            cursor: pointer;
-            transition: all 0.2s;
-            color: var(--text-secondary);
-        }
-
-        .pagination-btn:hover {
-            background: var(--hover-color);
-            border-color: var(--border-color);
-        }
-
-        .pagination-btn.active {
-            background: #3b82f6;
-            border-color: #3b82f6;
-            color: white;
-            font-weight: 500;
-        }
-
-        .pagination-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* ==================== MODAL ==================== */
-        .modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: var(--modal-bg);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            padding: 16px;
-        }
-
-        .modal.show {
-            display: flex;
-        }
-
-        .modal-content {
-            background: var(--surface-color);
-            width: 100%;
-            max-width: 600px;
-            max-height: 90vh;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-            display: flex;
-            flex-direction: column;
-            animation: modalIn 0.3s ease-out;
-        }
-
-        @keyframes modalIn {
-            from { opacity: 0; transform: translateY(-20px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        .modal-header {
-            background: var(--header-bg);
-            padding: 16px 20px;
-            font-size: 1.2rem;
-            font-weight: 600;
-            flex-shrink: 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .close-btn {
-            font-size: 24px;
-            cursor: pointer;
-            opacity: 0.6;
-            color: var(--text-secondary);
-        }
-        .close-btn:hover { 
-            opacity: 1;
-            color: var(--text-primary);
-        }
-
-        .modal-body {
-            padding: 20px;
-            overflow-y: auto;
-            flex: 1;
-            max-height: calc(90vh - 140px);
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        .form-field {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .form-field label {
-            font-size: 11.5px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            margin-bottom: 4px;
-        }
-
+        .main-table td:nth-child(4) strong { font-size: 12.5px; display: block; margin-bottom: 2px; }
+        .main-table td:nth-child(4) div:last-child { font-size: 11px; color: var(--text-secondary); }
+        .actions { display: flex; gap: 4px; }
+        .actions button { padding: 4px 8px; background: var(--surface-color); border: 1px solid var(--border-color); color: var(--text-secondary); border-radius: 4px; font-size: 11px; font-weight: 500; cursor: pointer; }
+        .actions button:hover { background: var(--hover-color); }
+        .actions button.delete-btn { background: #fef2f2; border-color: #fecaca; color: #dc2626; }
+        .dark-mode .actions button.delete-btn { background: #7f1d1d; border-color: #991b1b; color: #fecaca; }
+        .pagination { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: var(--header-bg); border-top: 1px solid var(--border-color); }
+        .pagination-info { font-size: 12px; color: var(--text-secondary); }
+        .pagination-controls { display: flex; gap: 6px; align-items: center; }
+        .pagination-btn { padding: 6px 10px; background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 4px; font-size: 11px; cursor: pointer; color: var(--text-secondary); }
+        .pagination-btn:hover { background: var(--hover-color); }
+        .pagination-btn.active { background: #3b82f6; border-color: #3b82f6; color: white; font-weight: 500; }
+        .pagination-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .modal { display: none; position: fixed; inset: 0; background: var(--modal-bg); justify-content: center; align-items: center; z-index: 1000; padding: 16px; }
+        .modal.show { display: flex; }
+        .modal-content { background: var(--surface-color); width: 100%; max-width: 600px; max-height: 90vh; border-radius: 8px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.15); display: flex; flex-direction: column; }
+        .modal-header { background: var(--header-bg); padding: 16px 20px; font-size: 1.2rem; font-weight: 600; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); }
+        .close-btn { font-size: 24px; cursor: pointer; opacity: 0.6; color: var(--text-secondary); }
+        .close-btn:hover { opacity: 1; }
+        .modal-body { padding: 20px; overflow-y: auto; flex: 1; max-height: calc(90vh - 140px); }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .form-field { display: flex; flex-direction: column; }
+        .form-field label { font-size: 11.5px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; }
         .required { color: #ef4444; }
-
-        .form-field input,
-        .form-field select,
-        .form-field textarea {
-            width: 100%;
-            padding: 8px 10px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 13px;
-            background: var(--surface-color);
-            color: var(--text-primary);
-            transition: all 0.2s;
-        }
-
-        .form-field input:focus,
-        .form-field select:focus,
-        .form-field textarea:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        textarea {
-            min-height: 80px;
-            resize: vertical;
-        }
-
+        .form-field input, .form-field select, .form-field textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; background: var(--surface-color); color: var(--text-primary); }
+        .form-field input:focus, .form-field select:focus, .form-field textarea:focus { outline: none; border-color: #3b82f6; }
+        textarea { min-height: 80px; resize: vertical; }
         .full-width { grid-column: 1 / -1; margin-top: 8px; }
-
-        .status-row {
-            display: flex;
-            gap: 12px;
-            margin-top: 12px;
-        }
-
+        .status-row { display: flex; gap: 12px; margin-top: 12px; }
         .status-row .form-field { flex: 1; }
-
-        .modal-footer {
-            padding: 16px 20px;
-            background: var(--surface-color);
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            flex-shrink: 0;
-        }
-
-        .btn-cancel, .btn-save {
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-size: 12.5px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-cancel {
-            background: var(--surface-color);
-            border: 1px solid var(--border-color);
-            color: var(--text-secondary);
-        }
-        .btn-cancel:hover { 
-            background: var(--hover-color);
-            border-color: var(--border-color);
-        }
-
-        .btn-save {
-            background: #3b82f6;
-            border: 1px solid #3b82f6;
-            color: white;
-        }
-        .btn-save:hover {
-            background: #2563eb;
-        }
-
-        /* Status badges */
-        .status-badge {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 10.5px;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
+        .modal-footer { padding: 16px 20px; background: var(--surface-color); border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 10px; }
+        .btn-cancel, .btn-save { padding: 8px 16px; border-radius: 6px; font-size: 12.5px; font-weight: 500; cursor: pointer; }
+        .btn-cancel { background: var(--surface-color); border: 1px solid var(--border-color); color: var(--text-secondary); }
+        .btn-save { background: #3b82f6; border: 1px solid #3b82f6; color: white; }
+        .btn-save:hover { background: #2563eb; }
+        .status-badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 10.5px; font-weight: 600; text-transform: uppercase; }
         .status-pending { background: #fef3c7; color: #d97706; }
         .dark-mode .status-pending { background: #78350f; color: #fbbf24; }
-        
         .status-in-progress { background: #dbeafe; color: #1d4ed8; }
         .dark-mode .status-in-progress { background: #1e3a8a; color: #60a5fa; }
-        
         .status-done { background: #dcfce7; color: #15803d; }
         .dark-mode .status-done { background: #14532d; color: #4ade80; }
-        
         .status-cancelled { background: #fee2e2; color: #dc2626; }
         .dark-mode .status-cancelled { background: #7f1d1d; color: #fca5a5; }
-
-        /* Status note styling */
-        .status-note {
-            font-size: 11px;
-            color: var(--text-secondary);
-            margin-top: 4px;
-            line-height: 1.4;
-            word-wrap: break-word;
-            white-space: normal;
-        }
-
-        /* Snackbar */
-        .snackbar {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--surface-color);
-            color: var(--text-primary);
-            padding: 10px 20px;
-            border-radius: 6px;
-            font-weight: 500;
-            font-size: 12.5px;
-            z-index: 10000;
-            opacity: 0;
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-            border: 1px solid var(--border-color);
-        }
-
-        .snackbar.show {
-            opacity: 1;
-            transform: translateX(-50%) translateY(-8px);
-        }
-
+        .status-note { font-size: 11px; color: var(--text-secondary); margin-top: 4px; line-height: 1.4; }
+        .snackbar { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--surface-color); color: var(--text-primary); padding: 10px 20px; border-radius: 6px; font-weight: 500; font-size: 12.5px; z-index: 10000; opacity: 0; box-shadow: 0 8px 20px rgba(0,0,0,0.15); border: 1px solid var(--border-color); }
+        .snackbar.show { opacity: 1; transform: translateX(-50%) translateY(-8px); }
         .snackbar.error { background: #ef4444; color: white; }
         .snackbar.success { background: #10b981; color: white; }
-
-        /* Status filter in search row */
-        .status-filter {
-            padding: 8px 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 12.5px;
-            background: var(--surface-color);
-            color: var(--text-primary);
-            min-width: 140px;
-            transition: all 0.2s;
-        }
-
-        .status-filter:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
     </style>
 </head>
 <body>
-
-    <!-- Login Page -->
     <div id="loginPage" class="login-container">
         <div class="login-box">
             <h1>Helpdesk Monitor</h1>
@@ -832,21 +126,16 @@
             </form>
         </div>
     </div>
-
-    <!-- Dashboard -->
     <div id="dashboard" class="dashboard">
         <div class="container">
             <div class="header">
                 <h2>Helpdesk Monitoring</h2>
                 <div class="header-right">
-                    <button id="themeToggle" class="theme-toggle">
-                        <i class="fas fa-moon"></i> Dark Mode
-                    </button>
+                    <button id="themeToggle" class="theme-toggle"><i class="fas fa-moon"></i> Dark Mode</button>
                     <span class="user-info">Logged in as: <strong id="currentUser"></strong></span>
                     <button onclick="logout()" class="logout-btn">Logout</button>
                 </div>
             </div>
-
             <div class="top-controls">
                 <div class="left-controls">
                     <input type="text" id="searchInput" placeholder="Search tickets...">
@@ -866,66 +155,35 @@
                     </select>
                 </div>
                 <div class="action-buttons">
-                    <!-- Print Dropdown -->
                     <div class="print-dropdown" id="printDropdown">
-                        <button id="printBtn">
-                            <i class="fas fa-print"></i> Print
-                        </button>
+                        <button id="printBtn"><i class="fas fa-print"></i> Print</button>
                         <div class="print-options">
-                            <button data-print="all">
-                                <i class="fas fa-print"></i> Print All Data
-                            </button>
-                            <button data-print="pending">
-                                <i class="fas fa-clock"></i> Print Pending Only
-                            </button>
-                            <button data-print="in-progress">
-                                <i class="fas fa-spinner"></i> Print In Progress Only
-                            </button>
-                            <button data-print="done">
-                                <i class="fas fa-check"></i> Print Done Only
-                            </button>
+                            <button data-print="all"><i class="fas fa-print"></i> Print All Data</button>
+                            <button data-print="pending"><i class="fas fa-clock"></i> Print Pending Only</button>
+                            <button data-print="in-progress"><i class="fas fa-spinner"></i> Print In Progress Only</button>
+                            <button data-print="done"><i class="fas fa-check"></i> Print Done Only</button>
                         </div>
                     </div>
-                    
-                    <!-- Export Dropdown -->
                     <div class="export-dropdown" id="exportDropdown">
-                        <button id="exportBtn">
-                            <i class="fas fa-download"></i> Export
-                        </button>
+                        <button id="exportBtn"><i class="fas fa-download"></i> Export</button>
                         <div class="export-options">
-                            <button data-export="all">
-                                <i class="fas fa-file-excel"></i> Export All Data
-                            </button>
-                            <button data-export="pending">
-                                <i class="fas fa-clock"></i> Export Pending Only
-                            </button>
-                            <button data-export="in-progress">
-                                <i class="fas fa-spinner"></i> Export In Progress Only
-                            </button>
-                            <button data-export="done">
-                                <i class="fas fa-check"></i> Export Done Only
-                            </button>
+                            <button data-export="all"><i class="fas fa-file-excel"></i> Export All Data</button>
+                            <button data-export="pending"><i class="fas fa-clock"></i> Export Pending Only</button>
+                            <button data-export="in-progress"><i class="fas fa-spinner"></i> Export In Progress Only</button>
+                            <button data-export="done"><i class="fas fa-check"></i> Export Done Only</button>
                         </div>
                     </div>
-                    
                     <button id="addBtn" onclick="openModal()">+ New Ticket</button>
                 </div>
             </div>
-
             <div class="table-wrapper">
                 <table class="main-table">
                     <thead>
                         <tr>
-                            <th class="sortable" data-sort="date">
-                                Date <i class="fas fa-sort sort-icon"></i>
-                            </th>
-                            <th class="sortable" data-sort="location">
-                                Location <i class="fas fa-sort sort-icon"></i>
-                            </th>
+                            <th class="sortable" data-sort="date">Date <i class="fas fa-sort sort-icon"></i></th>
+                            <th class="sortable" data-sort="location">Location <i class="fas fa-sort sort-icon"></i></th>
                             <th>ID</th>
-                            <th class="sortable" data-sort="title">
-                                Title & Description <i class="fas fa-sort sort-icon"></i>
-                            </th>
+                            <th class="sortable" data-sort="title">Title & Description <i class="fas fa-sort sort-icon"></i></th>
                             <th>Requester</th>
                             <th>Request To</th>
                             <th>Category</th>
@@ -935,7 +193,6 @@
                     </thead>
                     <tbody id="tableBody"></tbody>
                 </table>
-                
                 <div class="pagination">
                     <div class="pagination-info" id="paginationInfo">Showing 0 of 0 tickets</div>
                     <div class="pagination-controls">
@@ -949,320 +206,117 @@
             </div>
         </div>
     </div>
-
-    <!-- Fixed Modal -->
     <div id="modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
                 <h2 id="modalTitle">New Ticket</h2>
                 <span class="close-btn" onclick="closeModal()">×</span>
             </div>
-
             <form id="ticketForm" onsubmit="event.preventDefault(); saveTicket();">
                 <div class="modal-body">
                     <div class="form-grid">
-                        <div class="form-field">
-                            <label>Date <span class="required">*</span></label>
-                            <input type="date" id="date" required>
-                        </div>
-                        <div class="form-field">
-                            <label>Location <span class="required">*</span></label>
-                            <input type="text" id="location" placeholder="e.g. LCC Food Garden - LC" required>
-                        </div>
-                        <div class="form-field">
-                            <label>Ticket ID</label>
-                            <input type="text" id="ticketId" placeholder="TKT-001">
-                        </div>
-                        <div class="form-field">
-                            <label>Requester <span class="required">*</span></label>
-                            <input type="text" id="requester" required>
-                        </div>
-                        <div class="form-field">
-                            <label>Request To</label>
-                            <input type="text" id="assigned" placeholder="Optional">
-                        </div>
-                        <div class="form-field">
-                            <label>Category <span class="required">*</span></label>
-                            <input type="text" id="category" placeholder="" required>
-                        </div>
+                        <div class="form-field"><label>Date <span class="required">*</span></label><input type="date" id="date" required></div>
+                        <div class="form-field"><label>Location <span class="required">*</span></label><input type="text" id="location" placeholder="e.g. LCC Food Garden - LC" required></div>
+                        <div class="form-field"><label>Ticket ID</label><input type="text" id="ticketId" placeholder="TKT-001"></div>
+                        <div class="form-field"><label>Requester <span class="required">*</span></label><input type="text" id="requester" required></div>
+                        <div class="form-field"><label>Request To</label><input type="text" id="assigned" placeholder="Optional"></div>
+                        <div class="form-field"><label>Category <span class="required">*</span></label><input type="text" id="category" required></div>
                     </div>
-
-                    <div class="form-field full-width">
-                        <label>Title & Description <span class="required">*</span></label>
-                        <textarea id="titleDesc" rows="4" placeholder="Description" required></textarea>
-                    </div>
-
+                    <div class="form-field full-width"><label>Title & Description <span class="required">*</span></label><textarea id="titleDesc" rows="4" placeholder="Description" required></textarea></div>
                     <div class="status-row">
-                        <div class="form-field">
-                            <label>Status <span class="required">*</span></label>
-                            <select id="statusSelect" required>
-                                <option>Pending</option>
-                                <option>In Progress</option>
-                                <option>Done</option>
-                                <option>Cancelled</option>
-                            </select>
-                        </div>
-                        <div class="form-field">
-                            <label>Note (optional)</label>
-                            <input type="text" id="statusNote" placeholder="e.g. Waiting for approval">
-                        </div>
+                        <div class="form-field"><label>Status <span class="required">*</span></label><select id="statusSelect" required><option>Pending</option><option>In Progress</option><option>Done</option><option>Cancelled</option></select></div>
+                        <div class="form-field"><label>Note (optional)</label><input type="text" id="statusNote" placeholder="e.g. Waiting for approval"></div>
                     </div>
                 </div>
-
                 <div class="modal-footer">
                     <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
-                    <button type="submit" class="btn-save">
-                        <span id="saveBtnText">Save Ticket</span>
-                    </button>
+                    <button type="submit" class="btn-save"><span id="saveBtnText">Save Ticket</span></button>
                 </div>
             </form>
         </div>
     </div>
-
     <div id="snackbar" class="snackbar">Saved!</div>
-
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-
         const SUPABASE_URL = 'https://crdevgfrptdhhgqnpqzk.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_nLYTInAlXEqxy6YbMIxKpw_ZacBlomD';
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        let currentUser = localStorage.getItem('helpdeskUser') || '';
-        let editingTicketId = null;
-        let currentPage = 1;
+        let currentUser = localStorage.getItem('helpdeskUser') || '', editingTicketId = null, currentPage = 1;
         const itemsPerPage = 4;
-        let totalTickets = 0;
-        let totalPages = 1;
-        let allTickets = [];
-        let filteredTickets = [];
+        let totalTickets = 0, totalPages = 1, allTickets = [], filteredTickets = [];
+        let filterState = { search: '', status: '' }, sortState = { field: 'date', direction: 'desc' };
 
-        // Filter state
-        let filterState = {
-            search: '',
-            status: ''
-        };
-
-        // Sort state
-        let sortState = {
-            field: 'date',
-            direction: 'desc'
-        };
-
-        // Theme functionality
         function setupTheme() {
-            const themeToggle = document.getElementById('themeToggle');
-            const isDarkMode = localStorage.getItem('darkMode') === 'true';
-            
-            if (isDarkMode) {
-                document.body.classList.add('dark-mode');
-                themeToggle.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
-            }
-            
-            themeToggle.addEventListener('click', () => {
+            const t = document.getElementById('themeToggle');
+            if (localStorage.getItem('darkMode') === 'true') { document.body.classList.add('dark-mode'); t.innerHTML = '<i class="fas fa-sun"></i> Light Mode'; }
+            t.addEventListener('click', () => {
                 document.body.classList.toggle('dark-mode');
-                const isDark = document.body.classList.contains('dark-mode');
-                localStorage.setItem('darkMode', isDark);
-                
-                if (isDark) {
-                    themeToggle.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
-                } else {
-                    themeToggle.innerHTML = '<i class="fas fa-moon"></i> Dark Mode';
-                }
+                const d = document.body.classList.contains('dark-mode');
+                localStorage.setItem('darkMode', d);
+                t.innerHTML = d ? '<i class="fas fa-sun"></i> Light Mode' : '<i class="fas fa-moon"></i> Dark Mode';
             });
         }
 
-        // Enhanced Export & Print Dropdown Functionality
         function setupExportDropdown() {
-            const exportDropdown = document.getElementById('exportDropdown');
-            const exportBtn = document.getElementById('exportBtn');
-            const exportOptions = document.querySelectorAll('.export-options button');
-            
-            // Toggle dropdown on button click
-            exportBtn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                exportDropdown.classList.toggle('active');
-            });
-            
-            // Handle export option clicks
-            exportOptions.forEach(option => {
-                option.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const exportType = this.getAttribute('data-export');
-                    exportToExcel(exportType);
-                    exportDropdown.classList.remove('active');
-                });
-            });
+            const dd = document.getElementById('exportDropdown'), btn = document.getElementById('exportBtn');
+            btn.addEventListener('click', e => { e.stopPropagation(); dd.classList.toggle('active'); });
+            document.querySelectorAll('.export-options button').forEach(o => o.addEventListener('click', e => { e.stopPropagation(); exportToExcel(e.target.closest('button').dataset.export); dd.classList.remove('active'); }));
         }
 
         function setupPrintDropdown() {
-            const printDropdown = document.getElementById('printDropdown');
-            const printBtn = document.getElementById('printBtn');
-            const printOptions = document.querySelectorAll('.print-options button');
-            
-            // Toggle dropdown on button click
-            printBtn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                printDropdown.classList.toggle('active');
-            });
-            
-            // Handle print option clicks
-            printOptions.forEach(option => {
-                option.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const printType = this.getAttribute('data-print');
-                    handlePrint(printType);
-                    printDropdown.classList.remove('active');
-                });
-            });
+            const dd = document.getElementById('printDropdown'), btn = document.getElementById('printBtn');
+            btn.addEventListener('click', e => { e.stopPropagation(); dd.classList.toggle('active'); });
+            document.querySelectorAll('.print-options button').forEach(o => o.addEventListener('click', e => { e.stopPropagation(); handlePrint(e.target.closest('button').dataset.print); dd.classList.remove('active'); }));
         }
 
-        // Close dropdowns when clicking outside
         function setupDropdownCloseHandlers() {
-            document.addEventListener('click', function() {
-                document.getElementById('exportDropdown').classList.remove('active');
-                document.getElementById('printDropdown').classList.remove('active');
-            });
-            
-            // Prevent dropdowns from closing when clicking inside
-            document.getElementById('exportDropdown').addEventListener('click', function(e) {
-                e.stopPropagation();
-            });
-            
-            document.getElementById('printDropdown').addEventListener('click', function(e) {
-                e.stopPropagation();
-            });
+            document.addEventListener('click', () => { document.getElementById('exportDropdown').classList.remove('active'); document.getElementById('printDropdown').classList.remove('active'); });
         }
 
-        // Sort functionality
         function setupSorting() {
-            const sortableHeaders = document.querySelectorAll('th.sortable');
-            
-            sortableHeaders.forEach(header => {
-                header.addEventListener('click', function() {
-                    const field = this.dataset.sort;
-                    
-                    // If clicking the same field, toggle direction
-                    if (sortState.field === field) {
-                        sortState.direction = sortState.direction === 'asc' ? 'desc' : 'asc';
-                    } else {
-                        // If clicking a different field, set to default descending
-                        sortState.field = field;
-                        sortState.direction = 'desc';
-                    }
-                    
-                    // Update UI
-                    updateSortIcons();
-                    
-                    // Apply sorting
-                    applySorting();
-                });
-            });
+            document.querySelectorAll('th.sortable').forEach(h => h.addEventListener('click', function() {
+                const f = this.dataset.sort;
+                sortState = sortState.field === f ? { field: f, direction: sortState.direction === 'asc' ? 'desc' : 'asc' } : { field: f, direction: 'desc' };
+                updateSortIcons(); applySorting();
+            }));
         }
 
         function updateSortIcons() {
-            // Remove all sort classes
-            document.querySelectorAll('th.sortable').forEach(header => {
-                header.classList.remove('sort-asc', 'sort-desc');
-            });
-            
-            // Add appropriate class to active sort header
-            const activeHeader = document.querySelector(`th[data-sort="${sortState.field}"]`);
-            if (activeHeader) {
-                activeHeader.classList.add(sortState.direction === 'asc' ? 'sort-asc' : 'sort-desc');
-            }
+            document.querySelectorAll('th.sortable').forEach(h => h.classList.remove('sort-asc', 'sort-desc'));
+            const a = document.querySelector(`th[data-sort="${sortState.field}"]`);
+            if (a) a.classList.add(sortState.direction === 'asc' ? 'sort-asc' : 'sort-desc');
         }
 
         function applySorting() {
             filteredTickets.sort((a, b) => {
-                let valueA, valueB;
-                
-                switch (sortState.field) {
-                    case 'date':
-                        valueA = a.date;
-                        valueB = b.date;
-                        break;
-                    case 'location':
-                        valueA = (a.location || '').toLowerCase();
-                        valueB = (b.location || '').toLowerCase();
-                        break;
-                    case 'title':
-                        valueA = (a.title_description || '').toLowerCase();
-                        valueB = (b.title_description || '').toLowerCase();
-                        break;
-                    default:
-                        return 0;
-                }
-                
-                // Handle empty values
-                if (!valueA) valueA = '';
-                if (!valueB) valueB = '';
-                
-                let result = 0;
-                if (valueA < valueB) result = -1;
-                if (valueA > valueB) result = 1;
-                
-                // Reverse for descending order
-                return sortState.direction === 'desc' ? -result : result;
+                let vA, vB;
+                if (sortState.field === 'date') { vA = a.date; vB = b.date; }
+                else if (sortState.field === 'location') { vA = (a.location || '').toLowerCase(); vB = (b.location || '').toLowerCase(); }
+                else if (sortState.field === 'title') { vA = (a.title_description || '').toLowerCase(); vB = (b.title_description || '').toLowerCase(); }
+                let r = vA < vB ? -1 : vA > vB ? 1 : 0;
+                return sortState.direction === 'desc' ? -r : r;
             });
-            
-            currentPage = 1;
-            renderTable();
-            updatePagination();
+            currentPage = 1; renderTable(); updatePagination();
         }
 
-        // Filter functionality
         function setupFilters() {
-            const statusFilter = document.getElementById('statusFilter');
-            const searchInput = document.getElementById('searchInput');
-
-            statusFilter.addEventListener('change', applyFilters);
-            searchInput.addEventListener('input', applyFilters);
+            document.getElementById('statusFilter').addEventListener('change', applyFilters);
+            document.getElementById('searchInput').addEventListener('input', applyFilters);
         }
 
         function applyFilters() {
-            filterState = {
-                status: document.getElementById('statusFilter').value,
-                search: document.getElementById('searchInput').value.toLowerCase()
-            };
-
-            filteredTickets = allTickets.filter(ticket => {
-                // Status filter
-                if (filterState.status && ticket.status !== filterState.status) {
-                    return false;
-                }
-
-                // Global search
-                if (filterState.search) {
-                    const searchText = filterState.search;
-                    const searchableText = [
-                        ticket.date,
-                        ticket.location,
-                        ticket.ticket_id,
-                        ticket.title_description,
-                        ticket.requester,
-                        ticket.assigned_to,
-                        ticket.category,
-                        ticket.status,
-                        ticket.status_note
-                    ].join(' ').toLowerCase();
-
-                    if (!searchableText.includes(searchText)) {
-                        return false;
-                    }
-                }
-
+            filterState = { status: document.getElementById('statusFilter').value, search: document.getElementById('searchInput').value.toLowerCase() };
+            filteredTickets = allTickets.filter(t => {
+                if (filterState.status && t.status !== filterState.status) return false;
+                if (filterState.search && ![t.date, t.location, t.ticket_id, t.title_description, t.requester, t.assigned_to, t.category, t.status, t.status_note].join(' ').toLowerCase().includes(filterState.search)) return false;
                 return true;
             });
-
-            // Apply current sorting to filtered results
             applySorting();
         }
 
         function showSnackbar(msg, type = 'info') {
             const s = document.getElementById('snackbar');
-            s.textContent = msg;
-            s.className = 'snackbar';
+            s.textContent = msg; s.className = 'snackbar';
             if (type === 'success') s.classList.add('success');
             if (type === 'error') s.classList.add('error');
             s.classList.add('show');
@@ -1274,9 +328,7 @@
                 document.getElementById('currentUser').textContent = currentUser;
                 document.getElementById('loginPage').style.display = 'none';
                 document.getElementById('dashboard').style.display = 'block';
-                if (currentUser === 'Admin') {
-                    document.getElementById('userFilter').style.display = 'block';
-                }
+                if (currentUser === 'Admin') document.getElementById('userFilter').style.display = 'block';
                 loadTickets();
             }
         }
@@ -1289,19 +341,13 @@
             checkLogin();
         });
 
-        window.logout = () => {
-            if (confirm('Log out?')) {
-                localStorage.removeItem('helpdeskUser');
-                location.reload();
-            }
-        };
+        window.logout = () => { if (confirm('Log out?')) { localStorage.removeItem('helpdeskUser'); location.reload(); } };
 
         window.openModal = async (id = null) => {
             editingTicketId = id;
             document.getElementById('modal').classList.add('show');
             document.getElementById('modalTitle').textContent = id ? 'Update Ticket' : 'New Ticket';
             document.getElementById('saveBtnText').textContent = id ? 'Update' : 'Save';
-
             if (id) {
                 const { data } = await supabase.from('tickets').select('*').eq('id', id).single();
                 if (data) {
@@ -1327,388 +373,139 @@
         window.saveTicket = async () => {
             const form = document.getElementById('ticketForm');
             if (!form.checkValidity()) { form.reportValidity(); return; }
-
-            const lines = document.getElementById('titleDesc').value.trim().split('\n');
-            const title = lines[0] || '(No title)';
-            const desc = lines.slice(1).join('\n').trim();
-
-            // Get the original ticket data if we're editing
-            let originalTicket = null;
-            if (editingTicketId) {
-                const { data } = await supabase.from('tickets').select('*').eq('id', editingTicketId).single();
-                originalTicket = data;
-            }
-
+            let orig = null;
+            if (editingTicketId) { const { data } = await supabase.from('tickets').select('*').eq('id', editingTicketId).single(); orig = data; }
             const data = {
-                date: document.getElementById('date').value,
-                location: document.getElementById('location').value.trim(),
+                date: document.getElementById('date').value, location: document.getElementById('location').value.trim(),
                 ticket_id: document.getElementById('ticketId').value.trim() || null,
                 title_description: document.getElementById('titleDesc').value.trim(),
-                title, description: desc,
                 requester: document.getElementById('requester').value.trim(),
                 assigned_to: document.getElementById('assigned').value.trim() || null,
                 category: document.getElementById('category').value.trim(),
                 status: document.getElementById('statusSelect').value,
                 status_note: document.getElementById('statusNote').value.trim() || null,
-                // FIX: Preserve the original creator when editing, only set currentUser for new tickets
-                created_by: editingTicketId ? (originalTicket?.created_by || currentUser) : currentUser
+                created_by: editingTicketId ? (orig?.created_by || currentUser) : currentUser
             };
-
             try {
-                if (editingTicketId) {
-                    await supabase.from('tickets').update(data).eq('id', editingTicketId);
-                    showSnackbar('Updated!', 'success');
-                } else {
-                    await supabase.from('tickets').insert([data]);
-                    showSnackbar('Created!', 'success');
-                }
-                closeModal();
-                loadTickets();
-            } catch (err) {
-                showSnackbar('Error: ' + err.message, 'error');
-            }
+                if (editingTicketId) { await supabase.from('tickets').update(data).eq('id', editingTicketId); showSnackbar('Updated!', 'success'); }
+                else { await supabase.from('tickets').insert([data]); showSnackbar('Created!', 'success'); }
+                closeModal(); loadTickets();
+            } catch (err) { showSnackbar('Error: ' + err.message, 'error'); }
         };
 
-        window.deleteTicket = async id => {
-            if (!confirm('Delete permanently?')) return;
-            await supabase.from('tickets').delete().eq('id', id);
-            showSnackbar('Deleted', 'success');
-            loadTickets();
-        };
+        window.deleteTicket = async id => { if (!confirm('Delete permanently?')) return; await supabase.from('tickets').delete().eq('id', id); showSnackbar('Deleted', 'success'); loadTickets(); };
 
         async function loadTickets() {
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '<tr><td colspan="9" style="padding:40px;text-align:center;color:var(--text-secondary);">Loading...</td></tr>';
-
             let query = supabase.from('tickets').select('*', { count: 'exact' }).order('date', { ascending: false });
-
             const filter = document.getElementById('userFilter').value;
-            if (currentUser !== 'Admin') {
-                query = query.eq('created_by', currentUser);
-            } else if (filter) {
-                query = query.eq('created_by', filter);
-            }
-
+            if (currentUser !== 'Admin') query = query.eq('created_by', currentUser);
+            else if (filter) query = query.eq('created_by', filter);
             const { data: tickets, error, count } = await query;
-
-            if (error || !tickets) {
-                tbody.innerHTML = '<tr><td colspan="9" style="padding:40px;color:#ef4444;">Error loading tickets</td></tr>';
-                return;
-            }
-
-            allTickets = tickets;
-            filteredTickets = [...allTickets];
-            totalTickets = count;
-            totalPages = Math.ceil(totalTickets / itemsPerPage);
-            
-            // Apply initial sorting
+            if (error || !tickets) { tbody.innerHTML = '<tr><td colspan="9" style="padding:40px;color:#ef4444;">Error loading tickets</td></tr>'; return; }
+            allTickets = tickets; filteredTickets = [...allTickets]; totalTickets = count; totalPages = Math.ceil(totalTickets / itemsPerPage);
             applySorting();
         }
 
         function renderTable() {
-            const tbody = document.getElementById('tableBody');
-            const startIndex = (currentPage - 1) * itemsPerPage;
-            const endIndex = Math.min(startIndex + itemsPerPage, filteredTickets.length);
-            const pageTickets = filteredTickets.slice(startIndex, endIndex);
-
-            tbody.innerHTML = pageTickets.length === 0
-                ? '<tr><td colspan="9" style="padding:60px;text-align:center;color:var(--text-secondary);">No tickets found</td></tr>'
-                : '';
-
-            pageTickets.forEach(t => {
-                const lines = (t.title_description || '').split('\n');
-                const title = lines[0] || '(No title)';
-                const desc = lines.slice(1).join('\n').trim();
-                const statusClass = `status-${t.status.toLowerCase().replace(' ', '-')}`;
-                
-                // Create status display with proper line breaks for status note
-                let statusDisplay = `<span class="status-badge ${statusClass}">${t.status}</span>`;
-                if (t.status_note) {
-                    statusDisplay += `<div class="status-note">${t.status_note}</div>`;
-                }
-
+            const tbody = document.getElementById('tableBody'), start = (currentPage - 1) * itemsPerPage, end = Math.min(start + itemsPerPage, filteredTickets.length);
+            const page = filteredTickets.slice(start, end);
+            tbody.innerHTML = page.length === 0 ? '<tr><td colspan="9" style="padding:60px;text-align:center;color:var(--text-secondary);">No tickets found</td></tr>' : '';
+            page.forEach(t => {
+                const lines = (t.title_description || '').split('\n'), title = lines[0] || '(No title)', desc = lines.slice(1).join('\n').trim();
+                const sc = `status-${t.status.toLowerCase().replace(' ', '-')}`;
+                let sd = `<span class="status-badge ${sc}">${t.status}</span>`;
+                if (t.status_note) sd += `<div class="status-note">${t.status_note}</div>`;
                 const row = tbody.insertRow();
-                row.innerHTML = 
-                    `<td>${t.date}</td>
-                    <td>${t.location || '-'}</td>
-                    <td>${t.ticket_id || '-'}</td>
-                    <td><strong>${title}</strong><div>${desc}</div></td>
-                    <td>${t.requester}</td>
-                    <td>${t.assigned_to || '-'}</td>
-                    <td>${t.category}</td>
-                    <td>${statusDisplay}</td>
-                    <td class="actions">
-                        <button onclick="openModal(${t.id})">Update</button>
-                        <button class="delete-btn" onclick="deleteTicket(${t.id})">&nbsp;X&nbsp;</button>
-                    </td>`;
+                row.innerHTML = `<td>${t.date}</td><td>${t.location || '-'}</td><td>${t.ticket_id || '-'}</td><td><strong>${title}</strong><div>${desc}</div></td><td>${t.requester}</td><td>${t.assigned_to || '-'}</td><td>${t.category}</td><td>${sd}</td><td class="actions"><button onclick="openModal(${t.id})">Update</button><button class="delete-btn" onclick="deleteTicket(${t.id})">X</button></td>`;
             });
         }
 
         function updatePagination() {
-            const startIndex = (currentPage - 1) * itemsPerPage + 1;
-            const endIndex = Math.min(currentPage * itemsPerPage, filteredTickets.length);
-            
-            document.getElementById('paginationInfo').textContent = 
-                `Showing ${startIndex} to ${endIndex} of ${filteredTickets.length} tickets`;
-            
-            // Update pagination buttons
+            const start = (currentPage - 1) * itemsPerPage + 1, end = Math.min(currentPage * itemsPerPage, filteredTickets.length);
+            document.getElementById('paginationInfo').textContent = `Showing ${start} to ${end} of ${filteredTickets.length} tickets`;
             document.getElementById('firstPage').disabled = currentPage === 1;
             document.getElementById('prevPage').disabled = currentPage === 1;
             document.getElementById('nextPage').disabled = currentPage === totalPages;
             document.getElementById('lastPage').disabled = currentPage === totalPages;
-            
-            // Generate page number buttons
-            const pageNumbersContainer = document.getElementById('pageNumbers');
-            pageNumbersContainer.innerHTML = '';
-            
-            const maxVisiblePages = 4;
-            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-            
-            if (endPage - startPage + 1 < maxVisiblePages) {
-                startPage = Math.max(1, endPage - maxVisiblePages + 1);
-            }
-            
-            for (let i = startPage; i <= endPage; i++) {
-                const pageBtn = document.createElement('button');
-                pageBtn.className = `pagination-btn ${i === currentPage ? 'active' : ''}`;
-                pageBtn.textContent = i;
-                pageBtn.onclick = () => goToPage(i);
-                pageNumbersContainer.appendChild(pageBtn);
-            }
+            const pn = document.getElementById('pageNumbers'); pn.innerHTML = '';
+            const max = 4; let sp = Math.max(1, currentPage - Math.floor(max / 2)), ep = Math.min(totalPages, sp + max - 1);
+            if (ep - sp + 1 < max) sp = Math.max(1, ep - max + 1);
+            for (let i = sp; i <= ep; i++) { const b = document.createElement('button'); b.className = `pagination-btn ${i === currentPage ? 'active' : ''}`; b.textContent = i; b.onclick = () => goToPage(i); pn.appendChild(b); }
         }
 
-        function goToPage(page) {
-            if (page < 1 || page > totalPages) return;
-            currentPage = page;
-            renderTable();
-            updatePagination();
-        }
+        function goToPage(p) { if (p < 1 || p > totalPages) return; currentPage = p; renderTable(); updatePagination(); }
 
-        // Enhanced Export to Excel Functionality
-        window.exportToExcel = function(exportType = 'all') {
-            if (allTickets.length === 0) {
-                showSnackbar('No data to export', 'error');
-                return;
-            }
+        function getExportTypeDisplayName(t) { return t === 'all' ? 'All Data' : t === 'pending' ? 'Pending Only' : t === 'in-progress' ? 'In Progress Only' : t === 'done' ? 'Done Only' : t; }
 
-            // Filter tickets based on export type
-            let ticketsToExport = [...allTickets];
-            if (exportType !== 'all') {
-                ticketsToExport = allTickets.filter(ticket => 
-                    ticket.status.toLowerCase().replace(' ', '-') === exportType
-                );
-            }
-
-            if (ticketsToExport.length === 0) {
-                showSnackbar(`No ${exportType} tickets to export`, 'error');
-                return;
-            }
-
-            // Prepare data for Excel
-            const data = [
-                ['Helpdesk Tickets Export'],
-                ['Generated', new Date().toLocaleString('en-PH')],
-                ['Export Type', getExportTypeDisplayName(exportType)],
-                ['Total Tickets', ticketsToExport.length],
-                [''],
-                ['Date', 'Location', 'Ticket ID', 'Title & Description', 'Requester', 'Request To', 'Category', 'Status']
-            ];
-
-            ticketsToExport.forEach(ticket => {
-                // Combine Title & Description in one cell
-                const titleDesc = ticket.title_description || '(No title)';
-                
-                // Combine Status with Status Note
-                let statusDisplay = ticket.status;
-                if (ticket.status_note) {
-                    statusDisplay += ` - ${ticket.status_note}`;
-                }
-
-                data.push([
-                    ticket.date,
-                    ticket.location || '',
-                    ticket.ticket_id || '',
-                    titleDesc,
-                    ticket.requester,
-                    ticket.assigned_to || '',
-                    ticket.category,
-                    statusDisplay
-                ]);
-            });
-
-            // Create worksheet
+        window.exportToExcel = function(type = 'all') {
+            if (allTickets.length === 0) { showSnackbar('No data to export', 'error'); return; }
+            let tks = type === 'all' ? [...allTickets] : allTickets.filter(t => t.status.toLowerCase().replace(' ', '-') === type);
+            if (tks.length === 0) { showSnackbar(`No ${type} tickets to export`, 'error'); return; }
+            const data = [['Helpdesk Tickets Export'], ['Generated', new Date().toLocaleString('en-PH')], ['Export Type', getExportTypeDisplayName(type)], ['Total Tickets', tks.length], [''], ['Date', 'Location', 'Ticket ID', 'Title & Description', 'Requester', 'Request To', 'Category', 'Status']];
+            tks.forEach(t => { let sd = t.status; if (t.status_note) sd += ` - ${t.status_note}`; data.push([t.date, t.location || '', t.ticket_id || '', t.title_description || '(No title)', t.requester, t.assigned_to || '', t.category, sd]); });
             const ws = XLSX.utils.aoa_to_sheet(data);
-            
-            // Set column widths
-            ws['!cols'] = [
-                {wch: 12}, // Date
-                {wch: 15}, // Location
-                {wch: 12}, // Ticket ID
-                {wch: 50}, // Title & Description (wider for combined content)
-                {wch: 15}, // Requester
-                {wch: 15}, // Request To
-                {wch: 12}, // Category
-                {wch: 25}  // Status (wider for status + note)
-            ];
-
-            // Style header row (row 5 is the column headers)
-            const range = XLSX.utils.decode_range(ws['!ref']);
-            for (let C = range.s.c; C <= range.e.c; ++C) {
-                const cell = ws[XLSX.utils.encode_cell({r: 5, c: C})];
-                if (cell) cell.s = { font: { bold: true } };
-            }
-
-            // Create workbook and save
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'Helpdesk Tickets');
-            
-            const fileName = `Helpdesk_Tickets_${getExportTypeDisplayName(exportType).replace(/\s+/g, '_')}_${new Date().toISOString().slice(0,10)}.xlsx`;
-            XLSX.writeFile(wb, fileName);
-            
-            showSnackbar(`Exported ${getExportTypeDisplayName(exportType).toLowerCase()} successfully!`, 'success');
+            ws['!cols'] = [{wch:12},{wch:15},{wch:12},{wch:50},{wch:15},{wch:15},{wch:12},{wch:25}];
+            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Helpdesk Tickets');
+            XLSX.writeFile(wb, `Helpdesk_Tickets_${getExportTypeDisplayName(type).replace(/\s+/g, '_')}_${new Date().toISOString().slice(0,10)}.xlsx`);
+            showSnackbar(`Exported ${getExportTypeDisplayName(type).toLowerCase()} successfully!`, 'success');
         };
 
-        function getExportTypeDisplayName(exportType) {
-            switch(exportType) {
-                case 'all': return 'All Data';
-                case 'pending': return 'Pending Only';
-                case 'in-progress': return 'In Progress Only';
-                case 'done': return 'Done Only';
-                default: return exportType;
-            }
-        }
-
-        // Print Functionality
-        window.handlePrint = function(printType = 'all') {
-            if (allTickets.length === 0) {
-                showSnackbar('No data to print', 'error');
-                return;
-            }
-
-            // Filter tickets based on print type
-            let ticketsToPrint = [...allTickets];
-            if (printType !== 'all') {
-                ticketsToPrint = allTickets.filter(ticket => 
-                    ticket.status.toLowerCase().replace(' ', '-') === printType
-                );
-            }
-
-            if (ticketsToPrint.length === 0) {
-                showSnackbar(`No ${printType} tickets to print`, 'error');
-                return;
-            }
-
-            // Create print window
-            const printWindow = window.open('', '_blank');
-            const printDate = new Date().toLocaleString('en-PH');
-            
-            printWindow.document.write(`
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>Helpdesk Tickets - ${getExportTypeDisplayName(printType)}</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; margin: 20px; color: #334155; }
-                        .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
-                        .header h1 { margin: 0 0 5px 0; color: #1e293b; }
-                        .print-info { text-align: center; margin-bottom: 20px; font-size: 14px; color: #64748b; }
-                        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-                        th, td { border: 1px solid #e2e8f0; padding: 10px; text-align: left; }
-                        th { background-color: #f8fafc; font-weight: bold; }
-                        .title-desc { max-width: 300px; white-space: pre-line; }
-                        .status-display { max-width: 200px; white-space: normal; }
-                        @media print {
-                            body { margin: 0; }
-                            .no-print { display: none; }
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="header">
-                        <h1>HELPDESK TICKETS</h1>
-                        <div class="print-info">
-                            <div>Generated: ${printDate}</div>
-                            <div>Print Type: ${getExportTypeDisplayName(printType)}</div>
-                            <div>Total Tickets: ${ticketsToPrint.length}</div>
-                        </div>
-                    </div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Location</th>
-                                <th>Ticket ID</th>
-                                <th>Title & Description</th>
-                                <th>Requester</th>
-                                <th>Request To</th>
-                                <th>Category</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `);
-
-            ticketsToPrint.forEach(ticket => {
-                // Combine Status with Status Note
-                let statusDisplay = ticket.status;
-                if (ticket.status_note) {
-                    statusDisplay += ` - ${ticket.status_note}`;
-                }
-                
-                printWindow.document.write(`
-                    <tr>
-                        <td>${ticket.date}</td>
-                        <td>${ticket.location || '-'}</td>
-                        <td>${ticket.ticket_id || '-'}</td>
-                        <td class="title-desc">${ticket.title_description || '(No title)'}</td>
-                        <td>${ticket.requester}</td>
-                        <td>${ticket.assigned_to || '-'}</td>
-                        <td>${ticket.category}</td>
-                        <td class="status-display">${statusDisplay}</td>
-                    </tr>
-                `);
+        window.handlePrint = function(type = 'all') {
+            if (allTickets.length === 0) { showSnackbar('No data to print', 'error'); return; }
+            let tks = type === 'all' ? [...allTickets] : allTickets.filter(t => t.status.toLowerCase().replace(' ', '-') === type);
+            if (tks.length === 0) { showSnackbar(`No ${type} tickets to print`, 'error'); return; }
+            const pw = window.open('', '_blank'), pd = new Date().toLocaleString('en-PH');
+            pw.document.write(`<!DOCTYPE html><html><head><title>Helpdesk Tickets - ${getExportTypeDisplayName(type)}</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: Arial, sans-serif; margin: 12px; color: #1e293b; font-size: 10px; line-height: 1.3; }
+.header { text-align: center; margin-bottom: 12px; border-bottom: 2px solid #cbd5e1; padding-bottom: 8px; }
+.header h1 { margin: 0 0 4px 0; color: #0f172a; font-size: 16px; font-weight: 700; letter-spacing: 0.5px; }
+.print-info { display: flex; justify-content: center; gap: 20px; font-size: 9px; color: #475569; margin-top: 4px; }
+.print-info span { display: inline-block; }
+table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 10px; }
+th { background: #f1f5f9; font-weight: 600; text-transform: uppercase; font-size: 9px; letter-spacing: 0.3px; color: #334155; }
+th, td { border: 1px solid #cbd5e1; padding: 6px 8px; text-align: left; vertical-align: top; }
+td { color: #334155; }
+tr:nth-child(even) { background: #f8fafc; }
+.title-desc { max-width: 220px; white-space: pre-line; word-wrap: break-word; }
+.status-display { max-width: 150px; white-space: normal; word-wrap: break-word; }
+.footer { margin-top: 16px; text-align: center; font-size: 8px; color: #94a3b8; padding-top: 8px; border-top: 1px solid #e2e8f0; }
+@media print {
+  body { margin: 8px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  @page { margin: 10mm; size: landscape; }
+  .no-print { display: none; }
+  table { page-break-inside: auto; }
+  tr { page-break-inside: avoid; page-break-after: auto; }
+  th { background: #f1f5f9 !important; }
+}
+</style></head><body>
+<div class="header">
+  <h1>HELPDESK TICKETS REPORT</h1>
+  <div class="print-info">
+    <span><strong>Generated:</strong> ${pd}</span>
+    <span><strong>Filter:</strong> ${getExportTypeDisplayName(type)}</span>
+    <span><strong>Total:</strong> ${tks.length} ticket(s)</span>
+  </div>
+</div>
+<table>
+  <thead><tr><th style="width:70px">Date</th><th style="width:85px">Location</th><th style="width:55px">ID</th><th style="width:150px">Title & Description</th><th style="width:95px">Requester</th><th style="width:85px">Request To</th><th style="width:110px">Category</th><th style="width:160px">Status</th></tr></thead>
+  <tbody>`);
+            tks.forEach(t => {
+                let sd = t.status; if (t.status_note) sd += ` - ${t.status_note}`;
+                pw.document.write(`<tr><td>${t.date}</td><td>${t.location || '-'}</td><td>${t.ticket_id || '-'}</td><td class="title-desc">${t.title_description || '(No title)'}</td><td>${t.requester}</td><td>${t.assigned_to || '-'}</td><td>${t.category}</td><td class="status-display">${sd}</td></tr>`);
             });
-
-            printWindow.document.write(`
-                        </tbody>
-                    </table>
-                    <div style="margin-top: 30px; text-align: center; font-size: 12px; color: #64748b;">
-                        Printed from Helpdesk Monitoring System
-                    </div>
-                </body>
-                </html>
-            `);
-
-            printWindow.document.close();
-            
-            // Wait for content to load then print
-            printWindow.onload = function() {
-                printWindow.print();
-            };
-
-            showSnackbar(`Printing ${getExportTypeDisplayName(printType).toLowerCase()}...`, 'info');
+            pw.document.write(`</tbody></table><div class="footer">Helpdesk Monitoring System &bull; Printed Report</div></body></html>`);
+            pw.document.close();
+            pw.onload = function() { pw.print(); };
+            showSnackbar(`Printing ${getExportTypeDisplayName(type).toLowerCase()}...`, 'info');
         };
 
-        document.getElementById('userFilter').addEventListener('change', () => {
-            currentPage = 1;
-            loadTickets();
-        });
-
-        // Initialize functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            setupTheme();
-            setupExportDropdown();
-            setupPrintDropdown();
-            setupDropdownCloseHandlers();
-            setupFilters();
-            setupSorting();
-        });
-
-        supabase.channel('tickets')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'tickets' }, loadTickets)
-            .subscribe();
-
+        document.getElementById('userFilter').addEventListener('change', () => { currentPage = 1; loadTickets(); });
+        document.addEventListener('DOMContentLoaded', function() { setupTheme(); setupExportDropdown(); setupPrintDropdown(); setupDropdownCloseHandlers(); setupFilters(); setupSorting(); });
+        supabase.channel('tickets').on('postgres_changes', { event: '*', schema: 'public', table: 'tickets' }, loadTickets).subscribe();
         checkLogin();
     </script>
 </body>
