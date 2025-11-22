@@ -1031,7 +1031,7 @@
         let currentUser = localStorage.getItem('helpdeskUser') || '';
         let editingTicketId = null;
         let currentPage = 1;
-        const itemsPerPage = 10;
+        const itemsPerPage = 4;
         let totalTickets = 0;
         let totalPages = 1;
         let allTickets = [];
@@ -1461,7 +1461,7 @@
             const pageNumbersContainer = document.getElementById('pageNumbers');
             pageNumbersContainer.innerHTML = '';
             
-            const maxVisiblePages = 5;
+            const maxVisiblePages = 4;
             let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
             let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
             
