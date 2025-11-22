@@ -452,7 +452,7 @@
             width: 120px;
         }
 
-        .main-table th:nth-child(6), /* Assigned To */
+        .main-table th:nth-child(6), /* Request To */
         .main-table td:nth-child(6) {
             width: 120px;
         }
@@ -967,7 +967,7 @@
                         </div>
                         <div class="form-field">
                             <label>Location <span class="required">*</span></label>
-                            <input type="text" id="location" placeholder="e.g. Room 301" required>
+                            <input type="text" id="location" placeholder="e.g. LCC Food Garden - LC" required>
                         </div>
                         <div class="form-field">
                             <label>Ticket ID</label>
@@ -983,13 +983,13 @@
                         </div>
                         <div class="form-field">
                             <label>Category <span class="required">*</span></label>
-                            <input type="text" id="category" placeholder="e.g. Hardware, Software" required>
+                            <input type="text" id="category" placeholder="" required>
                         </div>
                     </div>
 
                     <div class="form-field full-width">
                         <label>Title & Description <span class="required">*</span></label>
-                        <textarea id="titleDesc" rows="4" placeholder="Title on first line&#10;Full description below..." required></textarea>
+                        <textarea id="titleDesc" rows="4" placeholder="Description" required></textarea>
                     </div>
 
                     <div class="status-row">
@@ -1332,6 +1332,13 @@
             const title = lines[0] || '(No title)';
             const desc = lines.slice(1).join('\n').trim();
 
+            // Get the original ticket data if we're editing
+            let originalTicket = null;
+            if (editingTicketId) {
+                const { data } = await supabase.from('tickets').select('*').eq('id', editingTicketId).single();
+                originalTicket = data;
+            }
+
             const data = {
                 date: document.getElementById('date').value,
                 location: document.getElementById('location').value.trim(),
@@ -1343,7 +1350,8 @@
                 category: document.getElementById('category').value.trim(),
                 status: document.getElementById('statusSelect').value,
                 status_note: document.getElementById('statusNote').value.trim() || null,
-                created_by: currentUser
+                // FIX: Preserve the original creator when editing, only set currentUser for new tickets
+                created_by: editingTicketId ? (originalTicket?.created_by || currentUser) : currentUser
             };
 
             try {
@@ -1431,7 +1439,7 @@
                     <td>${statusDisplay}</td>
                     <td class="actions">
                         <button onclick="openModal(${t.id})">Update</button>
-                        <button class="delete-btn" onclick="deleteTicket(${t.id})">Delete</button>
+                        <button class="delete-btn" onclick="deleteTicket(${t.id})">&nbsp;X&nbsp;</button>
                     </td>`;
             });
         }
@@ -1539,7 +1547,7 @@
                 {wch: 12}, // Ticket ID
                 {wch: 50}, // Title & Description (wider for combined content)
                 {wch: 15}, // Requester
-                {wch: 15}, // Assigned To
+                {wch: 15}, // Request To
                 {wch: 12}, // Category
                 {wch: 25}  // Status (wider for status + note)
             ];
