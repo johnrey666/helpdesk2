@@ -1,512 +1,583 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Helpdesk Monitoring System</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <style>
-        * { margin:0; padding:0; box-sizing:border-box; }
-        html, body { height: 100%; font-family: 'Inter', sans-serif; color: #334155; font-size: 13px; line-height: 1.4; transition: all 0.3s ease; }
-        :root { --bg-color: #fff; --surface-color: #fff; --text-primary: #334155; --text-secondary: #64748b; --text-muted: #94a3b8; --border-color: #e2e8f0; --hover-color: #f8fafc; --header-bg: #f8fafc; --shadow: 0 1px 3px rgba(0,0,0,0.05); --modal-bg: rgba(0,0,0,0.5); }
-        .dark-mode { --bg-color: #0f172a; --surface-color: #1e293b; --text-primary: #f1f5f9; --text-secondary: #cbd5e1; --text-muted: #94a3b8; --border-color: #334155; --hover-color: #1e293b; --header-bg: #1e293b; --shadow: 0 1px 3px rgba(0,0,0,0.3); --modal-bg: rgba(0,0,0,0.7); }
-        body { background: var(--bg-color); color: var(--text-primary); }
-        .container { min-height: 100vh; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-        .theme-toggle { background: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; }
-        .theme-toggle:hover { background: var(--hover-color); }
-        .login-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: var(--header-bg); }
-        .login-box { background: var(--surface-color); padding: 32px; border-radius: 8px; box-shadow: var(--shadow); width: 100%; max-width: 380px; border: 1px solid var(--border-color); }
-        .login-box h1 { text-align: center; color: var(--text-primary); margin-bottom: 24px; font-size: 1.4rem; font-weight: 600; }
-        .form-group { margin-bottom: 16px; }
-        .form-group label { display: block; margin-bottom: 6px; color: var(--text-secondary); font-weight: 500; font-size: 12px; }
-        .form-group select { width: 100%; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; background: var(--surface-color); color: var(--text-primary); }
-        .btn-login { width: 100%; padding: 10px; background: #3b82f6; color: white; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
-        .btn-login:hover { background: #2563eb; }
-        .dashboard { display: none; }
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--border-color); margin-bottom: 12px; }
-        .header h2 { font-size: 1.3rem; font-weight: 600; }
-        .header-right { display: flex; align-items: center; gap: 12px; font-size: 11.5px; }
-        .user-info { color: var(--text-secondary); font-weight: 500; }
-        .logout-btn { background: var(--hover-color); color: var(--text-secondary); border: 1px solid var(--border-color); padding: 6px 12px; border-radius: 4px; font-size: 11px; cursor: pointer; font-weight: 500; }
-        .logout-btn:hover { background: var(--border-color); color: var(--text-primary); }
-        .top-controls { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 8px; }
-        .left-controls { display: flex; gap: 8px; align-items: center; flex: 1; }
-        #searchInput { flex: 1; min-width: 200px; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 12.5px; background: var(--surface-color); color: var(--text-primary); }
-        #searchInput:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
-        #userFilter, .status-filter { padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 12.5px; background: var(--surface-color); color: var(--text-primary); min-width: 140px; }
-        .action-buttons { display: flex; gap: 8px; }
-        #addBtn { padding: 8px 16px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 12px; background: #3b82f6; color: white; }
-        #addBtn:hover { background: #2563eb; }
-        .export-dropdown, .print-dropdown { position: relative; display: inline-block; }
-        #exportBtn, #printBtn { display: flex; align-items: center; gap: 6px; padding: 8px 16px; background: var(--surface-color); color: var(--text-secondary); border: 1px solid var(--border-color); border-radius: 6px; font-weight: 500; cursor: pointer; font-size: 12px; }
-        #exportBtn:hover, #printBtn:hover { background: var(--hover-color); }
-        .export-options, .print-options { display: none; position: absolute; top: calc(100% + 4px); right: 0; background: var(--surface-color); border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,.2); min-width: 180px; z-index: 1000; border: 1px solid var(--border-color); }
-        .export-dropdown.active .export-options, .print-dropdown.active .print-options { display: block; }
-        .export-options button, .print-options button { display: flex; align-items: center; gap: 8px; width: 100%; padding: 10px 12px; border: none; background: transparent; text-align: left; cursor: pointer; font-size: 12px; font-weight: 500; color: var(--text-secondary); }
-        .export-options button:hover, .print-options button:hover { background: var(--hover-color); color: var(--text-primary); }
-        .table-wrapper { flex: 1; background: var(--surface-color); border-radius: 8px; overflow: hidden; box-shadow: var(--shadow); border: 1px solid var(--border-color); display: flex; flex-direction: column; }
-        .main-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-        .main-table th { background: var(--header-bg); padding: 10px 12px; text-align: left; font-weight: 600; color: var(--text-secondary); border-bottom: 1px solid var(--border-color); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; position: relative; }
-        .main-table th:hover { background: var(--hover-color); }
-        .sort-icon { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 10px; color: var(--text-muted); }
-        .main-table th.sort-asc .sort-icon, .main-table th.sort-desc .sort-icon { color: #3b82f6; }
-        .main-table th.sort-desc .sort-icon { transform: translateY(-50%) rotate(180deg); }
-        .main-table td { padding: 10px 12px; border-bottom: 1px solid var(--border-color); vertical-align: top; line-height: 1.35; white-space: normal; word-wrap: break-word; }
-        .main-table tr:hover { background: var(--hover-color); }
-        .main-table td:nth-child(4) strong { font-size: 12.5px; display: block; margin-bottom: 2px; }
-        .main-table td:nth-child(4) div:last-child { font-size: 11px; color: var(--text-secondary); }
-        .actions { display: flex; gap: 4px; }
-        .actions button { padding: 4px 8px; background: var(--surface-color); border: 1px solid var(--border-color); color: var(--text-secondary); border-radius: 4px; font-size: 11px; font-weight: 500; cursor: pointer; }
-        .actions button:hover { background: var(--hover-color); }
-        .actions button.delete-btn { background: #fef2f2; border-color: #fecaca; color: #dc2626; }
-        .dark-mode .actions button.delete-btn { background: #7f1d1d; border-color: #991b1b; color: #fecaca; }
-        .pagination { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: var(--header-bg); border-top: 1px solid var(--border-color); }
-        .pagination-info { font-size: 12px; color: var(--text-secondary); }
-        .pagination-controls { display: flex; gap: 6px; align-items: center; }
-        .pagination-btn { padding: 6px 10px; background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 4px; font-size: 11px; cursor: pointer; color: var(--text-secondary); }
-        .pagination-btn:hover { background: var(--hover-color); }
-        .pagination-btn.active { background: #3b82f6; border-color: #3b82f6; color: white; font-weight: 500; }
-        .pagination-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .modal { display: none; position: fixed; inset: 0; background: var(--modal-bg); justify-content: center; align-items: center; z-index: 1000; padding: 16px; }
-        .modal.show { display: flex; }
-        .modal-content { background: var(--surface-color); width: 100%; max-width: 600px; max-height: 90vh; border-radius: 8px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.15); display: flex; flex-direction: column; }
-        .modal-header { background: var(--header-bg); padding: 16px 20px; font-size: 1.2rem; font-weight: 600; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); }
-        .close-btn { font-size: 24px; cursor: pointer; opacity: 0.6; color: var(--text-secondary); }
-        .close-btn:hover { opacity: 1; }
-        .modal-body { padding: 20px; overflow-y: auto; flex: 1; max-height: calc(90vh - 140px); }
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .form-field { display: flex; flex-direction: column; }
-        .form-field label { font-size: 11.5px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; }
-        .required { color: #ef4444; }
-        .form-field input, .form-field select, .form-field textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; background: var(--surface-color); color: var(--text-primary); }
-        .form-field input:focus, .form-field select:focus, .form-field textarea:focus { outline: none; border-color: #3b82f6; }
-        textarea { min-height: 80px; resize: vertical; }
-        .full-width { grid-column: 1 / -1; margin-top: 8px; }
-        .status-row { display: flex; gap: 12px; margin-top: 12px; }
-        .status-row .form-field { flex: 1; }
-        .modal-footer { padding: 16px 20px; background: var(--surface-color); border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 10px; }
-        .btn-cancel, .btn-save { padding: 8px 16px; border-radius: 6px; font-size: 12.5px; font-weight: 500; cursor: pointer; }
-        .btn-cancel { background: var(--surface-color); border: 1px solid var(--border-color); color: var(--text-secondary); }
-        .btn-save { background: #3b82f6; border: 1px solid #3b82f6; color: white; }
-        .btn-save:hover { background: #2563eb; }
-        .status-badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 10.5px; font-weight: 600; text-transform: uppercase; }
-        .status-pending { background: #fef3c7; color: #d97706; }
-        .dark-mode .status-pending { background: #78350f; color: #fbbf24; }
-        .status-in-progress { background: #dbeafe; color: #1d4ed8; }
-        .dark-mode .status-in-progress { background: #1e3a8a; color: #60a5fa; }
-        .status-done { background: #dcfce7; color: #15803d; }
-        .dark-mode .status-done { background: #14532d; color: #4ade80; }
-        .status-cancelled { background: #fee2e2; color: #dc2626; }
-        .dark-mode .status-cancelled { background: #7f1d1d; color: #fca5a5; }
-        .status-note { font-size: 11px; color: var(--text-secondary); margin-top: 4px; line-height: 1.4; }
-        .snackbar { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--surface-color); color: var(--text-primary); padding: 10px 20px; border-radius: 6px; font-weight: 500; font-size: 12.5px; z-index: 10000; opacity: 0; box-shadow: 0 8px 20px rgba(0,0,0,0.15); border: 1px solid var(--border-color); }
-        .snackbar.show { opacity: 1; transform: translateX(-50%) translateY(-8px); }
-        .snackbar.error { background: #ef4444; color: white; }
-        .snackbar.success { background: #10b981; color: white; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Helpdesk Monitor</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+<script人生 src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{--bg:#fafafa;--surface:#ffffff;--text:#1a1a1a;--muted:#71717a;--border:#e2e8f0;--hover:#f1f5f9;--primary:#3b82f6;--primary-hover:#2563eb;--shadow:0 4px 16px -4px rgba(0,0,0,.08);--radius:10px;--transition:all .2s ease;--font:'Inter',sans-serif}
+.dark-mode{--bg:#0c0e15;--surface:#111827;--text:#f1f5f9;--muted:#94a3b8;--border:#2d3748;--hover:#1e293b}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:12.4px;line-height:1.4;transition:var(--transition);min-height:100vh}
+.container{max-width:1520px;margin:0 auto;padding:0.6rem}
+.header{display:flex;justify-content:space-between;align-items:center;padding:0.6rem 0;border-bottom:1px solid var(--border)}
+.header h2{font-size:1.15rem;font-weight:500}
+.header-right{display:flex;gap:0.5rem;align-items:center;font-size:11.5px}
+.theme-toggle{background:transparent;border:1px solid var(--border);color:var(--muted);padding:0.3rem 0.65rem;border-radius:7px;cursor:pointer;font-size:10.8px;transition:var(--transition)}
+.theme-toggle:hover{background:var(--hover)}
+.top-controls{display:flex;flex-wrap:wrap;gap:0.55rem;margin:0.65rem 0;align-items:center}
+.left-controls{display:flex;gap:0.45rem;flex:1;min-width:260px}
+input,select{padding:0.4rem 0.7rem;border:1px solid var(--border);border-radius:7px;background:var(--surface);color:var(--text);font-size:12px;transition:var(--transition);font-weight:400}
+input:focus,select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(59,146,255,.15)}
+.btn{padding:0.4rem 0.9rem;border-radius:7px;font-weight:500;cursor:pointer;transition:var(--transition);font-size:12px;display:inline-flex;align-items:center;gap:0.45rem;white-space:nowrap}
+.btn-primary{background:var(--primary);color:#fff;border:none}
+.btn-primary:hover{background:var(--primary-hover)}
+.btn-secondary{background:var(--surface);border:1px solid var(--border);color:var(--muted)}
+.btn-secondary:hover{background:var(--hover);color:var(--text)}
+.dropdown{position:relative;display:inline-block}
+.dropdown-menu{position:absolute;top:100%;right:0;margin-top:0.4rem;background:var(--surface);border:1px solid var(--border);border-radius:9px;box-shadow:var(--shadow);min-width:158px;opacity:0;visibility:hidden;transform:translateY(-5px);transition:all .22s ease;z-index:1000;overflow:hidden}
+.dropdown.active .dropdown-menu{opacity:1;visibility:visible;transform:translateY(0)}
+.dropdown-item{padding:0.58rem 0.9rem;display:flex;align-items:center;gap:0.45rem;color:var(--muted);font-size:11.8px;cursor:pointer;transition:var(--transition)}
+.dropdown-item:hover{background:var(--hover);color:var(--text)}
+.custom-select{position:relative;width:100%}
+.select-display{padding:0.4rem 0.7rem;border:1px solid var(--border);border-radius:7px;background:var(--surface);cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:12px;transition:var(--transition);color:var(--text)}
+.select-display:hover{border-color:var(--primary)}
+.select-options{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:9px;max-height:360px;overflow-y:auto;box-shadow:var(--shadow);opacity:0;visibility:hidden;transform:scale(.97);transform-origin:top;transition:all .25s ease;z-index:1000}
+.select-options.show{opacity:1;visibility:visible;transform:scale(1)}
+.category-header{padding:0.65rem 1rem;background:var(--hover);font-weight:500;font-size:11.8px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;color:var(--muted);transition:var(--transition);border-bottom:1px solid var(--border)}
+.category-header:hover{background:var(--border)}
+.category-header i{font-size:10.5px;transition:transform .25s ease}
+.category-header.expanded i{transform:rotate(180deg)}
+.category-options{max-height:0;overflow:hidden;transition:max-height .32s ease}
+.category-options.expanded{max-height:800px}
+.location-item{padding:0.55rem 1.2rem 0.55rem 2.2rem;cursor:pointer;font-size:11.8px;transition:var(--transition);position:relative;color:var(--text);font-weight:400}
+.location-item:hover{background:var(--hover)}
+.location-item::before{content:"";position:absolute;left:1rem;top:50%;width:4px;height:4px;background:var(--primary);border-radius:50%;transform:translateY(-50%);opacity:0;transition:opacity .2s}
+.location-item:hover::before{opacity:1}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.58);backdrop-filter:blur(11px);display:flex;align-items:center;justify-content:center;z-index:2000;opacity:0;visibility:hidden;transition:opacity .32s ease}
+.modal.show{opacity:1;visibility:visible}
+.modal-content{background:var(--surface);border-radius:var(--radius);width:100%;max-width:700px;max-height:93vh;overflow:hidden;box-shadow:var(--shadow);transform:scale(.93);transition:transform .32s ease}
+.modal.show .modal-content{transform:scale(1)}
+.modal-header{padding:0.9rem 1.4rem;background:var(--hover);display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);font-size:1.05rem;font-weight:500}
+.close-btn{font-size:1.55rem;cursor:pointer;opacity:.55;transition:var(--transition)}
+.close-btn:hover{opacity:1;color:#ef4444}
+.modal-body{padding:1.4rem;overflow-y:auto;max-height:calc(93vh - 125px)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.9rem}
+.form-field{display:flex;flex-direction:column;gap:0.3rem}
+.form-field label{font-size:11.5px;font-weight:500;color:var(--muted)}
+.required{color:#ef4444}
+textarea{min-height:84px;resize:vertical;font-size:12.4px;padding:0.6rem}
+.full-width{grid-column:1/-1}
+.modal-footer{padding:0.9rem 1.4rem;background:var(--hover);border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:0.65rem}
+.table-wrapper{background:var(--surface);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--border);font-size:12px}
+table{width:100%;border-collapse:collapse}
+th{background:var(--hover);padding:0.58rem 0.9rem;text-align:left;font-weight:500;font-size:10.8px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);cursor:pointer;user-select:none}
+td{padding:0.58rem 0.9rem;border-bottom:1px solid var(--border);line-height:1.35;vertical-align:top}
+tr:hover{background:var(--hover)}
+.status-badge{display:inline-block;padding:2.5px 8px;border-radius:5px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+.status-pending{background:#fffaeb;color:#d97706}
+.dark-mode .status-pending{background:#451a03;color:#fbbf24}
+.status-in-progress{background:#eff6ff;color:#1d4ed8}
+.dark-mode .status-in-progress{background:#172554;color:#93c5fd}
+.status-done{background:#f0fdf4;color:#166534}
+.dark-mode .status-done{background:#166534;color:#86efac}
+.status-cancelled{background:#fef2f2;color:#dc2626}
+.dark-mode .status-cancelled{background:#7f1d1d;color:#fca5a5}
+.actions{display:flex;gap:0.35rem}
+.actions button{padding:0.3rem 0.65rem;background:var(--surface);border:1px solid var(--border);color:var(--muted);border-radius:5px;font-size:11px;cursor:pointer;transition:var(--transition)}
+.actions button:hover{background:var(--hover)}
+.actions .delete-btn{background:#fef2f2;border-color:#fecaca;color:#dc2626}
+.dark-mode .actions .delete-btn{background:#7f1d1d;border-color:#991b1b;color:#fca5a5}
+.pagination{display:flex;justify-content:space-between;align-items:center;padding:0.65rem 0.9rem;background:var(--hover);border-top:1px solid var(--border);font-size:11.5px}
+.pagination-info{color:var(--muted)}
+.pagination-controls{display:flex;gap:0.35rem;align-items:center}
+.pagination-btn{padding:0.3rem 0.7rem;background:var(--surface);border:1px solid var(--border);border-radius:5px;font-size:11px;cursor:pointer;color:var(--muted);transition:var(--transition)}
+.pagination-btn:hover{background:var(--hover)}
+.pagination-btn.active{background:var(--primary);border-color:var(--primary);color:#fff;font-weight:500}
+.loader{width:32px;height:32px;border:2.8px solid var(--border);border-top:2.8px solid var(--primary);border-radius:50%;animation:spin 1s linear infinite;margin:1.8rem auto;display:none}
+@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+.snackbar{position:fixed;bottom:1.4rem;left:50%;transform:translateX(-50%);padding:0.7rem 1.4rem;border-radius:9px;background:#10b981;color:#fff;font-weight:500;box-shadow:var(--shadow);z-index:9999;opacity:0;transition:all .32s ease;font-size:12.4px}
+.snackbar.show{opacity:1;transform:translateX(-50%) translateY(-8px)}
+.snackbar.error{background:#ef4444}
+@media(max-width:768px){.form-grid{grid-template-columns:1fr}.top-controls{flex-direction:column;align-items:stretch}.left-controls{flex-direction:column}}
+</style>
 </head>
 <body>
-    <div id="loginPage" class="login-container">
-        <div class="login-box">
-            <h1>Helpdesk Monitor</h1>
-            <form id="loginForm">
-                <div class="form-group">
-                    <label for="username">Select Your Name</label>
-                    <select id="username" required>
-                        <option value="">-- Select User --</option>
-                        <option value="Admin">Admin</option>
-                        <option value="CTK">CTK</option>
-                        <option value="FO">FO</option>
-                        <option value="Concourse">Concourse</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn-login">Login</button>
-            </form>
-        </div>
-    </div>
-    <div id="dashboard" class="dashboard">
-        <div class="container">
-            <div class="header">
-                <h2>Helpdesk Monitoring</h2>
-                <div class="header-right">
-                    <button id="themeToggle" class="theme-toggle"><i class="fas fa-moon"></i> Dark Mode</button>
-                    <span class="user-info">Logged in as: <strong id="currentUser"></strong></span>
-                    <button onclick="logout()" class="logout-btn">Logout</button>
-                </div>
-            </div>
-            <div class="top-controls">
-                <div class="left-controls">
-                    <input type="text" id="searchInput" placeholder="Search tickets...">
-                    <select id="statusFilter" class="status-filter">
-                        <option value="">All Status</option>
-                        <option value="Pending">Pending</option>
-                        <option value="In Progress">In Progress</option>
-                        <option value="Done">Done</option>
-                        <option value="Cancelled">Cancelled</option>
-                    </select>
-                    <select id="userFilter" style="display:none;">
-                        <option value="">All Users</option>
-                        <option value="CTK">CTK</option>
-                        <option value="FO">FO</option>
-                        <option value="Concourse">Concourse</option>
-                        <option value="Admin">Admin</option>
-                    </select>
-                </div>
-                <div class="action-buttons">
-                    <div class="print-dropdown" id="printDropdown">
-                        <button id="printBtn"><i class="fas fa-print"></i> Print</button>
-                        <div class="print-options">
-                            <button data-print="all"><i class="fas fa-print"></i> Print All Data</button>
-                            <button data-print="pending"><i class="fas fa-clock"></i> Print Pending Only</button>
-                            <button data-print="in-progress"><i class="fas fa-spinner"></i> Print In Progress Only</button>
-                            <button data-print="done"><i class="fas fa-check"></i> Print Done Only</button>
-                        </div>
-                    </div>
-                    <div class="export-dropdown" id="exportDropdown">
-                        <button id="exportBtn"><i class="fas fa-download"></i> Export</button>
-                        <div class="export-options">
-                            <button data-export="all"><i class="fas fa-file-excel"></i> Export All Data</button>
-                            <button data-export="pending"><i class="fas fa-clock"></i> Export Pending Only</button>
-                            <button data-export="in-progress"><i class="fas fa-spinner"></i> Export In Progress Only</button>
-                            <button data-export="done"><i class="fas fa-check"></i> Export Done Only</button>
-                        </div>
-                    </div>
-                    <button id="addBtn" onclick="openModal()">+ New Ticket</button>
-                </div>
-            </div>
-            <div class="table-wrapper">
-                <table class="main-table">
-                    <thead>
-                        <tr>
-                            <th class="sortable" data-sort="date">Date <i class="fas fa-sort sort-icon"></i></th>
-                            <th class="sortable" data-sort="location">Location <i class="fas fa-sort sort-icon"></i></th>
-                            <th>ID</th>
-                            <th class="sortable" data-sort="title">Title & Description <i class="fas fa-sort sort-icon"></i></th>
-                            <th>Requester</th>
-                            <th>Request To</th>
-                            <th>Category</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody"></tbody>
-                </table>
-                <div class="pagination">
-                    <div class="pagination-info" id="paginationInfo">Showing 0 of 0 tickets</div>
-                    <div class="pagination-controls">
-                        <button class="pagination-btn" id="firstPage" onclick="goToPage(1)">First</button>
-                        <button class="pagination-btn" id="prevPage" onclick="goToPage(currentPage - 1)">Previous</button>
-                        <span id="pageNumbers"></span>
-                        <button class="pagination-btn" id="nextPage" onclick="goToPage(currentPage + 1)">Next</button>
-                        <button class="pagination-btn" id="lastPage" onclick="goToPage(totalPages)">Last</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div id="modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modalTitle">New Ticket</h2>
-                <span class="close-btn" onclick="closeModal()">×</span>
-            </div>
-            <form id="ticketForm" onsubmit="event.preventDefault(); saveTicket();">
-                <div class="modal-body">
-                    <div class="form-grid">
-                        <div class="form-field"><label>Date <span class="required">*</span></label><input type="date" id="date" required></div>
-                        <div class="form-field"><label>Location <span class="required">*</span></label><input type="text" id="location" placeholder="e.g. LCC Food Garden - LC" required></div>
-                        <div class="form-field"><label>Ticket ID</label><input type="text" id="ticketId" placeholder="TKT-001"></div>
-                        <div class="form-field"><label>Requester <span class="required">*</span></label><input type="text" id="requester" required></div>
-                        <div class="form-field"><label>Request To</label><input type="text" id="assigned" placeholder="Optional"></div>
-                        <div class="form-field"><label>Category <span class="required">*</span></label><input type="text" id="category" required></div>
-                    </div>
-                    <div class="form-field full-width"><label>Title & Description <span class="required">*</span></label><textarea id="titleDesc" rows="4" placeholder="Description" required></textarea></div>
-                    <div class="status-row">
-                        <div class="form-field"><label>Status <span class="required">*</span></label><select id="statusSelect" required><option>Pending</option><option>In Progress</option><option>Done</option><option>Cancelled</option></select></div>
-                        <div class="form-field"><label>Note (optional)</label><input type="text" id="statusNote" placeholder="e.g. Waiting for approval"></div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
-                    <button type="submit" class="btn-save"><span id="saveBtnText">Save Ticket</span></button>
-                </div>
-            </form>
-        </div>
-    </div>
-    <div id="snackbar" class="snackbar">Saved!</div>
-    <script type="module">
-        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-        const SUPABASE_URL = 'https://crdevgfrptdhhgqnpqzk.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_nLYTInAlXEqxy6YbMIxKpw_ZacBlomD';
-        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        let currentUser = localStorage.getItem('helpdeskUser') || '', editingTicketId = null, currentPage = 1;
-        const itemsPerPage = 4;
-        let totalTickets = 0, totalPages = 1, allTickets = [], filteredTickets = [];
-        let filterState = { search: '', status: '' }, sortState = { field: 'date', direction: 'desc' };
-
-        function setupTheme() {
-            const t = document.getElementById('themeToggle');
-            if (localStorage.getItem('darkMode') === 'true') { document.body.classList.add('dark-mode'); t.innerHTML = '<i class="fas fa-sun"></i> Light Mode'; }
-            t.addEventListener('click', () => {
-                document.body.classList.toggle('dark-mode');
-                const d = document.body.classList.contains('dark-mode');
-                localStorage.setItem('darkMode', d);
-                t.innerHTML = d ? '<i class="fas fa-sun"></i> Light Mode' : '<i class="fas fa-moon"></i> Dark Mode';
-            });
-        }
-
-        function setupExportDropdown() {
-            const dd = document.getElementById('exportDropdown'), btn = document.getElementById('exportBtn');
-            btn.addEventListener('click', e => { e.stopPropagation(); dd.classList.toggle('active'); });
-            document.querySelectorAll('.export-options button').forEach(o => o.addEventListener('click', e => { e.stopPropagation(); exportToExcel(e.target.closest('button').dataset.export); dd.classList.remove('active'); }));
-        }
-
-        function setupPrintDropdown() {
-            const dd = document.getElementById('printDropdown'), btn = document.getElementById('printBtn');
-            btn.addEventListener('click', e => { e.stopPropagation(); dd.classList.toggle('active'); });
-            document.querySelectorAll('.print-options button').forEach(o => o.addEventListener('click', e => { e.stopPropagation(); handlePrint(e.target.closest('button').dataset.print); dd.classList.remove('active'); }));
-        }
-
-        function setupDropdownCloseHandlers() {
-            document.addEventListener('click', () => { document.getElementById('exportDropdown').classList.remove('active'); document.getElementById('printDropdown').classList.remove('active'); });
-        }
-
-        function setupSorting() {
-            document.querySelectorAll('th.sortable').forEach(h => h.addEventListener('click', function() {
-                const f = this.dataset.sort;
-                sortState = sortState.field === f ? { field: f, direction: sortState.direction === 'asc' ? 'desc' : 'asc' } : { field: f, direction: 'desc' };
-                updateSortIcons(); applySorting();
-            }));
-        }
-
-        function updateSortIcons() {
-            document.querySelectorAll('th.sortable').forEach(h => h.classList.remove('sort-asc', 'sort-desc'));
-            const a = document.querySelector(`th[data-sort="${sortState.field}"]`);
-            if (a) a.classList.add(sortState.direction === 'asc' ? 'sort-asc' : 'sort-desc');
-        }
-
-        function applySorting() {
-            filteredTickets.sort((a, b) => {
-                let vA, vB;
-                if (sortState.field === 'date') { vA = a.date; vB = b.date; }
-                else if (sortState.field === 'location') { vA = (a.location || '').toLowerCase(); vB = (b.location || '').toLowerCase(); }
-                else if (sortState.field === 'title') { vA = (a.title_description || '').toLowerCase(); vB = (b.title_description || '').toLowerCase(); }
-                let r = vA < vB ? -1 : vA > vB ? 1 : 0;
-                return sortState.direction === 'desc' ? -r : r;
-            });
-            currentPage = 1; renderTable(); updatePagination();
-        }
-
-        function setupFilters() {
-            document.getElementById('statusFilter').addEventListener('change', applyFilters);
-            document.getElementById('searchInput').addEventListener('input', applyFilters);
-        }
-
-        function applyFilters() {
-            filterState = { status: document.getElementById('statusFilter').value, search: document.getElementById('searchInput').value.toLowerCase() };
-            filteredTickets = allTickets.filter(t => {
-                if (filterState.status && t.status !== filterState.status) return false;
-                if (filterState.search && ![t.date, t.location, t.ticket_id, t.title_description, t.requester, t.assigned_to, t.category, t.status, t.status_note].join(' ').toLowerCase().includes(filterState.search)) return false;
-                return true;
-            });
-            applySorting();
-        }
-
-        function showSnackbar(msg, type = 'info') {
-            const s = document.getElementById('snackbar');
-            s.textContent = msg; s.className = 'snackbar';
-            if (type === 'success') s.classList.add('success');
-            if (type === 'error') s.classList.add('error');
-            s.classList.add('show');
-            setTimeout(() => s.classList.remove('show'), 3000);
-        }
-
-        function checkLogin() {
-            if (currentUser) {
-                document.getElementById('currentUser').textContent = currentUser;
-                document.getElementById('loginPage').style.display = 'none';
-                document.getElementById('dashboard').style.display = 'block';
-                if (currentUser === 'Admin') document.getElementById('userFilter').style.display = 'block';
-                loadTickets();
-            }
-        }
-
-        document.getElementById('loginForm').addEventListener('submit', e => {
-            e.preventDefault();
-            currentUser = document.getElementById('username').value.trim();
-            if (!currentUser) return showSnackbar('Select a user', 'error');
-            localStorage.setItem('helpdeskUser', currentUser);
-            checkLogin();
-        });
-
-        window.logout = () => { if (confirm('Log out?')) { localStorage.removeItem('helpdeskUser'); location.reload(); } };
-
-        window.openModal = async (id = null) => {
-            editingTicketId = id;
-            document.getElementById('modal').classList.add('show');
-            document.getElementById('modalTitle').textContent = id ? 'Update Ticket' : 'New Ticket';
-            document.getElementById('saveBtnText').textContent = id ? 'Update' : 'Save';
-            if (id) {
-                const { data } = await supabase.from('tickets').select('*').eq('id', id).single();
-                if (data) {
-                    document.getElementById('date').value = data.date || '';
-                    document.getElementById('location').value = data.location || '';
-                    document.getElementById('ticketId').value = data.ticket_id || '';
-                    document.getElementById('titleDesc').value = data.title_description || '';
-                    document.getElementById('requester').value = data.requester || '';
-                    document.getElementById('assigned').value = data.assigned_to || '';
-                    document.getElementById('category').value = data.category || '';
-                    document.getElementById('statusSelect').value = data.status || 'Pending';
-                    document.getElementById('statusNote').value = data.status_note || '';
-                }
-            } else {
-                document.getElementById('ticketForm').reset();
-                document.getElementById('date').value = new Date().toISOString().split('T')[0];
-                document.getElementById('requester').value = currentUser;
-            }
-        };
-
-        window.closeModal = () => document.getElementById('modal').classList.remove('show');
-
-        window.saveTicket = async () => {
-            const form = document.getElementById('ticketForm');
-            if (!form.checkValidity()) { form.reportValidity(); return; }
-            let orig = null;
-            if (editingTicketId) { const { data } = await supabase.from('tickets').select('*').eq('id', editingTicketId).single(); orig = data; }
-            const data = {
-                date: document.getElementById('date').value, location: document.getElementById('location').value.trim(),
-                ticket_id: document.getElementById('ticketId').value.trim() || null,
-                title_description: document.getElementById('titleDesc').value.trim(),
-                requester: document.getElementById('requester').value.trim(),
-                assigned_to: document.getElementById('assigned').value.trim() || null,
-                category: document.getElementById('category').value.trim(),
-                status: document.getElementById('statusSelect').value,
-                status_note: document.getElementById('statusNote').value.trim() || null,
-                created_by: editingTicketId ? (orig?.created_by || currentUser) : currentUser
-            };
-            try {
-                if (editingTicketId) { await supabase.from('tickets').update(data).eq('id', editingTicketId); showSnackbar('Updated!', 'success'); }
-                else { await supabase.from('tickets').insert([data]); showSnackbar('Created!', 'success'); }
-                closeModal(); loadTickets();
-            } catch (err) { showSnackbar('Error: ' + err.message, 'error'); }
-        };
-
-        window.deleteTicket = async id => { if (!confirm('Delete permanently?')) return; await supabase.from('tickets').delete().eq('id', id); showSnackbar('Deleted', 'success'); loadTickets(); };
-
-        async function loadTickets() {
-            const tbody = document.getElementById('tableBody');
-            tbody.innerHTML = '<tr><td colspan="9" style="padding:40px;text-align:center;color:var(--text-secondary);">Loading...</td></tr>';
-            let query = supabase.from('tickets').select('*', { count: 'exact' }).order('date', { ascending: false });
-            const filter = document.getElementById('userFilter').value;
-            if (currentUser !== 'Admin') query = query.eq('created_by', currentUser);
-            else if (filter) query = query.eq('created_by', filter);
-            const { data: tickets, error, count } = await query;
-            if (error || !tickets) { tbody.innerHTML = '<tr><td colspan="9" style="padding:40px;color:#ef4444;">Error loading tickets</td></tr>'; return; }
-            allTickets = tickets; filteredTickets = [...allTickets]; totalTickets = count; totalPages = Math.ceil(totalTickets / itemsPerPage);
-            applySorting();
-        }
-
-        function renderTable() {
-            const tbody = document.getElementById('tableBody'), start = (currentPage - 1) * itemsPerPage, end = Math.min(start + itemsPerPage, filteredTickets.length);
-            const page = filteredTickets.slice(start, end);
-            tbody.innerHTML = page.length === 0 ? '<tr><td colspan="9" style="padding:60px;text-align:center;color:var(--text-secondary);">No tickets found</td></tr>' : '';
-            page.forEach(t => {
-                const lines = (t.title_description || '').split('\n'), title = lines[0] || '(No title)', desc = lines.slice(1).join('\n').trim();
-                const sc = `status-${t.status.toLowerCase().replace(' ', '-')}`;
-                let sd = `<span class="status-badge ${sc}">${t.status}</span>`;
-                if (t.status_note) sd += `<div class="status-note">${t.status_note}</div>`;
-                const row = tbody.insertRow();
-                row.innerHTML = `<td>${t.date}</td><td>${t.location || '-'}</td><td>${t.ticket_id || '-'}</td><td><strong>${title}</strong><div>${desc}</div></td><td>${t.requester}</td><td>${t.assigned_to || '-'}</td><td>${t.category}</td><td>${sd}</td><td class="actions"><button onclick="openModal(${t.id})">Update</button><button class="delete-btn" onclick="deleteTicket(${t.id})">X</button></td>`;
-            });
-        }
-
-        function updatePagination() {
-            const start = (currentPage - 1) * itemsPerPage + 1, end = Math.min(currentPage * itemsPerPage, filteredTickets.length);
-            document.getElementById('paginationInfo').textContent = `Showing ${start} to ${end} of ${filteredTickets.length} tickets`;
-            document.getElementById('firstPage').disabled = currentPage === 1;
-            document.getElementById('prevPage').disabled = currentPage === 1;
-            document.getElementById('nextPage').disabled = currentPage === totalPages;
-            document.getElementById('lastPage').disabled = currentPage === totalPages;
-            const pn = document.getElementById('pageNumbers'); pn.innerHTML = '';
-            const max = 4; let sp = Math.max(1, currentPage - Math.floor(max / 2)), ep = Math.min(totalPages, sp + max - 1);
-            if (ep - sp + 1 < max) sp = Math.max(1, ep - max + 1);
-            for (let i = sp; i <= ep; i++) { const b = document.createElement('button'); b.className = `pagination-btn ${i === currentPage ? 'active' : ''}`; b.textContent = i; b.onclick = () => goToPage(i); pn.appendChild(b); }
-        }
-
-        function goToPage(p) { if (p < 1 || p > totalPages) return; currentPage = p; renderTable(); updatePagination(); }
-
-        function getExportTypeDisplayName(t) { return t === 'all' ? 'All Data' : t === 'pending' ? 'Pending Only' : t === 'in-progress' ? 'In Progress Only' : t === 'done' ? 'Done Only' : t; }
-
-        window.exportToExcel = function(type = 'all') {
-            if (allTickets.length === 0) { showSnackbar('No data to export', 'error'); return; }
-            let tks = type === 'all' ? [...allTickets] : allTickets.filter(t => t.status.toLowerCase().replace(' ', '-') === type);
-            if (tks.length === 0) { showSnackbar(`No ${type} tickets to export`, 'error'); return; }
-            const data = [['Helpdesk Tickets Export'], ['Generated', new Date().toLocaleString('en-PH')], ['Export Type', getExportTypeDisplayName(type)], ['Total Tickets', tks.length], [''], ['Date', 'Location', 'Ticket ID', 'Title & Description', 'Requester', 'Request To', 'Category', 'Status']];
-            tks.forEach(t => { let sd = t.status; if (t.status_note) sd += ` - ${t.status_note}`; data.push([t.date, t.location || '', t.ticket_id || '', t.title_description || '(No title)', t.requester, t.assigned_to || '', t.category, sd]); });
-            const ws = XLSX.utils.aoa_to_sheet(data);
-            ws['!cols'] = [{wch:12},{wch:15},{wch:12},{wch:50},{wch:15},{wch:15},{wch:12},{wch:25}];
-            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Helpdesk Tickets');
-            XLSX.writeFile(wb, `Helpdesk_Tickets_${getExportTypeDisplayName(type).replace(/\s+/g, '_')}_${new Date().toISOString().slice(0,10)}.xlsx`);
-            showSnackbar(`Exported ${getExportTypeDisplayName(type).toLowerCase()} successfully!`, 'success');
-        };
-
-        window.handlePrint = function(type = 'all') {
-            if (allTickets.length === 0) { showSnackbar('No data to print', 'error'); return; }
-            let tks = type === 'all' ? [...allTickets] : allTickets.filter(t => t.status.toLowerCase().replace(' ', '-') === type);
-            if (tks.length === 0) { showSnackbar(`No ${type} tickets to print`, 'error'); return; }
-            const pw = window.open('', '_blank'), pd = new Date().toLocaleString('en-PH');
-            pw.document.write(`<!DOCTYPE html><html><head><title>Helpdesk Tickets - ${getExportTypeDisplayName(type)}</title>
-<style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: Arial, sans-serif; margin: 12px; color: #1e293b; font-size: 10px; line-height: 1.3; }
-.header { text-align: center; margin-bottom: 12px; border-bottom: 2px solid #cbd5e1; padding-bottom: 8px; }
-.header h1 { margin: 0 0 4px 0; color: #0f172a; font-size: 16px; font-weight: 700; letter-spacing: 0.5px; }
-.print-info { display: flex; justify-content: center; gap: 20px; font-size: 9px; color: #475569; margin-top: 4px; }
-.print-info span { display: inline-block; }
-table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 10px; }
-th { background: #f1f5f9; font-weight: 600; text-transform: uppercase; font-size: 9px; letter-spacing: 0.3px; color: #334155; }
-th, td { border: 1px solid #cbd5e1; padding: 6px 8px; text-align: left; vertical-align: top; }
-td { color: #334155; }
-tr:nth-child(even) { background: #f8fafc; }
-.title-desc { max-width: 220px; white-space: pre-line; word-wrap: break-word; }
-.status-display { max-width: 150px; white-space: normal; word-wrap: break-word; }
-.footer { margin-top: 16px; text-align: center; font-size: 8px; color: #94a3b8; padding-top: 8px; border-top: 1px solid #e2e8f0; }
-@media print {
-  body { margin: 8px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  @page { margin: 10mm; size: landscape; }
-  .no-print { display: none; }
-  table { page-break-inside: auto; }
-  tr { page-break-inside: avoid; page-break-after: auto; }
-  th { background: #f1f5f9 !important; }
-}
-</style></head><body>
-<div class="header">
-  <h1>HELPDESK TICKETS REPORT</h1>
-  <div class="print-info">
-    <span><strong>Generated:</strong> ${pd}</span>
-    <span><strong>Filter:</strong> ${getExportTypeDisplayName(type)}</span>
-    <span><strong>Total:</strong> ${tks.length} ticket(s)</span>
+<div id="loginPage" style="display:flex;justify-content:center;align-items:center;min-height:100vh;background:var(--hover)">
+  <div style="background:var(--surface);padding:2.2rem;border-radius:var(--radius);box-shadow:var(--shadow);width:100%;max-width:360px;border:1px solid var(--border)">
+    <h1 style="text-align:center;margin-bottom:1.6rem;font-size:1.35rem;font-weight:500">Helpdesk Monitor</h1>
+    <form id="loginForm">
+      <div style="margin-bottom:0.9rem"><label style="display:block;margin-bottom:0.3rem;font-size:11.8px;color:var(--muted);font-weight:500">Username</label><input type="text" id="username" required style="width:100%"></div>
+      <div style="margin-bottom:1.4rem"><label style="display:block;margin-bottom:0.3rem;font-size:11.8px;color:var(--muted);font-weight:500">Password</label><input type="password" id="password" required style="width:100%"></div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center">Login</button>
+      <div style="margin-top:1rem;text-align:center;font-size:11px;color:var(--muted)">Default: admin / admin</div>
+    </form>
   </div>
 </div>
-<table>
-  <thead><tr><th style="width:70px">Date</th><th style="width:85px">Location</th><th style="width:55px">ID</th><th style="width:150px">Title & Description</th><th style="width:95px">Requester</th><th style="width:85px">Request To</th><th style="width:110px">Category</th><th style="width:160px">Status</th></tr></thead>
-  <tbody>`);
-            tks.forEach(t => {
-                let sd = t.status; if (t.status_note) sd += ` - ${t.status_note}`;
-                pw.document.write(`<tr><td>${t.date}</td><td>${t.location || '-'}</td><td>${t.ticket_id || '-'}</td><td class="title-desc">${t.title_description || '(No title)'}</td><td>${t.requester}</td><td>${t.assigned_to || '-'}</td><td>${t.category}</td><td class="status-display">${sd}</td></tr>`);
-            });
-            pw.document.write(`</tbody></table><div class="footer">Helpdesk Monitoring System &bull; Printed Report</div></body></html>`);
-            pw.document.close();
-            pw.onload = function() { pw.print(); };
-            showSnackbar(`Printing ${getExportTypeDisplayName(type).toLowerCase()}...`, 'info');
-        };
-
-        document.getElementById('userFilter').addEventListener('change', () => { currentPage = 1; loadTickets(); });
-        document.addEventListener('DOMContentLoaded', function() { setupTheme(); setupExportDropdown(); setupPrintDropdown(); setupDropdownCloseHandlers(); setupFilters(); setupSorting(); });
-        supabase.channel('tickets').on('postgres_changes', { event: '*', schema: 'public', table: 'tickets' }, loadTickets).subscribe();
-        checkLogin();
-    </script>
+<div id="dashboard" class="container" style="display:none">
+  <div class="header">
+    <h2>Helpdesk Monitoring</h2>
+    <div class="header-right">
+      <button id="themeToggle" class="theme-toggle">Dark Mode</button>
+      <span>Logged in as: <strong id="currentUser"></strong></span>
+      <button onclick="logout()" class="btn btn-secondary">Logout</button>
+    </div>
+  </div>
+  <div class="top-controls">
+    <div class="left-controls">
+      <input type="text" id="searchInput" placeholder="Search tickets...">
+      <select id="statusFilter">
+        <option value="">All Status</option>
+        <option value="Pending">Pending</option>
+        <option value="In Progress">In Progress</option>
+        <option value="Done">Done</option>
+        <option value="Cancelled">Cancelled</option>
+      </select>
+      <select id="userFilter"><option value="">All Users</option></select>
+      <select id="locationFilter"><option value="">All Locations</option></select>
+    </div>
+    <div style="display:flex;gap:0.45rem">
+      <div class="dropdown" id="printDropdown"><button class="btn btn-secondary">Print</button>
+        <div class="dropdown-menu">
+          <div class="dropdown-item" data-print="all">Print All</div>
+          <div class="dropdown-item" data-print="pending">Pending Only</div>
+          <div class="dropdown-item" data-print="in-progress">In Progress Only</div>
+          <div class="dropdown-item" data-print="done">Done Only</div>
+        </div>
+      </div>
+      <div class="dropdown" id="exportDropdown"><button class="btn btn-secondary">Export</button>
+        <div class="dropdown-menu">
+          <div class="dropdown-item" data-export="all">Export All</div>
+          <div class="dropdown-item" data-export="pending">Pending Only</div>
+          <div class="dropdown-item" data-export="in-progress">In Progress Only</div>
+          <div class="dropdown-item" data-export="done">Done Only</div>
+        </div>
+      </div>
+      <div class="dropdown" id="userManagementDropdown" style="display:none"><button class="btn btn-secondary">Users</button>
+        <div class="dropdown-menu"><div class="dropdown-item" onclick="openUserManagementModal()">Manage Users</div></div>
+      </div>
+      <button id="addBtn" class="btn btn-primary" onclick="openModal()">+ New Ticket</button>
+    </div>
+  </div>
+  <div class="table-wrapper">
+    <div class="loader" id="tableLoader"></div>
+    <table id="mainTable"><thead><tr>
+      <th class="sortable" data-sort="date">Date</th>
+      <th class="sortable" data-sort="location">Location</th>
+      <th>ID</th>
+      <th class="sortable" data-sort="title">Title & Description</th>
+      <th>Requester</th>
+      <th>Request To</th>
+      <th>Category</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr></thead><tbody id="tableBody"></tbody></table>
+    <div class="pagination">
+      <div class="pagination-info" id="paginationInfo">Loading...</div>
+      <div class="pagination-controls">
+        <button class="pagination-btn" id="firstPage" onclick="goToPage(1)">First</button>
+        <button class="pagination-btn" id="prevPage" onclick="goToPage(currentPage-1)">Prev</button>
+        <span id="pageNumbers"></span>
+        <button class="pagination-btn" id="nextPage" onclick="goToPage(currentPage+1)">Next</button>
+        <button class="pagination-btn" id="lastPage" onclick="goToPage(totalPages)">Last</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header"><h2 id="modalTitle">New Ticket</h2><span class="close-btn" onclick="closeModal()">x</span></div>
+    <form id="ticketForm" onsubmit="event.preventDefault();saveTicket()">
+      <div class="modal-body">
+        <div class="form-grid">
+          <div class="form-field"><label>Date <span class="required">*</span></label><input type="date" id="date" required></div>
+          <div class="form-field"><label>Location <span class="required">*</span></label>
+            <div class="custom-select">
+              <div class="select-display" id="locationDisplay"><span>-- Select Location --</span></div>
+              <div class="select-options" id="locationOptions">
+                <div class="location-item" data-value="CTK">CTK</div>
+                <div class="category"><div class="category-header" data-category="cscnq"><span>CSCNQ</span><i class="fas fa-chevron-down"></i></div>
+                  <div class="category-options">
+                    <div class="location-item" data-value="FG NG">FG NG</div>
+                    <div class="location-item" data-value="FG BAAO">FG BAAO</div>
+                  </div>
+                </div>
+                <div class="category"><div class="category-header" data-category="almasor"><span>ALMASOR</span><i class="fas fa-chevron-down"></i></div>
+                  <div class="category-options">
+                    <div class="location-item" data-value="FG LC">FG LC</div>
+                    <div class="location-item" data-value="FGE IRS">FGE IRS</div>
+                    <div class="location-item" data-value="FGE SoR RZL">FGE SoR RZL</div>
+                    <div class="location-item" data-value="FGE MBT">FGE MBT</div>
+                    <div class="location-item" data-value="FGE DRG">FGE DRG</div>
+                    <div class="location-item" data-value="FGE LTC">FGE LTC</div>
+                    <div class="location-item" data-value="FGE PLG2">FGE PLG2</div>
+                    <div class="location-item" data-value="FGE PIO">FGE PIO</div>
+                    <div class="location-item" data-value="FTG LC">FTG LC</div>
+                    <div class="location-item" data-value="FTG TA">FTG TA</div>
+                  </div>
+                </div>
+                <div class="category"><div class="category-header" data-category="cn"><span>CN</span><i class="fas fa-chevron-down"></i></div>
+                  <div class="category-options">
+                    <div class="location-item" data-value="CN LC">CN LC</div>
+                    <div class="location-item" data-value="CN HALL">CN HALL</div>
+                    <div class="location-item" data-value="CN TA">CN TA</div>
+                  </div>
+                </div>
+                <div class="category"><div class="category-header" data-category="fo"><span>FO Support</span><i class="fas fa-chevron-down"></i></div>
+                  <div class="category-options">
+                    <div class="location-item" data-value="PROC">PROC</div>
+                    <div class="location-item" data-value="HR">HR</div>
+                    <div class="location-item" data-value="MKTNG">MKTNG</div>
+                    <div class="location-item" data-value="RND">RND</div>
+                    <div class="location-item" data-value="QA/QC">QA/QC</div>
+                    <div class="location-item" data-value="ADMIN">ADMIN</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <input type="hidden" id="location" required>
+          </div>
+          <div class="form-field"><label>Ticket ID</label><input type="text" id="ticketId" placeholder="TKT-001"></div>
+          <div class="form-field"><label>Requester <span class="required">*</span></label><input type="text" id="requester" required></div>
+          <div class="form-field"><label>Request To</label><input type="text" id="assigned"></div>
+          <div class="form-field"><label>Category <span class="required">*</span></label><input type="text" id="category" required></div>
+        </div>
+        <div class="form-field full-width"><label>Title & Description <span class="required">*</span></label><textarea id="titleDesc" required></textarea></div>
+        <div style="display:flex;gap:0.9rem">
+          <div class="form-field" style="flex:1"><label>Status <span class="required">*</span></label>
+            <select id="statusSelect" required><option>Pending</option><option>In Progress</option><option>Done</option><option>Cancelled</option></select>
+          </div>
+          <div class="form-field" style="flex:1"><label>Note</label><input type="text" id="statusNote"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary"><span id="saveBtnText">Save Ticket</span></button>
+      </div>
+    </form>
+  </div>
+</div>
+<div id="userManagementModal" class="modal"><div class="modal-content" style="max-width:840px">
+  <div class="modal-header"><h2>User Management</h2><span class="close-btn" onclick="closeUserManagementModal()">x</span></div>
+  <div class="modal-body">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.9rem">
+      <h3 style="font-size:1.05rem;font-weight:500">Users List</h3>
+      <button class="btn btn-primary" onclick="openUserModal()">+ Add User</button>
+    </div>
+    <div class="table-wrapper"><table><thead><tr><th>Username</th><th>Name</th><th>Role</th><th>Created</th><th>Actions</th></tr></thead><tbody id="usersTableBody"></tbody></table></div>
+  </div>
+</div></div>
+<div id="userModal" class="modal"><div class="modal-content">
+  <div class="modal-header"><h2 id="userModalTitle">Add User</h2><span class="close-btn" onclick="closeUserModal()">x</span></div>
+  <form id="userForm" onsubmit="event.preventDefault();saveUser()">
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-field full-width"><label>Username <span class="required">*</span></label><input type="text" id="newUsername" required></div>
+        <div class="form-field full-width"><label>Name <span class="required">*</span></label><input type="text" id="newName" required></div>
+        <div class="form-field full-width"><label>Password <span class="required">*</span></label><input type="password" id="newPassword" required></div>
+        <div class="form-field full-width"><label>Role <span class="required">*</span></label>
+          <select id="newRole" required><option value="user">User</option><option value="admin">Admin</option></select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" onclick="closeUserModal()">Cancel</button>
+      <button type="submit" class="btn btn-primary"><span id="saveUserBtnText">Save User</span></button>
+    </div>
+  </form>
+</div></div>
+<div id="snackbar" class="snackbar">Saved!</div>
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const supabase = createClient('https://crdevgfrptdhhgqnpqzk.supabase.co','sb_publishable_nLYTInAlXEqxy6YbMIxKpw_ZacBlomD');
+let currentUser=null,editingTicketId=null,editingUserId=null,currentPage=1;
+const itemsPerPage=6;
+let allTickets=[],filteredTickets=[],totalPages=1;
+let sortState={field:'date',direction:'desc'};
+let allUsers=[],allLocations=[];
+function showLoader(){document.getElementById('tableLoader').style.display='block'}
+function hideLoader(){document.getElementById('tableLoader').style.display='none'}
+function setupCustomLocationDropdown(){
+  const display=document.getElementById('locationDisplay');
+  const options=document.getElementById('locationOptions');
+  const hidden=document.getElementById('location');
+  display.addEventListener('click',e=>{e.stopPropagation();options.classList.toggle('show')});
+  document.addEventListener('click',e=>{if(!display.contains(e.target)&&!options.contains(e.target))options.classList.remove('show')});
+  document.querySelectorAll('.category-header').forEach(h=>h.addEventListener('click',e=>{
+    e.stopPropagation();h.classList.toggle('expanded');
+    h.nextElementSibling.classList.toggle('expanded');
+  }));
+  document.querySelectorAll('.location-item').forEach(i=>i.addEventListener('click',()=>{
+    display.querySelector('span').textContent=i.textContent;
+    hidden.value=i.dataset.value;
+    options.classList.remove('show');
+  }));
+}
+function setupTheme(){
+  const t=document.getElementById('themeToggle');
+  if(localStorage.getItem('darkMode')==='true'){document.body.classList.add('dark-mode');t.innerHTML='Light Mode'}
+  t.addEventListener('click',()=>{document.body.classList.toggle('dark-mode');
+    const d=document.body.classList.contains('dark-mode');localStorage.setItem('darkMode',d);
+    t.innerHTML=d?'Light Mode':'Dark Mode';
+  });
+}
+function setupDropdowns(){
+  document.querySelectorAll('.dropdown > button').forEach(b=>b.addEventListener('click',e=>{
+    e.stopPropagation();b.parentElement.classList.toggle('active');
+  }));
+  document.addEventListener('click',()=>{document.querySelectorAll('.dropdown').forEach(d=>d.classList.remove('active'))});
+  document.querySelectorAll('[data-export]').forEach(b=>b.addEventListener('click',()=>{exportToExcel(b.dataset.export)}));
+  document.querySelectorAll('[data-print]').forEach(b=>b.addEventListener('click',()=>{handlePrint(b.dataset.print)}));
+}
+function setupSorting(){
+  document.querySelectorAll('th.sortable').forEach(th=>th.addEventListener('click',()=>{
+    const f=th.dataset.sort;
+    sortState=sortState.field===f?{field:f,direction:sortState.direction==='asc'?'desc':'asc'}:{field:f,direction:'desc'};
+    applySorting();
+  }));
+}
+function applySorting(){
+  filteredTickets.sort((a,b)=>{
+    let A=a[sortState.field]||'',B=b[sortState.field]||'';
+    if(sortState.field==='date'){A=new Date(a.date);B=new Date(b.date)}
+    return (A<B?-1:A>B?1:0)*(sortState.direction==='asc'?1:-1);
+  });
+  renderTable();updatePagination();
+}
+function populateUserFilter(){
+  const sel=document.getElementById('userFilter');
+  sel.innerHTML='<option value="">All Users</option>';
+  allUsers.forEach(u=>{
+    const opt=document.createElement('option');
+    opt.value=u.username;opt.textContent=u.name;
+    sel.appendChild(opt);
+  });
+}
+function populateLocationFilter(){
+  const sel=document.getElementById('locationFilter');
+  sel.innerHTML='<option value="">All Locations</option>';
+  const uniq=new Set(allLocations);
+  [...uniq].sort().forEach(loc=>{
+    const opt=document.createElement('option');
+    opt.value=loc;opt.textContent=loc;
+    sel.appendChild(opt);
+  });
+}
+function applyFilters(){
+  const search=document.getElementById('searchInput').value.toLowerCase();
+  const status=document.getElementById('statusFilter').value;
+  const user=document.getElementById('userFilter').value;
+  const location=document.getElementById('locationFilter').value;
+  filteredTickets=allTickets.filter(t=>{
+    if(status && t.status!==status) return false;
+    if(user && t.created_by!==user) return false;
+    if(location && t.location!==location) return false;
+    const str=[t.date,t.location,t.ticket_id,t.title_description,t.requester,t.assigned_to,t.category,t.status,t.status_note].join(' ').toLowerCase();
+    return !search||str.includes(search);
+  });
+  currentPage=1;applySorting();
+}
+function showSnackbar(msg,type='info'){
+  const s=document.getElementById('snackbar');s.textContent=msg;s.className='snackbar';
+  if(type==='error')s.classList.add('error');
+  s.classList.add('show');setTimeout(()=>s.classList.remove('show'),3000);
+}
+async function checkLogin(){
+  const u=localStorage.getItem('helpdeskUser');
+  if(u){currentUser=JSON.parse(u);document.getElementById('currentUser').textContent=currentUser.name;
+    document.getElementById('loginPage').style.display='none';document.getElementById('dashboard').style.display='block';
+    if(currentUser.role==='admin'){
+      document.getElementById('userManagementDropdown').style.display='inline-block';
+      document.getElementById('userFilter').style.display='block';
+    }
+    await loadUsersAndLocations();loadTickets();showSnackbar(`Welcome back, ${currentUser.name}!`,'success');
+  }
+}
+async function loadUsersAndLocations(){
+  const {data:users}=await supabase.from('users').select('username,name');
+  allUsers=users||[];
+  populateUserFilter();
+  const {data:tickets}=await supabase.from('tickets').select('location');
+  allLocations=tickets?tickets.map(t=>t.location).filter(Boolean):[];
+  populateLocationFilter();
+}
+document.getElementById('loginForm').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const u=document.getElementById('username').value.trim();
+  const p=document.getElementById('password').value.trim();
+  const {data,error}=await supabase.from('users').select('*').eq('username',u).eq('password',p);
+  if(error|| !data||data.length===0) return showSnackbar('Invalid credentials','error');
+  currentUser=data[0];localStorage.setItem('helpdeskUser',JSON.stringify(currentUser));checkLogin();
+});
+window.logout=()=>{if(confirm('Log out?')){localStorage.removeItem('helpdeskUser');location.reload()}}
+window.openModal=id=>{editingTicketId=id;document.getElementById('modal').classList.add('show');
+  document.getElementById('modalTitle').textContent=id?'Update Ticket':'New Ticket';
+  document.getElementById('saveBtnText').textContent=id?'Update':'Save Ticket';
+  if(id){supabase.from('tickets').select('*').eq('id',id).single().then(r=>{if(r.data){
+    document.getElementById('date').value=r.data.date;
+    document.getElementById('locationDisplay').querySelector('span').textContent=r.data.location||'-- Select Location --';
+    document.getElementById('location').value=r.data.location||'';
+    document.getElementById('ticketId').value=r.data.ticket_id||'';
+    document.getElementById('titleDesc').value=r.data.title_description||'';
+    document.getElementById('requester').value=r.data.requester||'';
+    document.getElementById('assigned').value=r.data.assigned_to||'';
+    document.getElementById('category').value=r.data.category||'';
+    document.getElementById('statusSelect').value=r.data.status||'Pending';
+    document.getElementById('statusNote').value=r.data.status_note||'';
+  }})}
+  else{document.getElementById('ticketForm').reset();document.getElementById('date').value=new Date().toISOString().split('T')[0];
+    document.getElementById('requester').value=currentUser.name;
+    document.getElementById('locationDisplay').querySelector('span').textContent='-- Select Location --';
+    document.getElementById('location').value='';
+  }
+}
+window.closeModal=()=>{document.getElementById('modal').classList.remove('show')}
+window.saveTicket=async()=>{
+  const f=document.getElementById('ticketForm');if(!f.checkValidity()){f.reportValidity();return}
+  const d={
+    date:document.getElementById('date').value,
+    location:document.getElementById('location').value,
+    ticket_id:document.getElementById('ticketId').value||null,
+    title_description:document.getElementById('titleDesc').value,
+    requester:document.getElementById('requester').value,
+    assigned_to:document.getElementById('assigned').value||null,
+    category:document.getElementById('category').value,
+    status:document.getElementById('statusSelect').value,
+    status_note:document.getElementById('statusNote').value||null,
+    created_by:currentUser.username
+  };
+  try{
+    editingTicketId?
+      await supabase.from('tickets').update(d).eq('id',editingTicketId):
+      await supabase.from('tickets').insert([d]);
+    showSnackbar(editingTicketId?'Ticket updated!':'Ticket created!','success');
+    closeModal();loadTickets();loadUsersAndLocations();
+  }catch(e){showSnackbar('Error: '+e.message,'error')}
+}
+window.deleteTicket=async id=>{if(!confirm('Delete permanently?'))return;
+  await supabase.from('tickets').delete().eq('id',id);showSnackbar('Deleted','success');loadTickets();loadUsersAndLocations()}
+async function loadTickets(){
+  showLoader();
+  let q=supabase.from('tickets').select('*',{count:'exact'}).order('date',{ascending:false});
+  if(currentUser.role!=='admin') q=q.eq('created_by',currentUser.username);
+  const {data:tickets,count}=await q;
+  allTickets=tickets||[];filteredTickets=[...allTickets];
+  totalPages=Math.ceil(allTickets.length/itemsPerPage);
+  applyFilters();hideLoader();
+}
+function renderTable(){
+  const tb=document.getElementById('tableBody'),start=(currentPage-1)*itemsPerPage,end=start+itemsPerPage;
+  tb.innerHTML='';filteredTickets.slice(start,end).forEach(t=>{
+    const lines=(t.title_description||'').split('\n'),title=lines[0]||'(No title)',desc=lines.slice(1).join('\n');
+    const sc=`status-${t.status.toLowerCase().replace(' ','-')}`;
+    const row=tb.insertRow();
+    row.innerHTML=`<td>${t.date}</td><td>${t.location||'-'}</td><td>${t.ticket_id||'-'}</td>
+      <td><div style="font-weight:500;font-size:11.9px">${title}</div><div style="font-size:11px;color:var(--muted);margin-top:1px">${desc}</div></td>
+      <td>${t.requester}</td><td>${t.assigned_to||'-'}</td><td>${t.category}</td>
+      <td><span class="status-badge ${sc}">${t.status}</span>${t.status_note?`<div style="font-size:10.5px;margin-top:2px;color:var(--muted)">${t.status_note}</div>`:''}</td>
+      <td class="actions">
+        <button class="btn btn-secondary" onclick="openModal(${t.id})">Update</button>
+        <button class="btn delete-btn" onclick="deleteTicket(${t.id})">X</button>
+      </td>`;
+  });
+  if(!filteredTickets.slice(start,end).length)tb.innerHTML='<tr><td colspan="9" style="padding:2.4rem;text-align:center;color:var(--muted);font-size:11.8px">No tickets found</td></tr>';
+}
+function updatePagination(){
+  const start=(currentPage-1)*itemsPerPage+1,end=Math.min(currentPage*itemsPerPage,filteredTickets.length);
+  document.getElementById('paginationInfo').textContent=`Showing ${start}-${end} of ${filteredTickets.length}`;
+  document.getElementById('firstPage').disabled=currentPage===1;
+  document.getElementById('prevPage').disabled=currentPage===1;
+  document.getElementById('nextPage').disabled=currentPage===totalPages;
+  document.getElementById('lastPage').disabled=currentPage===totalPages;
+  const pn=document.getElementById('pageNumbers');pn.innerHTML='';
+  for(let i=1;i<=totalPages;i++){
+    const b=document.createElement('button');b.className='pagination-btn'+(i===currentPage?' active':'');
+    b.textContent=i;b.onclick=()=>goToPage(i);pn.appendChild(b);
+  }
+}
+window.goToPage=p=>{if(p<1||p>totalPages)return;currentPage=p;renderTable();updatePagination()}
+document.getElementById('searchInput').addEventListener('input',()=>{currentPage=1;applyFilters()});
+document.getElementById('statusFilter').addEventListener('change',applyFilters);
+document.getElementById('userFilter').addEventListener('change',applyFilters);
+document.getElementById('locationFilter').addEventListener('change',applyFilters);
+async function loadUsers(){
+  const {data}=await supabase.from('users').select('*').order('created_at',{ascending:false});
+  const tb=document.getElementById('usersTableBody');tb.innerHTML='';
+  data?.forEach(u=>{const r=tb.insertRow();
+    r.innerHTML=`<td>${u.username}</td><td>${u.name}</td>
+      <td><span class="status-badge ${u.role==='admin'?'status-in-progress':'status-pending'}">${u.role}</span></td>
+      <td>${new Date(u.created_at).toLocaleDateString()}</td>
+      <td class="actions">
+        <button class="btn btn-secondary" onclick="editUser(${u.id})">Edit</button>
+        ${u.username!=='admin'?`<button class="btn delete-btn" onclick="deleteUser(${u.id})">Delete</button>`:''}
+      </td>`;
+  });
+}
+window.openUserManagementModal=()=>{document.getElementById('userManagementModal').classList.add('show');loadUsers()}
+window.closeUserManagementModal=()=>{document.getElementById('userManagementModal').classList.remove('show')}
+window.openUserModal=id=>{editingUserId=id;document.getElementById('userModal').classList.add('show');
+  document.getElementById('userModalTitle').textContent=id?'Edit User':'Add User';
+  document.getElementById('saveUserBtnText').textContent=id?'Update User':'Save User';
+  if(id){supabase.from('users').select('*').eq('id',id).single().then(r=>{if(r.data){
+    document.getElementById('newUsername').value=r.data.username;
+    document.getElementById('newName').value=r.data.name;
+    document.getElementById('newRole').value=r.data.role;
+    document.getElementById('newPassword').required=false;
+    document.getElementById('newPassword').placeholder='Leave blank to keep current';
+  }})}
+  else{document.getElementById('userForm').reset();document.getElementById('newPassword').required=true;
+    document.getElementById('newPassword').placeholder='';
+  }
+}
+window.closeUserModal=()=>{document.getElementById('userModal').classList.remove('show');editingUserId=null}
+window.saveUser=async()=>{
+  const f=document.getElementById('userForm');
+  if(!f.checkValidity()){f.reportValidity();return}
+  const username=document.getElementById('newUsername').value.trim();
+  const name=document.getElementById('newName').value.trim();
+  const password=document.getElementById('newPassword').value;
+  const role=document.getElementById('newRole').value;
+  if(!editingUserId){
+    const {data:existingUsers}=await supabase.from('users').select('username').eq('username',username);
+    if(existingUsers&&existingUsers.length>0){
+      return showSnackbar('Username already exists','error');
+    }
+  }
+  try{
+    let result;
+    if(editingUserId){
+      const updateData={username,name,role};
+      if(password)updateData.password=password;
+      result=await supabase.from('users').update(updateData).eq('id',editingUserId);
+    }else{
+      result=await supabase.from('users').insert([{username,name,password,role}]);
+    }
+    if(result.error)throw result.error;
+    showSnackbar(editingUserId?'User updated!':'User created!','success');
+    closeUserModal();loadUsers();loadUsersAndLocations();
+  }catch(e){showSnackbar('Error: '+e.message,'error')}
+}
+window.editUser=id=>openUserModal(id);
+window.deleteUser=async id=>{if(!confirm('Delete this user?'))return;
+  await supabase.from('users').delete().eq('id',id);showSnackbar('User deleted','success');loadUsers();loadUsersAndLocations()}
+function exportToExcel(type='all'){
+  let data=type==='all'?allTickets:allTickets.filter(t=>t.status.toLowerCase().includes(type.replace('-',' ')));
+  if(!data.length)return showSnackbar('No data','error');
+  const ws=XLSX.utils.json_to_sheet(data.map(t=>({
+    Date:t.date,Location:t.location||'',ID:t.ticket_id||'',Title:t.title_description,
+    Requester:t.requester,'Request To':t.assigned_to||'',Category:t.category,Status:t.status,Note:t.status_note||''
+  })));
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Tickets');
+  XLSX.writeFile(wb,`Helpdesk_${type}_${new Date().toISOString().slice(0,10)}.xlsx`);
+  showSnackbar('Exported','success');
+}
+function handlePrint(type='all'){
+  let data=type==='all'?allTickets:allTickets.filter(t=>t.status.toLowerCase().includes(type.replace('-',' ')));
+  if(!data.length)return showSnackbar('No data','error');
+  const win=window.open('','_blank');
+  win.document.write(`<pre style="font-size:10.5px">${JSON.stringify(data.map(t=>({
+    Date:t.date,Location:t.location,ID:t.ticket_id,Title:t.title_description,Requester:t.requester,
+    'Request To':t.assigned_to,Category:t.category,Status:t.status,Note:t.status_note
+  })),null,2)}</pre>`);
+  setTimeout(()=>{win.print();},500);
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  setupCustomLocationDropdown();setupTheme();setupDropdowns();setupSorting();checkLogin();
+});
+supabase.channel('tickets').on('postgres_changes',{event:'*',schema:'public',table:'tickets'},()=>{loadTickets();loadUsersAndLocations()}).subscribe();
+</script>
 </body>
 </html>
