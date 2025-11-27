@@ -1701,7 +1701,10 @@ function renderTable(){
       <td><span class="status-badge ${sc}">${t.status}</span>${t.status_note?`<div class="status-note">${t.status_note}</div>`:''}</td>
       <td class="actions">
         <button class="action-btn update" onclick="openModal(${t.id})">Update</button>
-        <button class="action-btn delete" onclick="deleteTicket(${t.id})">X</button>&nbsp;&nbsp;
+        <button class="action-btn delete" onclick="deleteTicket(${t.id})" aria-label="Delete">
+  <i class="fa fa-trash"></i>
+</button>
+
       </td>`;
   });
   if(!filteredTickets.slice(start,end).length)tb.innerHTML='<tr><td colspan="9" style="padding:1.5rem;text-align:center;color:var(--muted);font-size:11px">No tickets found</td></tr>';
