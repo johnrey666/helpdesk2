@@ -1032,6 +1032,22 @@ td:nth-child(7) { /* Category column */
     font-size: 11px;
   }
 }
+
+/* Search bar specific styling */
+#searchInput {
+  flex: 2;
+  min-width: 200px;
+}
+
+/* Location filter specific styling */
+#locationFilterContainer {
+  width: 180px;
+  flex: none;
+}
+
+#locationFilterOptions {
+  max-height: 200px;
+}
 </style>
 </head>
 <body>
@@ -1081,8 +1097,70 @@ td:nth-child(7) { /* Category column */
         <option value="In Progress">In Progress</option>
         <option value="Cancelled">Cancelled</option>
       </select>
-      <select id="userFilter"><option value="">All Users</option></select>
-      <select id="locationFilter"><option value="">All Locations</option></select>
+      <select id="userFilter" style="display:none"><option value="">All Users</option></select>
+      <div class="custom-select" id="locationFilterContainer">
+        <div class="select-display" id="locationFilterDisplay">
+          <span>All Locations</span>
+          <i class="fas fa-chevron-down"></i>
+        </div>
+        <div class="select-options" id="locationFilterOptions">
+          <div class="location-item" data-value="">All Locations</div>
+          <div class="location-item" data-value="CTK">CTK</div>
+          <div class="category">
+            <div class="category-header" data-category="cscnq">
+              <span>CSCNQ</span>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="category-options">
+              <div class="location-item" data-value="FG NG">FG NG</div>
+              <div class="location-item" data-value="FG BAAO">FG BAAO</div>
+            </div>
+          </div>
+          <div class="category">
+            <div class="category-header" data-category="almasor">
+              <span>ALMASOR</span>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="category-options">
+              <div class="location-item" data-value="FG LC">FG LC</div>
+              <div class="location-item" data-value="FGE IRS">FGE IRS</div>
+              <div class="location-item" data-value="FGE SoR RZL">FGE SoR RZL</div>
+              <div class="location-item" data-value="FGE MBT">FGE MBT</div>
+              <div class="location-item" data-value="FGE DRG">FGE DRG</div>
+              <div class="location-item" data-value="FGE LTC">FGE LTC</div>
+              <div class="location-item" data-value="FGE PLG2">FGE PLG2</div>
+              <div class="location-item" data-value="FGE PIO">FGE PIO</div>
+              <div class="location-item" data-value="FTG LC">FTG LC</div>
+              <div class="location-item" data-value="FTG TA">FTG TA</div>
+            </div>
+          </div>
+          <div class="category">
+            <div class="category-header" data-category="cn">
+              <span>CN</span>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="category-options">
+              <div class="location-item" data-value="CN LC">CN LC</div>
+              <div class="location-item" data-value="CN HALL">CN HALL</div>
+              <div class="location-item" data-value="CN TA">CN TA</div>
+            </div>
+          </div>
+          <div class="category">
+            <div class="category-header" data-category="fo">
+              <span>FO Support</span>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="category-options">
+              <div class="location-item" data-value="PROC">PROC</div>
+              <div class="location-item" data-value="HR">HR</div>
+              <div class="location-item" data-value="MKTNG">MKTNG</div>
+              <div class="location-item" data-value="RND">RND</div>
+              <div class="location-item" data-value="QA/QC">QA/QC</div>
+              <div class="location-item" data-value="ADMIN">ADMIN</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     <div style="display:flex;gap:0.5rem">
       <div class="dropdown" id="printDropdown">
@@ -1357,6 +1435,7 @@ let allTickets=[],filteredTickets=[],totalPages=1;
 let sortState={field:'date',direction:'desc'};
 let allUsers=[],allLocations=[];
 let showDoneTicketsOnly = false;
+let selectedLocationFilter = '';
 
 function showLoader(){document.getElementById('tableLoader').style.display='block'}
 function hideLoader(){document.getElementById('tableLoader').style.display='none'}
@@ -1369,15 +1448,35 @@ function setupCustomLocationDropdown(){
   display.addEventListener('click',e=>{e.stopPropagation();options.classList.toggle('show')});
   document.addEventListener('click',e=>{if(!display.contains(e.target)&&!options.contains(e.target))options.classList.remove('show')});
   
-  document.querySelectorAll('.category-header').forEach(h=>h.addEventListener('click',e=>{
+  document.querySelectorAll('#locationOptions .category-header').forEach(h=>h.addEventListener('click',e=>{
     e.stopPropagation();h.classList.toggle('expanded');
     h.nextElementSibling.classList.toggle('expanded');
   }));
   
-  document.querySelectorAll('.location-item').forEach(i=>i.addEventListener('click',()=>{
+  document.querySelectorAll('#locationOptions .location-item').forEach(i=>i.addEventListener('click',()=>{
     display.querySelector('span').textContent=i.textContent;
     hidden.value=i.dataset.value;
     options.classList.remove('show');
+  }));
+}
+
+function setupCustomLocationFilter(){
+  const display=document.getElementById('locationFilterDisplay');
+  const options=document.getElementById('locationFilterOptions');
+  
+  display.addEventListener('click',e=>{e.stopPropagation();options.classList.toggle('show')});
+  document.addEventListener('click',e=>{if(!display.contains(e.target)&&!options.contains(e.target))options.classList.remove('show')});
+  
+  document.querySelectorAll('#locationFilterOptions .category-header').forEach(h=>h.addEventListener('click',e=>{
+    e.stopPropagation();h.classList.toggle('expanded');
+    h.nextElementSibling.classList.toggle('expanded');
+  }));
+  
+  document.querySelectorAll('#locationFilterOptions .location-item').forEach(i=>i.addEventListener('click',()=>{
+    display.querySelector('span').textContent=i.textContent;
+    selectedLocationFilter = i.dataset.value;
+    options.classList.remove('show');
+    applyFilters();
   }));
 }
 
@@ -1426,22 +1525,10 @@ function populateUserFilter(){
   });
 }
 
-function populateLocationFilter(){
-  const sel=document.getElementById('locationFilter');
-  sel.innerHTML='<option value="">All Locations</option>';
-  const uniq=new Set(allLocations);
-  [...uniq].sort().forEach(loc=>{
-    const opt=document.createElement('option');
-    opt.value=loc;opt.textContent=loc;
-    sel.appendChild(opt);
-  });
-}
-
 function applyFilters(){
   const search=document.getElementById('searchInput').value.toLowerCase();
   const status=document.getElementById('statusFilter').value;
   const user=document.getElementById('userFilter').value;
-  const location=document.getElementById('locationFilter').value;
   
   filteredTickets=allTickets.filter(t=>{
     // In normal view, hide Done tickets. In Done Tickets view, show only Done tickets
@@ -1455,7 +1542,7 @@ function applyFilters(){
     
     if(status && t.status!==status) return false;
     if(user && t.created_by!==user) return false;
-    if(location && t.location!==location) return false;
+    if(selectedLocationFilter && t.location!==selectedLocationFilter) return false;
     const str=[t.date,t.location,t.ticket_id,t.title_description,t.requester,t.assigned_to,t.category,t.status,t.status_note].join(' ').toLowerCase();
     return !search||str.includes(search);
   });
@@ -1483,9 +1570,6 @@ async function loadUsersAndLocations(){
   const {data:users}=await supabase.from('users').select('username,name');
   allUsers=users||[];
   populateUserFilter();
-  const {data:tickets}=await supabase.from('tickets').select('location');
-  allLocations=tickets?tickets.map(t=>t.location).filter(Boolean):[];
-  populateLocationFilter();
 }
 
 document.getElementById('loginForm').addEventListener('submit',async e=>{
@@ -1626,7 +1710,6 @@ window.goToPage=p=>{if(p<1||p>totalPages)return;currentPage=p;renderTable();upda
 document.getElementById('searchInput').addEventListener('input',()=>{currentPage=1;applyFilters()});
 document.getElementById('statusFilter').addEventListener('change',applyFilters);
 document.getElementById('userFilter').addEventListener('change',applyFilters);
-document.getElementById('locationFilter').addEventListener('change',applyFilters);
 
 async function loadUsers(){
   const {data}=await supabase.from('users').select('*').order('created_at',{ascending:false});
@@ -1734,7 +1817,7 @@ function handlePrint(type='all'){
 }
 
 document.addEventListener('DOMContentLoaded',()=>{
-  setupCustomLocationDropdown();setupTheme();setupDropdowns();setupSorting();checkLogin();
+  setupCustomLocationDropdown();setupCustomLocationFilter();setupTheme();setupDropdowns();setupSorting();checkLogin();
   // Add event listener for Done Tickets button
   document.getElementById('doneTicketsBtn').addEventListener('click', toggleDoneTickets);
 });
