@@ -4,160 +4,1039 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Helpdesk Monitor</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-:root{--bg:#fafafa;--surface:#ffffff;--text:#1a1a1a;--muted:#71717a;--border:#e2e8f0;--hover:#f1f5f9;--primary:#3b82f6;--primary-hover:#2563eb;--shadow:0 4px 16px -4px rgba(0,0,0,.08);--radius:10px;--transition:all .2s ease;--font:'Inter',sans-serif}
-.dark-mode{--bg:#0c0e15;--surface:#111827;--text:#f1f5f9;--muted:#94a3b8;--border:#2d3748;--hover:#1e293b}
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:12.4px;line-height:1.4;transition:var(--transition);min-height:100vh}
-.container{max-width:1520px;margin:0 auto;padding:0.6rem}
-.header{display:flex;justify-content:space-between;align-items:center;padding:0.6rem 0;border-bottom:1px solid var(--border)}
-.header h2{font-size:1.15rem;font-weight:500}
-.header-right{display:flex;gap:0.5rem;align-items:center;font-size:11.5px}
-.theme-toggle{background:transparent;border:1px solid var(--border);color:var(--muted);padding:0.3rem 0.65rem;border-radius:7px;cursor:pointer;font-size:10.8px;transition:var(--transition)}
-.theme-toggle:hover{background:var(--hover)}
-.top-controls{display:flex;flex-wrap:wrap;gap:0.55rem;margin:0.65rem 0;align-items:center}
-.left-controls{display:flex;gap:0.45rem;flex:1;min-width:260px}
-input,select{padding:0.4rem 0.7rem;border:1px solid var(--border);border-radius:7px;background:var(--surface);color:var(--text);font-size:12px;transition:var(--transition);font-weight:400}
-input:focus,select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(59,146,255,.15)}
-.btn{padding:0.4rem 0.9rem;border-radius:7px;font-weight:500;cursor:pointer;transition:var(--transition);font-size:12px;display:inline-flex;align-items:center;gap:0.45rem;white-space:nowrap}
-.btn-primary{background:var(--primary);color:#fff;border:none}
-.btn-primary:hover{background:var(--primary-hover)}
-.btn-secondary{background:var(--surface);border:1px solid var(--border);color:var(--muted)}
-.btn-secondary:hover{background:var(--hover);color:var(--text)}
-.dropdown{position:relative;display:inline-block}
-.dropdown-menu{position:absolute;top:100%;right:0;margin-top:0.4rem;background:var(--surface);border:1px solid var(--border);border-radius:9px;box-shadow:var(--shadow);min-width:158px;opacity:0;visibility:hidden;transform:translateY(-5px);transition:all .22s ease;z-index:1000;overflow:hidden}
-.dropdown.active .dropdown-menu{opacity:1;visibility:visible;transform:translateY(0)}
-.dropdown-item{padding:0.58rem 0.9rem;display:flex;align-items:center;gap:0.45rem;color:var(--muted);font-size:11.8px;cursor:pointer;transition:var(--transition)}
-.dropdown-item:hover{background:var(--hover);color:var(--text)}
-.custom-select{position:relative;width:100%}
-.select-display{padding:0.4rem 0.7rem;border:1px solid var(--border);border-radius:7px;background:var(--surface);cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:12px;transition:var(--transition);color:var(--text)}
-.select-display:hover{border-color:var(--primary)}
-.select-options{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:9px;max-height:360px;overflow-y:auto;box-shadow:var(--shadow);opacity:0;visibility:hidden;transform:scale(.97);transform-origin:top;transition:all .25s ease;z-index:1000}
-.select-options.show{opacity:1;visibility:visible;transform:scale(1)}
-.category-header{padding:0.65rem 1rem;background:var(--hover);font-weight:500;font-size:11.8px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;color:var(--muted);transition:var(--transition);border-bottom:1px solid var(--border)}
-.category-header:hover{background:var(--border)}
-.category-header i{font-size:10.5px;transition:transform .25s ease}
-.category-header.expanded i{transform:rotate(180deg)}
-.category-options{max-height:0;overflow:hidden;transition:max-height .32s ease}
-.category-options.expanded{max-height:800px}
-.location-item{padding:0.55rem 1.2rem 0.55rem 2.2rem;cursor:pointer;font-size:11.8px;transition:var(--transition);position:relative;color:var(--text);font-weight:400}
-.location-item:hover{background:var(--hover)}
-.location-item::before{content:"";position:absolute;left:1rem;top:50%;width:4px;height:4px;background:var(--primary);border-radius:50%;transform:translateY(-50%);opacity:0;transition:opacity .2s}
-.location-item:hover::before{opacity:1}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.58);backdrop-filter:blur(11px);display:flex;align-items:center;justify-content:center;z-index:2000;opacity:0;visibility:hidden;transition:opacity .32s ease}
-.modal.show{opacity:1;visibility:visible}
-.modal-content{background:var(--surface);border-radius:var(--radius);width:100%;max-width:700px;max-height:93vh;overflow:hidden;box-shadow:var(--shadow);transform:scale(.93);transition:transform .32s ease}
-.modal.show .modal-content{transform:scale(1)}
-.modal-header{padding:0.9rem 1.4rem;background:var(--hover);display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);font-size:1.05rem;font-weight:500}
-.close-btn{font-size:1.55rem;cursor:pointer;opacity:.55;transition:var(--transition)}
-.close-btn:hover{opacity:1;color:#ef4444}
-.modal-body{padding:1.4rem;overflow-y:auto;max-height:calc(93vh - 125px)}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.9rem}
-.form-field{display:flex;flex-direction:column;gap:0.3rem}
-.form-field label{font-size:11.5px;font-weight:500;color:var(--muted)}
-.required{color:#ef4444}
-textarea{min-height:84px;resize:vertical;font-size:12.4px;padding:0.6rem}
-.full-width{grid-column:1/-1}
-.modal-footer{padding:0.9rem 1.4rem;background:var(--hover);border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:0.65rem}
-.table-wrapper{background:var(--surface);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--border);font-size:12px}
-table{width:100%;border-collapse:collapse}
-th{background:var(--hover);padding:0.58rem 0.9rem;text-align:left;font-weight:500;font-size:10.8px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);cursor:pointer;user-select:none}
-td{min-height: 50px; padding:0.58rem 0.9rem;border-bottom:1px solid var(--border);line-height:1.35;vertical-align:top}
-tr:hover{background:var(--hover)}
-.status-badge{display:inline-block;padding:2.5px 8px;border-radius:5px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
-.status-pending{background:#fffaeb;color:#d97706}
-.dark-mode .status-pending{background:#451a03;color:#fbbf24}
-.status-in-progress{background:#eff6ff;color:#1d4ed8}
-.dark-mode .status-in-progress{background:#172554;color:#93c5fd}
-.status-done{background:#f0fdf4;color:#166534}
-.dark-mode .status-done{background:#166534;color:#86efac}
-.status-cancelled{background:#fef2f2;color:#dc2626}
-.dark-mode .status-cancelled{background:#7f1d1d;color:#fca5a5}
-.actions{display:flex;gap:0.35rem;justify-content:flex-start;align-items:center;min-height:40px}
-.actions button{padding:0.3rem 0.65rem;background:var(--surface);border:1px solid var(--border);color:var(--muted);border-radius:5px;font-size:11px;cursor:pointer;transition:var(--transition);height:28px;display:flex;align-items:center;justify-content:center}
-.actions button:hover{background:var(--hover)}
-.actions .delete-btn{background:#fef2f2;border-color:#fecaca;color:#dc2626}
-.dark-mode .actions .delete-btn{background:#7f1d1d;border-color:#991b1b;color:#fca5a5}
-.pagination{display:flex;justify-content:space-between;align-items:center;padding:0.65rem 0.9rem;background:var(--hover);border-top:1px solid var(--border);font-size:11.5px}
-.pagination-info{color:var(--muted)}
-.pagination-controls{display:flex;gap:0.35rem;align-items:center}
-.pagination-btn{padding:0.3rem 0.7rem;background:var(--surface);border:1px solid var(--border);border-radius:5px;font-size:11px;cursor:pointer;color:var(--muted);transition:var(--transition)}
-.pagination-btn:hover{background:var(--hover)}
-.pagination-btn.active{background:var(--primary);border-color:var(--primary);color:#fff;font-weight:500}
-.loader{width:32px;height:32px;border:2.8px solid var(--border);border-top:2.8px solid var(--primary);border-radius:50%;animation:spin 1s linear infinite;margin:1.8rem auto;display:none}
-@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
-.snackbar{position:fixed;bottom:1.4rem;left:50%;transform:translateX(-50%);padding:0.7rem 1.4rem;border-radius:9px;background:#10b981;color:#fff;font-weight:500;box-shadow:var(--shadow);z-index:9999;opacity:0;transition:all .32s ease;font-size:12.4px}
-.snackbar.show{opacity:1;transform:translateX(-50%) translateY(-8px)}
-.snackbar.error{background:#ef4444}
-
-td {
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  max-width: 200px; /* Adjust as needed */
+:root {
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --text: #1e293b;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --hover: #f1f5f9;
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+  --primary-light: #dbeafe;
+  --shadow: 0 1px 3px -1px rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 2px 4px -1px rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+  --radius: 4px;
+  --radius-lg: 6px;
+  --transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --font: 'Inter', sans-serif;
 }
 
-/* Specific column adjustments */
+.dark-mode {
+  --bg: #0f172a;
+  --surface: #1e293b;
+  --text: #f1f5f9;
+  --muted: #94a3b8;
+  --border: #334155;
+  --hover: #1e293b;
+  --primary-light: #1e3a8a;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1.3;
+  transition: var(--transition);
+  min-height: 100vh;
+  font-weight: 400;
+}
+
+.container {
+  max-width: 1520px;
+  margin: 0 auto;
+  padding: 0.6rem;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 0;
+  margin-bottom: 0.6rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.header h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.header h2::before {
+  content: "🎫";
+  font-size: 1rem;
+}
+
+.header-right {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 11px;
+}
+
+.theme-toggle {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  padding: 0.3rem 0.6rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 10px;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.theme-toggle:hover {
+  background: var(--hover);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+/* Controls */
+.top-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin: 0.8rem 0;
+  align-items: center;
+}
+
+.left-controls {
+  display: flex;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 260px;
+}
+
+input, select {
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 11px;
+  transition: var(--transition);
+  font-weight: 400;
+  flex: 1;
+  min-width: 100px;
+  height: 30px;
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+input::placeholder {
+  color: var(--muted);
+  opacity: 0.7;
+}
+
+/* Buttons */
+.btn {
+  padding: 0.4rem 0.8rem;
+  border-radius: var(--radius);
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  white-space: nowrap;
+  border: none;
+  outline: none;
+  height: 30px;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+  box-shadow: var(--shadow);
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-secondary {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+
+.btn-secondary:hover {
+  background: var(--hover);
+  color: var(--text);
+  border-color: var(--primary);
+}
+
+/* Dropdown */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.3rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  min-width: 140px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  transition: all 0.15s ease;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.dropdown.active .dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.dropdown-item {
+  padding: 0.5rem 0.7rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--muted);
+  font-size: 11px;
+  cursor: pointer;
+  transition: var(--transition);
+  border-bottom: 1px solid var(--border);
+}
+
+.dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.dropdown-item:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+
+/* Custom Select */
+.custom-select {
+  position: relative;
+  width: 100%;
+}
+
+.select-display {
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  transition: var(--transition);
+  color: var(--text);
+  height: 30px;
+}
+
+.select-display:hover {
+  border-color: var(--primary);
+}
+
+.select-options {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  max-height: 240px;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(0.95);
+  transform-origin: top;
+  transition: all 0.15s ease;
+  z-index: 1000;
+}
+
+.select-options.show {
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1);
+}
+
+.category-header {
+  padding: 0.5rem 0.7rem;
+  background: var(--hover);
+  font-weight: 500;
+  font-size: 11px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  color: var(--muted);
+  transition: var(--transition);
+  border-bottom: 1px solid var(--border);
+}
+
+.category-header:hover {
+  background: var(--border);
+}
+
+.category-header i {
+  font-size: 9px;
+  transition: transform 0.15s ease;
+}
+
+.category-header.expanded i {
+  transform: rotate(180deg);
+}
+
+.category-options {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease;
+}
+
+.category-options.expanded {
+  max-height: 350px;
+}
+
+.location-item {
+  padding: 0.5rem 1rem 0.5rem 2rem;
+  cursor: pointer;
+  font-size: 11px;
+  transition: var(--transition);
+  position: relative;
+  color: var(--text);
+  font-weight: 400;
+  border-bottom: 1px solid var(--border);
+}
+
+.location-item:last-child {
+  border-bottom: none;
+}
+
+.location-item:hover {
+  background: var(--hover);
+}
+
+.location-item::before {
+  content: "";
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  width: 4px;
+  height: 4px;
+  background: var(--primary);
+  border-radius: 50%;
+  transform: translateY(-50%);
+  opacity: 0.7;
+  transition: opacity 0.15s;
+}
+
+.location-item:hover::before {
+  opacity: 1;
+}
+
+/* Modal */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease;
+}
+
+.modal.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-content {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 650px;
+  max-height: 80vh;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  transform: scale(0.9);
+  transition: transform 0.2s ease;
+  border: 1px solid var(--border);
+}
+
+.modal.show .modal-content {
+  transform: scale(1);
+}
+
+.modal-header {
+  padding: 0.8rem 1rem;
+  background: var(--hover);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.close-btn {
+  font-size: 1rem;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: var(--transition);
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius);
+}
+
+.close-btn:hover {
+  opacity: 1;
+  background: var(--border);
+}
+
+.modal-body {
+  padding: 1rem;
+  overflow-y: auto;
+  max-height: calc(80vh - 90px);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  margin-bottom: 0.6rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.form-field label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.required {
+  color: #ef4444;
+}
+
+textarea {
+  min-height: 70px;
+  resize: vertical;
+  font-size: 12px;
+  padding: 0.5rem;
+  font-family: var(--font);
+  line-height: 1.3;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+.modal-footer {
+  padding: 0.8rem 1rem;
+  background: var(--hover);
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+/* Table */
+.table-wrapper {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  font-size: 11px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  background: var(--hover);
+  padding: 0.6rem 0.7rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.2px;
+  color: var(--muted);
+  cursor: pointer;
+  user-select: none;
+  border-bottom: 1px solid var(--border);
+  transition: var(--transition);
+  height: 36px;
+}
+
+th:hover {
+  background: var(--border);
+  color: var(--text);
+}
+
+th.sortable::after {
+  content: "↕";
+  margin-left: 0.3rem;
+  opacity: 0.3;
+  font-size: 8px;
+}
+
+td {
+  padding: 0.6rem 0.7rem;
+  border-bottom: 1px solid var(--border);
+  line-height: 1.3;
+  vertical-align: top;
+  transition: var(--transition);
+  height: 42px;
+}
+
+tr {
+  transition: var(--transition);
+}
+
+tr:hover {
+  background: var(--hover);
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+/* Status Badges */
+.status-badge {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: 10px;
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.2px;
+  border: 1px solid transparent;
+}
+
+.status-pending {
+  background: #fffbeb;
+  color: #d97706;
+  border-color: #fcd34d;
+}
+
+.dark-mode .status-pending {
+  background: #451a03;
+  color: #fbbf24;
+  border-color: #92400e;
+}
+
+.status-in-progress {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-color: #93c5fd;
+}
+
+.dark-mode .status-in-progress {
+  background: #172554;
+  color: #93c5fd;
+  border-color: #1e3a8a;
+}
+
+.status-done {
+  background: #f0fdf4;
+  color: #166534;
+  border-color: #86efac;
+}
+
+.dark-mode .status-done {
+  background: #166534;
+  color: #86efac;
+  border-color: #15803d;
+}
+
+.status-cancelled {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #fca5a5;
+}
+
+.dark-mode .status-cancelled {
+  background: #7f1d1d;
+  color: #fca5a5;
+  border-color: #991b1b;
+}
+
+/* Actions - IMPROVED */
+.actions {
+  display: flex;
+  gap: 0.4rem;
+  justify-content: flex-start;
+  align-items: center;
+  min-height: 32px;
+  padding: 0.1rem 0;
+}
+
+.action-btn {
+  padding: 0.35rem 0.7rem;
+  border: 1px solid;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  text-decoration: none;
+  line-height: 1;
+}
+
+.action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.action-btn.update {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  color: #1d4ed8;
+}
+
+.action-btn.update:hover {
+  background: #1d4ed8;
+  color: white;
+  border-color: #1d4ed8;
+}
+
+.dark-mode .action-btn.update {
+  background: #172554;
+  border-color: #1e3a8a;
+  color: #93c5fd;
+}
+
+.dark-mode .action-btn.update:hover {
+  background: #1e3a8a;
+  color: white;
+  border-color: #1e40af;
+}
+
+.action-btn.delete {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #dc2626;
+  padding: 0.35rem 0.6rem;
+  min-width: 26px;
+}
+
+.action-btn.delete:hover {
+  background: #dc2626;
+  color: white;
+  border-color: #dc2626;
+}
+
+.dark-mode .action-btn.delete {
+  background: #7f1d1d;
+  border-color: #991b1b;
+  color: #fca5a5;
+}
+
+.dark-mode .action-btn.delete:hover {
+  background: #991b1b;
+  color: white;
+  border-color: #b91c1c;
+}
+
+.action-btn.edit {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #166534;
+}
+
+.action-btn.edit:hover {
+  background: #166534;
+  color: white;
+  border-color: #166534;
+}
+
+.dark-mode .action-btn.edit {
+  background: #166534;
+  border-color: #15803d;
+  color: #86efac;
+}
+
+.dark-mode .action-btn.edit:hover {
+  background: #15803d;
+  color: white;
+  border-color: #16a34a;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 0.8rem;
+  background: var(--hover);
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  height: 42px;
+}
+
+.pagination-info {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.pagination-controls {
+  display: flex;
+  gap: 0.3rem;
+  align-items: center;
+}
+
+.pagination-btn {
+  padding: 0.3rem 0.6rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  font-size: 10px;
+  cursor: pointer;
+  color: var(--muted);
+  transition: var(--transition);
+  font-weight: 500;
+  height: 24px;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: var(--hover);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-btn.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+  font-weight: 600;
+}
+
+/* Loader */
+.loader {
+  width: 28px;
+  height: 28px;
+  border: 2.5px solid var(--border);
+  border-top: 2.5px solid var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 1.2rem auto;
+  display: none;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Snackbar */
+.snackbar {
+  position: fixed;
+  bottom: 1.2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.6rem 1rem;
+  border-radius: var(--radius);
+  background: #10b981;
+  color: white;
+  font-weight: 500;
+  box-shadow: var(--shadow-lg);
+  z-index: 9999;
+  opacity: 0;
+  transition: all 0.2s ease;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.snackbar.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-4px);
+}
+
+.snackbar.error {
+  background: #ef4444;
+}
+
+.snackbar.success {
+  background: #10b981;
+}
+
+.snackbar.warning {
+  background: #f59e0b;
+}
+
+/* Login Page */
+#loginPage {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--primary-light) 0%, var(--bg) 100%);
+  padding: 0.8rem;
+}
+
+.login-container {
+  background: var(--surface);
+  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 320px;
+  border: 1px solid var(--border);
+}
+
+.login-container h1 {
+  text-align: center;
+  margin-bottom: 1.2rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.form-group label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.login-note {
+  margin-top: 0.6rem;
+  text-align: center;
+  font-size: 10px;
+  color: var(--muted);
+  opacity: 0.8;
+}
+
+/* Enhanced table cell styling */
 td:nth-child(4) { /* Title & Description column */
-  max-width: 300px;
-  min-width: 200px;
+  max-width: 250px;
+  min-width: 160px;
 }
 
 td:nth-child(5), /* Requester column */
 td:nth-child(6), /* Request To column */
 td:nth-child(7) { /* Category column */
-  max-width: 150px;
+  max-width: 120px;
 }
 
-/* Ensure action buttons are properly aligned */
-.actions {
-  display: flex;
-  gap: 0.35rem;
-  justify-content: flex-start;
-  align-items: center;
-  min-height: 40px;
+/* Title description styling */
+.title-main {
+  font-weight: 600;
+  font-size: 11px;
+  color: var(--text);
+  margin-bottom: 0.15rem;
+  line-height: 1.2;
 }
 
-.actions button {
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  white-space: nowrap;
+.title-desc {
+  font-size: 10px;
+  color: var(--muted);
+  line-height: 1.2;
 }
 
-@media(max-width:768px){
-  .form-grid{grid-template-columns:1fr}
-  .top-controls{flex-direction:column;align-items:stretch}
-  .left-controls{flex-direction:column}
-  td, th {padding: 0.4rem 0.6rem;}
-  .actions {flex-direction: column; gap: 0.2rem;}
-  .actions button {width: 100%;}
+/* Status note styling */
+.status-note {
+  font-size: 9px;
+  margin-top: 0.2rem;
+  color: var(--muted);
+  font-style: italic;
+  line-height: 1.1;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 0.5rem;
+  }
+  
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .top-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  
+  .left-controls {
+    flex-direction: column;
+    min-width: auto;
+  }
+  
+  .header {
+    flex-direction: column;
+    gap: 0.6rem;
+    align-items: flex-start;
+  }
+  
+  .header-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  td, th {
+    padding: 0.5rem 0.3rem;
+    font-size: 10px;
+  }
+  
+  .actions {
+    flex-direction: column;
+    gap: 0.3rem;
+    align-items: stretch;
+  }
+  
+  .action-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .pagination {
+    flex-direction: column;
+    gap: 0.6rem;
+    text-align: center;
+    height: auto;
+    padding: 0.5rem;
+  }
+  
+  .modal-content {
+    margin: 0.6rem;
+    max-height: calc(100vh - 1.2rem);
+  }
+  
+  .modal-body {
+    padding: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-container {
+    padding: 1.2rem;
+  }
+  
+  .table-wrapper {
+    border-radius: var(--radius);
+  }
+  
+  .modal-content {
+    border-radius: var(--radius);
+  }
+  
+  body {
+    font-size: 11px;
+  }
 }
 </style>
 </head>
 <body>
-<div id="loginPage" style="display:flex;justify-content:center;align-items:center;min-height:100vh;background:var(--hover)">
-  <div style="background:var(--surface);padding:2.2rem;border-radius:var(--radius);box-shadow:var(--shadow);width:100%;max-width:360px;border:1px solid var(--border)">
-    <h1 style="text-align:center;margin-bottom:1.6rem;font-size:1.35rem;font-weight:500">Helpdesk Monitor</h1>
-    <form id="loginForm">
-      <div style="margin-bottom:0.9rem"><label style="display:block;margin-bottom:0.3rem;font-size:11.8px;color:var(--muted);font-weight:500">Username</label><input type="text" id="username" required style="width:100%"></div>
-      <div style="margin-bottom:1.4rem"><label style="display:block;margin-bottom:0.3rem;font-size:11.8px;color:var(--muted);font-weight:500">Password</label><input type="password" id="password" required style="width:100%"></div>
-      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center">Login</button>
+<div id="loginPage">
+  <div class="login-container">
+    <h1><i class="fas fa-headset"></i> Helpdesk Monitor</h1>
+    <form id="loginForm" class="login-form">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" required placeholder="Enter your username">
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" required placeholder="Enter your password">
+      </div>
+      <button type="submit" class="btn btn-primary" style="justify-content: center; margin-top: 0.3rem;">
+        <i class="fas fa-sign-in-alt"></i> Login
+      </button>
+      <div class="login-note">Default credentials: admin / admin</div>
     </form>
   </div>
 </div>
+
 <div id="dashboard" class="container" style="display:none">
   <div class="header">
-    <h2>Helpdesk Monitoring</h2>
+    <h2><i class="fas fa-headset"></i> Helpdesk Monitoring</h2>
     <div class="header-right">
-      <button id="themeToggle" class="theme-toggle">Dark Mode</button>
-      <span>Logged in as: <strong id="currentUser"></strong></span>
-      <button onclick="logout()" class="btn btn-secondary">Logout</button>
+      <button id="themeToggle" class="theme-toggle">
+        <i class="fas fa-moon"></i> Dark Mode
+      </button>
+      <span>Welcome, <strong id="currentUser"></strong></span>
+      <button onclick="logout()" class="btn btn-secondary">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </button>
     </div>
   </div>
+
   <div class="top-controls">
     <div class="left-controls">
       <input type="text" id="searchInput" placeholder="Search tickets...">
@@ -171,42 +1050,55 @@ td:nth-child(7) { /* Category column */
       <select id="userFilter"><option value="">All Users</option></select>
       <select id="locationFilter"><option value="">All Locations</option></select>
     </div>
-    <div style="display:flex;gap:0.45rem">
-      <div class="dropdown" id="printDropdown"><button class="btn btn-secondary">Print</button>
+    <div style="display:flex;gap:0.5rem">
+      <div class="dropdown" id="printDropdown">
+        <button class="btn btn-secondary"><i class="fas fa-print"></i> Print</button>
         <div class="dropdown-menu">
-          <div class="dropdown-item" data-print="all">Print All</div>
-          <div class="dropdown-item" data-print="pending">Pending Only</div>
-          <div class="dropdown-item" data-print="in-progress">In Progress Only</div>
-          <div class="dropdown-item" data-print="done">Done Only</div>
+          <div class="dropdown-item" data-print="all"><i class="fas fa-print"></i> Print All</div>
+          <div class="dropdown-item" data-print="pending"><i class="fas fa-clock"></i> Pending Only</div>
+          <div class="dropdown-item" data-print="in-progress"><i class="fas fa-spinner"></i> In Progress Only</div>
+          <div class="dropdown-item" data-print="done"><i class="fas fa-check"></i> Done Only</div>
         </div>
       </div>
-      <div class="dropdown" id="exportDropdown"><button class="btn btn-secondary">Export</button>
+      <div class="dropdown" id="exportDropdown">
+        <button class="btn btn-secondary"><i class="fas fa-download"></i> Export</button>
         <div class="dropdown-menu">
-          <div class="dropdown-item" data-export="all">Export All</div>
-          <div class="dropdown-item" data-export="pending">Pending Only</div>
-          <div class="dropdown-item" data-export="in-progress">In Progress Only</div>
-          <div class="dropdown-item" data-export="done">Done Only</div>
+          <div class="dropdown-item" data-export="all"><i class="fas fa-file-excel"></i> Export All</div>
+          <div class="dropdown-item" data-export="pending"><i class="fas fa-clock"></i> Pending Only</div>
+          <div class="dropdown-item" data-export="in-progress"><i class="fas fa-spinner"></i> In Progress Only</div>
+          <div class="dropdown-item" data-export="done"><i class="fas fa-check"></i> Done Only</div>
         </div>
       </div>
-      <div class="dropdown" id="userManagementDropdown" style="display:none"><button class="btn btn-secondary">Users</button>
-        <div class="dropdown-menu"><div class="dropdown-item" onclick="openUserManagementModal()">Manage Users</div></div>
+      <div class="dropdown" id="userManagementDropdown" style="display:none">
+        <button class="btn btn-secondary"><i class="fas fa-users"></i> Users</button>
+        <div class="dropdown-menu">
+          <div class="dropdown-item" onclick="openUserManagementModal()"><i class="fas fa-user-cog"></i> Manage Users</div>
+        </div>
       </div>
-      <button id="addBtn" class="btn btn-primary" onclick="openModal()">+ New Ticket</button>
+      <button id="addBtn" class="btn btn-primary" onclick="openModal()">
+        <i class="fas fa-plus"></i> New Ticket
+      </button>
     </div>
   </div>
+
   <div class="table-wrapper">
     <div class="loader" id="tableLoader"></div>
-    <table id="mainTable"><thead><tr>
-      <th class="sortable" data-sort="date">Date</th>
-      <th class="sortable" data-sort="location">Location</th>
-      <th>ID</th>
-      <th class="sortable" data-sort="title">Title & Description</th>
-      <th>Requester</th>
-      <th>Request To</th>
-      <th>Category</th>
-      <th>Status</th>
-      <th>Actions</th>
-    </tr></thead><tbody id="tableBody"></tbody></table>
+    <table id="mainTable">
+      <thead>
+        <tr>
+          <th class="sortable" data-sort="date">Date</th>
+          <th class="sortable" data-sort="location">Location</th>
+          <th>ID</th>
+          <th class="sortable" data-sort="title">Title & Description</th>
+          <th>Requester</th>
+          <th>Request To</th>
+          <th>Category</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
     <div class="pagination">
       <div class="pagination-info" id="paginationInfo">Loading...</div>
       <div class="pagination-controls">
@@ -219,25 +1111,45 @@ td:nth-child(7) { /* Category column */
     </div>
   </div>
 </div>
+
+<!-- Ticket Modal -->
 <div id="modal" class="modal">
   <div class="modal-content">
-    <div class="modal-header"><h2 id="modalTitle">New Ticket</h2><span class="close-btn" onclick="closeModal()">x</span></div>
+    <div class="modal-header">
+      <h2 id="modalTitle">New Ticket</h2>
+      <span class="close-btn" onclick="closeModal()">×</span>
+    </div>
     <form id="ticketForm" onsubmit="event.preventDefault();saveTicket()">
       <div class="modal-body">
         <div class="form-grid">
-          <div class="form-field"><label>Date <span class="required">*</span></label><input type="date" id="date" required></div>
-          <div class="form-field"><label>Location <span class="required">*</span></label>
+          <div class="form-field">
+            <label>Date <span class="required">*</span></label>
+            <input type="date" id="date" required>
+          </div>
+          <div class="form-field">
+            <label>Location <span class="required">*</span></label>
             <div class="custom-select">
-              <div class="select-display" id="locationDisplay"><span>-- Select Location --</span></div>
+              <div class="select-display" id="locationDisplay">
+                <span>-- Select Location --</span>
+                <i class="fas fa-chevron-down"></i>
+              </div>
               <div class="select-options" id="locationOptions">
                 <div class="location-item" data-value="CTK">CTK</div>
-                <div class="category"><div class="category-header" data-category="cscnq"><span>CSCNQ</span><i class="fas fa-chevron-down"></i></div>
+                <div class="category">
+                  <div class="category-header" data-category="cscnq">
+                    <span>CSCNQ</span>
+                    <i class="fas fa-chevron-down"></i>
+                  </div>
                   <div class="category-options">
                     <div class="location-item" data-value="FG NG">FG NG</div>
                     <div class="location-item" data-value="FG BAAO">FG BAAO</div>
                   </div>
                 </div>
-                <div class="category"><div class="category-header" data-category="almasor"><span>ALMASOR</span><i class="fas fa-chevron-down"></i></div>
+                <div class="category">
+                  <div class="category-header" data-category="almasor">
+                    <span>ALMASOR</span>
+                    <i class="fas fa-chevron-down"></i>
+                  </div>
                   <div class="category-options">
                     <div class="location-item" data-value="FG LC">FG LC</div>
                     <div class="location-item" data-value="FGE IRS">FGE IRS</div>
@@ -251,14 +1163,22 @@ td:nth-child(7) { /* Category column */
                     <div class="location-item" data-value="FTG TA">FTG TA</div>
                   </div>
                 </div>
-                <div class="category"><div class="category-header" data-category="cn"><span>CN</span><i class="fas fa-chevron-down"></i></div>
+                <div class="category">
+                  <div class="category-header" data-category="cn">
+                    <span>CN</span>
+                    <i class="fas fa-chevron-down"></i>
+                  </div>
                   <div class="category-options">
                     <div class="location-item" data-value="CN LC">CN LC</div>
                     <div class="location-item" data-value="CN HALL">CN HALL</div>
                     <div class="location-item" data-value="CN TA">CN TA</div>
                   </div>
                 </div>
-                <div class="category"><div class="category-header" data-category="fo"><span>FO Support</span><i class="fas fa-chevron-down"></i></div>
+                <div class="category">
+                  <div class="category-header" data-category="fo">
+                    <span>FO Support</span>
+                    <i class="fas fa-chevron-down"></i>
+                  </div>
                   <div class="category-options">
                     <div class="location-item" data-value="PROC">PROC</div>
                     <div class="location-item" data-value="HR">HR</div>
@@ -272,56 +1192,128 @@ td:nth-child(7) { /* Category column */
             </div>
             <input type="hidden" id="location" required>
           </div>
-          <div class="form-field"><label>Ticket ID</label><input type="text" id="ticketId" placeholder="TKT-001"></div>
-          <div class="form-field"><label>Requester <span class="required">*</span></label><input type="text" id="requester" required></div>
-          <div class="form-field"><label>Request To</label><input type="text" id="assigned"></div>
-          <div class="form-field"><label>Category <span class="required">*</span></label><input type="text" id="category" required></div>
-        </div>
-        <div class="form-field full-width"><label>Title & Description <span class="required">*</span></label><textarea id="titleDesc" required></textarea></div>
-        <div style="display:flex;gap:0.9rem">
-          <div class="form-field" style="flex:1"><label>Status <span class="required">*</span></label>
-            <select id="statusSelect" required><option>Pending</option><option>In Progress</option><option>Done</option><option>Cancelled</option></select>
+          <div class="form-field">
+            <label>Ticket ID</label>
+            <input type="text" id="ticketId" placeholder="TKT-001">
           </div>
-          <div class="form-field" style="flex:1"><label>Note</label><input type="text" id="statusNote"></div>
+          <div class="form-field">
+            <label>Requester <span class="required">*</span></label>
+            <input type="text" id="requester" required>
+          </div>
+          <div class="form-field">
+            <label>Request To</label>
+            <input type="text" id="assigned">
+          </div>
+          <div class="form-field">
+            <label>Category <span class="required">*</span></label>
+            <input type="text" id="category" required>
+          </div>
+        </div>
+        <div class="form-field full-width">
+          <label>Title & Description <span class="required">*</span></label>
+          <textarea id="titleDesc" required placeholder="Enter ticket title and description..."></textarea>
+        </div>
+        <div style="display:flex;gap:0.6rem">
+          <div class="form-field" style="flex:1">
+            <label>Status <span class="required">*</span></label>
+            <select id="statusSelect" required>
+              <option>Pending</option>
+              <option>In Progress</option>
+              <option>Done</option>
+              <option>Cancelled</option>
+            </select>
+          </div>
+          <div class="form-field" style="flex:1">
+            <label>Note</label>
+            <input type="text" id="statusNote" placeholder="Additional status note...">
+          </div>
         </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-        <button type="submit" class="btn btn-primary"><span id="saveBtnText">Save Ticket</span></button>
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-save"></i> <span id="saveBtnText">Save Ticket</span>
+        </button>
       </div>
     </form>
   </div>
 </div>
-<div id="userManagementModal" class="modal"><div class="modal-content" style="max-width:840px">
-  <div class="modal-header"><h2>User Management</h2><span class="close-btn" onclick="closeUserManagementModal()">x</span></div>
-  <div class="modal-body">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.9rem">
-      <h3 style="font-size:1.05rem;font-weight:500">Users List</h3>
-      <button class="btn btn-primary" onclick="openUserModal()">+ Add User</button>
+
+<!-- User Management Modal -->
+<div id="userManagementModal" class="modal">
+  <div class="modal-content" style="max-width:750px">
+    <div class="modal-header">
+      <h2><i class="fas fa-users-cog"></i> User Management</h2>
+      <span class="close-btn" onclick="closeUserManagementModal()">×</span>
     </div>
-    <div class="table-wrapper"><table><thead><tr><th>Username</th><th>Name</th><th>Role</th><th>Created</th><th>Actions</th></tr></thead><tbody id="usersTableBody"></tbody></table></div>
-  </div>
-</div></div>
-<div id="userModal" class="modal"><div class="modal-content">
-  <div class="modal-header"><h2 id="userModalTitle">Add User</h2><span class="close-btn" onclick="closeUserModal()">x</span></div>
-  <form id="userForm" onsubmit="event.preventDefault();saveUser()">
     <div class="modal-body">
-      <div class="form-grid">
-        <div class="form-field full-width"><label>Username <span class="required">*</span></label><input type="text" id="newUsername" required></div>
-        <div class="form-field full-width"><label>Name <span class="required">*</span></label><input type="text" id="newName" required></div>
-        <div class="form-field full-width"><label>Password <span class="required">*</span></label><input type="password" id="newPassword" required></div>
-        <div class="form-field full-width"><label>Role <span class="required">*</span></label>
-          <select id="newRole" required><option value="user">User</option><option value="admin">Admin</option></select>
-        </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.6rem">
+        <h3 style="font-size:0.9rem;font-weight:600">Users List</h3>
+        <button class="btn btn-primary" onclick="openUserModal()">
+          <i class="fas fa-user-plus"></i> Add User
+        </button>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th>Name</th>
+              <th>Role</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="usersTableBody"></tbody>
+        </table>
       </div>
     </div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" onclick="closeUserModal()">Cancel</button>
-      <button type="submit" class="btn btn-primary"><span id="saveUserBtnText">Save User</span></button>
+  </div>
+</div>
+
+<!-- User Modal -->
+<div id="userModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 id="userModalTitle"><i class="fas fa-user-edit"></i> Add User</h2>
+      <span class="close-btn" onclick="closeUserModal()">×</span>
     </div>
-  </form>
-</div></div>
-<div id="snackbar" class="snackbar">Saved!</div>
+    <form id="userForm" onsubmit="event.preventDefault();saveUser()">
+      <div class="modal-body">
+        <div class="form-grid">
+          <div class="form-field full-width">
+            <label>Username <span class="required">*</span></label>
+            <input type="text" id="newUsername" required placeholder="Enter username">
+          </div>
+          <div class="form-field full-width">
+            <label>Name <span class="required">*</span></label>
+            <input type="text" id="newName" required placeholder="Enter full name">
+          </div>
+          <div class="form-field full-width">
+            <label>Password <span class="required">*</span></label>
+            <input type="password" id="newPassword" required placeholder="Enter password">
+          </div>
+          <div class="form-field full-width">
+            <label>Role <span class="required">*</span></label>
+            <select id="newRole" required>
+              <option value="user">User</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeUserModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-save"></i> <span id="saveUserBtnText">Save User</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="snackbar" class="snackbar"></div>
+
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 const supabase = createClient('https://crdevgfrptdhhgqnpqzk.supabase.co','sb_publishable_nLYTInAlXEqxy6YbMIxKpw_ZacBlomD');
@@ -330,32 +1322,39 @@ const itemsPerPage=6;
 let allTickets=[],filteredTickets=[],totalPages=1;
 let sortState={field:'date',direction:'desc'};
 let allUsers=[],allLocations=[];
+
 function showLoader(){document.getElementById('tableLoader').style.display='block'}
 function hideLoader(){document.getElementById('tableLoader').style.display='none'}
+
 function setupCustomLocationDropdown(){
   const display=document.getElementById('locationDisplay');
   const options=document.getElementById('locationOptions');
   const hidden=document.getElementById('location');
+  
   display.addEventListener('click',e=>{e.stopPropagation();options.classList.toggle('show')});
   document.addEventListener('click',e=>{if(!display.contains(e.target)&&!options.contains(e.target))options.classList.remove('show')});
+  
   document.querySelectorAll('.category-header').forEach(h=>h.addEventListener('click',e=>{
     e.stopPropagation();h.classList.toggle('expanded');
     h.nextElementSibling.classList.toggle('expanded');
   }));
+  
   document.querySelectorAll('.location-item').forEach(i=>i.addEventListener('click',()=>{
     display.querySelector('span').textContent=i.textContent;
     hidden.value=i.dataset.value;
     options.classList.remove('show');
   }));
 }
+
 function setupTheme(){
   const t=document.getElementById('themeToggle');
-  if(localStorage.getItem('darkMode')==='true'){document.body.classList.add('dark-mode');t.innerHTML='Light Mode'}
+  if(localStorage.getItem('darkMode')==='true'){document.body.classList.add('dark-mode');t.innerHTML='<i class="fas fa-sun"></i> Light Mode'}
   t.addEventListener('click',()=>{document.body.classList.toggle('dark-mode');
     const d=document.body.classList.contains('dark-mode');localStorage.setItem('darkMode',d);
-    t.innerHTML=d?'Light Mode':'Dark Mode';
+    t.innerHTML=d?'<i class="fas fa-sun"></i> Light Mode':'<i class="fas fa-moon"></i> Dark Mode';
   });
 }
+
 function setupDropdowns(){
   document.querySelectorAll('.dropdown > button').forEach(b=>b.addEventListener('click',e=>{
     e.stopPropagation();b.parentElement.classList.toggle('active');
@@ -364,6 +1363,7 @@ function setupDropdowns(){
   document.querySelectorAll('[data-export]').forEach(b=>b.addEventListener('click',()=>{exportToExcel(b.dataset.export)}));
   document.querySelectorAll('[data-print]').forEach(b=>b.addEventListener('click',()=>{handlePrint(b.dataset.print)}));
 }
+
 function setupSorting(){
   document.querySelectorAll('th.sortable').forEach(th=>th.addEventListener('click',()=>{
     const f=th.dataset.sort;
@@ -371,6 +1371,7 @@ function setupSorting(){
     applySorting();
   }));
 }
+
 function applySorting(){
   filteredTickets.sort((a,b)=>{
     let A=a[sortState.field]||'',B=b[sortState.field]||'';
@@ -379,6 +1380,7 @@ function applySorting(){
   });
   renderTable();updatePagination();
 }
+
 function populateUserFilter(){
   const sel=document.getElementById('userFilter');
   sel.innerHTML='<option value="">All Users</option>';
@@ -388,6 +1390,7 @@ function populateUserFilter(){
     sel.appendChild(opt);
   });
 }
+
 function populateLocationFilter(){
   const sel=document.getElementById('locationFilter');
   sel.innerHTML='<option value="">All Locations</option>';
@@ -398,11 +1401,13 @@ function populateLocationFilter(){
     sel.appendChild(opt);
   });
 }
+
 function applyFilters(){
   const search=document.getElementById('searchInput').value.toLowerCase();
   const status=document.getElementById('statusFilter').value;
   const user=document.getElementById('userFilter').value;
   const location=document.getElementById('locationFilter').value;
+  
   filteredTickets=allTickets.filter(t=>{
     if(status && t.status!==status) return false;
     if(user && t.created_by!==user) return false;
@@ -412,11 +1417,12 @@ function applyFilters(){
   });
   currentPage=1;applySorting();
 }
-function showSnackbar(msg,type='info'){
-  const s=document.getElementById('snackbar');s.textContent=msg;s.className='snackbar';
-  if(type==='error')s.classList.add('error');
+
+function showSnackbar(msg,type='success'){
+  const s=document.getElementById('snackbar');s.textContent=msg;s.className='snackbar '+type;
   s.classList.add('show');setTimeout(()=>s.classList.remove('show'),3000);
 }
+
 async function checkLogin(){
   const u=localStorage.getItem('helpdeskUser');
   if(u){currentUser=JSON.parse(u);document.getElementById('currentUser').textContent=currentUser.name;
@@ -428,6 +1434,7 @@ async function checkLogin(){
     await loadUsersAndLocations();loadTickets();showSnackbar(`Welcome back, ${currentUser.name}!`,'success');
   }
 }
+
 async function loadUsersAndLocations(){
   const {data:users}=await supabase.from('users').select('username,name');
   allUsers=users||[];
@@ -436,6 +1443,7 @@ async function loadUsersAndLocations(){
   allLocations=tickets?tickets.map(t=>t.location).filter(Boolean):[];
   populateLocationFilter();
 }
+
 document.getElementById('loginForm').addEventListener('submit',async e=>{
   e.preventDefault();
   const u=document.getElementById('username').value.trim();
@@ -444,29 +1452,41 @@ document.getElementById('loginForm').addEventListener('submit',async e=>{
   if(error|| !data||data.length===0) return showSnackbar('Invalid credentials','error');
   currentUser=data[0];localStorage.setItem('helpdeskUser',JSON.stringify(currentUser));checkLogin();
 });
-window.logout=()=>{if(confirm('Log out?')){localStorage.removeItem('helpdeskUser');location.reload()}}
-window.openModal=id=>{editingTicketId=id;document.getElementById('modal').classList.add('show');
+
+window.logout=()=>{if(confirm('Are you sure you want to log out?')){localStorage.removeItem('helpdeskUser');location.reload()}}
+
+window.openModal=id=>{
+  editingTicketId=id;
+  document.getElementById('modal').classList.add('show');
   document.getElementById('modalTitle').textContent=id?'Update Ticket':'New Ticket';
-  document.getElementById('saveBtnText').textContent=id?'Update':'Save Ticket';
-  if(id){supabase.from('tickets').select('*').eq('id',id).single().then(r=>{if(r.data){
-    document.getElementById('date').value=r.data.date;
-    document.getElementById('locationDisplay').querySelector('span').textContent=r.data.location||'-- Select Location --';
-    document.getElementById('location').value=r.data.location||'';
-    document.getElementById('ticketId').value=r.data.ticket_id||'';
-    document.getElementById('titleDesc').value=r.data.title_description||'';
-    document.getElementById('requester').value=r.data.requester||'';
-    document.getElementById('assigned').value=r.data.assigned_to||'';
-    document.getElementById('category').value=r.data.category||'';
-    document.getElementById('statusSelect').value=r.data.status||'Pending';
-    document.getElementById('statusNote').value=r.data.status_note||'';
-  }})}
-  else{document.getElementById('ticketForm').reset();document.getElementById('date').value=new Date().toISOString().split('T')[0];
+  document.getElementById('saveBtnText').textContent=id?'Update Ticket':'Save Ticket';
+  
+  if(id){
+    supabase.from('tickets').select('*').eq('id',id).single().then(r=>{
+      if(r.data){
+        document.getElementById('date').value=r.data.date;
+        document.getElementById('locationDisplay').querySelector('span').textContent=r.data.location||'-- Select Location --';
+        document.getElementById('location').value=r.data.location||'';
+        document.getElementById('ticketId').value=r.data.ticket_id||'';
+        document.getElementById('titleDesc').value=r.data.title_description||'';
+        document.getElementById('requester').value=r.data.requester||'';
+        document.getElementById('assigned').value=r.data.assigned_to||'';
+        document.getElementById('category').value=r.data.category||'';
+        document.getElementById('statusSelect').value=r.data.status||'Pending';
+        document.getElementById('statusNote').value=r.data.status_note||'';
+      }
+    });
+  }else{
+    document.getElementById('ticketForm').reset();
+    document.getElementById('date').value=new Date().toISOString().split('T')[0];
     document.getElementById('requester').value=currentUser.name;
     document.getElementById('locationDisplay').querySelector('span').textContent='-- Select Location --';
     document.getElementById('location').value='';
   }
 }
+
 window.closeModal=()=>{document.getElementById('modal').classList.remove('show')}
+
 window.saveTicket=async()=>{
   const f=document.getElementById('ticketForm');if(!f.checkValidity()){f.reportValidity();return}
   const d={
@@ -485,12 +1505,18 @@ window.saveTicket=async()=>{
     editingTicketId?
       await supabase.from('tickets').update(d).eq('id',editingTicketId):
       await supabase.from('tickets').insert([d]);
-    showSnackbar(editingTicketId?'Ticket updated!':'Ticket created!','success');
+    showSnackbar(editingTicketId?'Ticket updated successfully!':'Ticket created successfully!','success');
     closeModal();loadTickets();loadUsersAndLocations();
   }catch(e){showSnackbar('Error: '+e.message,'error')}
 }
-window.deleteTicket=async id=>{if(!confirm('Delete permanently?'))return;
-  await supabase.from('tickets').delete().eq('id',id);showSnackbar('Deleted','success');loadTickets();loadUsersAndLocations()}
+
+window.deleteTicket=async id=>{
+  if(!confirm('Are you sure you want to delete this ticket permanently?'))return;
+  await supabase.from('tickets').delete().eq('id',id);
+  showSnackbar('Ticket deleted successfully','success');
+  loadTickets();loadUsersAndLocations();
+}
+
 async function loadTickets(){
   showLoader();
   let q=supabase.from('tickets').select('*',{count:'exact'}).order('date',{ascending:false});
@@ -500,6 +1526,7 @@ async function loadTickets(){
   totalPages=Math.ceil(allTickets.length/itemsPerPage);
   applyFilters();hideLoader();
 }
+
 function renderTable(){
   const tb=document.getElementById('tableBody'),start=(currentPage-1)*itemsPerPage,end=start+itemsPerPage;
   tb.innerHTML='';filteredTickets.slice(start,end).forEach(t=>{
@@ -507,16 +1534,17 @@ function renderTable(){
     const sc=`status-${t.status.toLowerCase().replace(' ','-')}`;
     const row=tb.insertRow();
     row.innerHTML=`<td>${t.date}</td><td>${t.location||'-'}</td><td>${t.ticket_id||'-'}</td>
-      <td><div style="font-weight:500;font-size:11.9px">${title}</div><div style="font-size:11px;color:var(--muted);margin-top:1px">${desc}</div></td>
+      <td><div class="title-main">${title}</div>${desc?`<div class="title-desc">${desc}</div>`:''}</td>
       <td>${t.requester}</td><td>${t.assigned_to||'-'}</td><td>${t.category}</td>
-      <td><span class="status-badge ${sc}">${t.status}</span>${t.status_note?`<div style="font-size:10.5px;margin-top:2px;color:var(--muted)">${t.status_note}</div>`:''}</td>
+      <td><span class="status-badge ${sc}">${t.status}</span>${t.status_note?`<div class="status-note">${t.status_note}</div>`:''}</td>
       <td class="actions">
-        <button class="btn btn-secondary" onclick="openModal(${t.id})">Update</button>
-        <button class="btn delete-btn" onclick="deleteTicket(${t.id})">X</button>
+        <button class="action-btn update" onclick="openModal(${t.id})">Update</button>
+        <button class="action-btn delete" onclick="deleteTicket(${t.id})">X</button>
       </td>`;
   });
-  if(!filteredTickets.slice(start,end).length)tb.innerHTML='<tr><td colspan="9" style="padding:2.4rem;text-align:center;color:var(--muted);font-size:11.8px">No tickets found</td></tr>';
+  if(!filteredTickets.slice(start,end).length)tb.innerHTML='<tr><td colspan="9" style="padding:1.5rem;text-align:center;color:var(--muted);font-size:11px">No tickets found</td></tr>';
 }
+
 function updatePagination(){
   const start=(currentPage-1)*itemsPerPage+1,end=Math.min(currentPage*itemsPerPage,filteredTickets.length);
   document.getElementById('paginationInfo').textContent=`Showing ${start}-${end} of ${filteredTickets.length}`;
@@ -530,41 +1558,57 @@ function updatePagination(){
     b.textContent=i;b.onclick=()=>goToPage(i);pn.appendChild(b);
   }
 }
+
 window.goToPage=p=>{if(p<1||p>totalPages)return;currentPage=p;renderTable();updatePagination()}
+
 document.getElementById('searchInput').addEventListener('input',()=>{currentPage=1;applyFilters()});
 document.getElementById('statusFilter').addEventListener('change',applyFilters);
 document.getElementById('userFilter').addEventListener('change',applyFilters);
 document.getElementById('locationFilter').addEventListener('change',applyFilters);
+
 async function loadUsers(){
   const {data}=await supabase.from('users').select('*').order('created_at',{ascending:false});
   const tb=document.getElementById('usersTableBody');tb.innerHTML='';
-  data?.forEach(u=>{const r=tb.insertRow();
+  data?.forEach(u=>{
+    const r=tb.insertRow();
     r.innerHTML=`<td>${u.username}</td><td>${u.name}</td>
       <td><span class="status-badge ${u.role==='admin'?'status-in-progress':'status-pending'}">${u.role}</span></td>
       <td>${new Date(u.created_at).toLocaleDateString()}</td>
       <td class="actions">
-        <button class="btn btn-secondary" onclick="editUser(${u.id})">Edit</button>
-        ${u.username!=='admin'?`<button class="btn delete-btn" onclick="deleteUser(${u.id})">Delete</button>`:''}
+        <button class="action-btn edit" onclick="editUser(${u.id})">Edit</button>
+        ${u.username!=='admin'?`<button class="action-btn delete" onclick="deleteUser(${u.id})">X</button>`:''}
       </td>`;
   });
 }
+
 window.openUserManagementModal=()=>{document.getElementById('userManagementModal').classList.add('show');loadUsers()}
 window.closeUserManagementModal=()=>{document.getElementById('userManagementModal').classList.remove('show')}
-window.openUserModal=id=>{editingUserId=id;document.getElementById('userModal').classList.add('show');
+
+window.openUserModal=id=>{
+  editingUserId=id;
+  document.getElementById('userModal').classList.add('show');
   document.getElementById('userModalTitle').textContent=id?'Edit User':'Add User';
   document.getElementById('saveUserBtnText').textContent=id?'Update User':'Save User';
-  if(id){supabase.from('users').select('*').eq('id',id).single().then(r=>{if(r.data){
-    document.getElementById('newUsername').value=r.data.username;
-    document.getElementById('newName').value=r.data.name;
-    document.getElementById('newRole').value=r.data.role;
-    document.getElementById('newPassword').required=false;
-    document.getElementById('newPassword').placeholder='Leave blank to keep current';
-  }})}
-  else{document.getElementById('userForm').reset();document.getElementById('newPassword').required=true;
+  
+  if(id){
+    supabase.from('users').select('*').eq('id',id).single().then(r=>{
+      if(r.data){
+        document.getElementById('newUsername').value=r.data.username;
+        document.getElementById('newName').value=r.data.name;
+        document.getElementById('newRole').value=r.data.role;
+        document.getElementById('newPassword').required=false;
+        document.getElementById('newPassword').placeholder='Leave blank to keep current';
+      }
+    });
+  }else{
+    document.getElementById('userForm').reset();
+    document.getElementById('newPassword').required=true;
     document.getElementById('newPassword').placeholder='';
   }
 }
+
 window.closeUserModal=()=>{document.getElementById('userModal').classList.remove('show');editingUserId=null}
+
 window.saveUser=async()=>{
   const f=document.getElementById('userForm');
   if(!f.checkValidity()){f.reportValidity();return}
@@ -572,12 +1616,14 @@ window.saveUser=async()=>{
   const name=document.getElementById('newName').value.trim();
   const password=document.getElementById('newPassword').value;
   const role=document.getElementById('newRole').value;
+  
   if(!editingUserId){
     const {data:existingUsers}=await supabase.from('users').select('username').eq('username',username);
     if(existingUsers&&existingUsers.length>0){
       return showSnackbar('Username already exists','error');
     }
   }
+  
   try{
     let result;
     if(editingUserId){
@@ -588,27 +1634,35 @@ window.saveUser=async()=>{
       result=await supabase.from('users').insert([{username,name,password,role}]);
     }
     if(result.error)throw result.error;
-    showSnackbar(editingUserId?'User updated!':'User created!','success');
+    showSnackbar(editingUserId?'User updated successfully!':'User created successfully!','success');
     closeUserModal();loadUsers();loadUsersAndLocations();
   }catch(e){showSnackbar('Error: '+e.message,'error')}
 }
+
 window.editUser=id=>openUserModal(id);
-window.deleteUser=async id=>{if(!confirm('Delete this user?'))return;
-  await supabase.from('users').delete().eq('id',id);showSnackbar('User deleted','success');loadUsers();loadUsersAndLocations()}
+
+window.deleteUser=async id=>{
+  if(!confirm('Are you sure you want to delete this user?'))return;
+  await supabase.from('users').delete().eq('id',id);
+  showSnackbar('User deleted successfully','success');
+  loadUsers();loadUsersAndLocations();
+}
+
 function exportToExcel(type='all'){
   let data=type==='all'?allTickets:allTickets.filter(t=>t.status.toLowerCase().includes(type.replace('-',' ')));
-  if(!data.length)return showSnackbar('No data','error');
+  if(!data.length)return showSnackbar('No data to export','error');
   const ws=XLSX.utils.json_to_sheet(data.map(t=>({
     Date:t.date,Location:t.location||'',ID:t.ticket_id||'',Title:t.title_description,
     Requester:t.requester,'Request To':t.assigned_to||'',Category:t.category,Status:t.status,Note:t.status_note||''
   })));
   const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Tickets');
   XLSX.writeFile(wb,`Helpdesk_${type}_${new Date().toISOString().slice(0,10)}.xlsx`);
-  showSnackbar('Exported','success');
+  showSnackbar('Data exported successfully','success');
 }
+
 function handlePrint(type='all'){
   let data=type==='all'?allTickets:allTickets.filter(t=>t.status.toLowerCase().includes(type.replace('-',' ')));
-  if(!data.length)return showSnackbar('No data','error');
+  if(!data.length)return showSnackbar('No data to print','error');
   const win=window.open('','_blank');
   win.document.write(`<pre style="font-size:10.5px">${JSON.stringify(data.map(t=>({
     Date:t.date,Location:t.location,ID:t.ticket_id,Title:t.title_description,Requester:t.requester,
@@ -616,9 +1670,11 @@ function handlePrint(type='all'){
   })),null,2)}</pre>`);
   setTimeout(()=>{win.print();},500);
 }
+
 document.addEventListener('DOMContentLoaded',()=>{
   setupCustomLocationDropdown();setupTheme();setupDropdowns();setupSorting();checkLogin();
 });
+
 supabase.channel('tickets').on('postgres_changes',{event:'*',schema:'public',table:'tickets'},()=>{loadTickets();loadUsersAndLocations()}).subscribe();
 </script>
 </body>
