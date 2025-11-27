@@ -110,6 +110,34 @@ body {
   color: var(--primary);
 }
 
+/* Done Tickets Button */
+.done-tickets-btn {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 0.3rem 0.8rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 500;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  height: 30px;
+}
+
+.done-tickets-btn:hover {
+  background: #059669;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+
+.done-tickets-btn.active {
+  background: #047857;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 /* Controls */
 .top-controls {
   display: flex;
@@ -947,6 +975,8 @@ td:nth-child(7) { /* Category column */
   .header-right {
     width: 100%;
     justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.4rem;
   }
   
   td, th {
@@ -958,6 +988,8 @@ td:nth-child(7) { /* Category column */
     flex-direction: column;
     gap: 0.3rem;
     align-items: stretch;
+    justify-content: center;
+    align-items: center;
   }
   
   .action-btn {
@@ -1027,6 +1059,9 @@ td:nth-child(7) { /* Category column */
   <div class="header">
     <h2><i class="fas fa-headset"></i> Helpdesk Monitoring</h2>
     <div class="header-right">
+      <button id="doneTicketsBtn" class="done-tickets-btn">
+        <i class="fas fa-check-circle"></i> Done Tickets
+      </button>
       <button id="themeToggle" class="theme-toggle">
         <i class="fas fa-moon"></i> Dark Mode
       </button>
@@ -1044,7 +1079,6 @@ td:nth-child(7) { /* Category column */
         <option value="">All Status</option>
         <option value="Pending">Pending</option>
         <option value="In Progress">In Progress</option>
-        <option value="Done">Done</option>
         <option value="Cancelled">Cancelled</option>
       </select>
       <select id="userFilter"><option value="">All Users</option></select>
@@ -1322,6 +1356,7 @@ const itemsPerPage=6;
 let allTickets=[],filteredTickets=[],totalPages=1;
 let sortState={field:'date',direction:'desc'};
 let allUsers=[],allLocations=[];
+let showDoneTicketsOnly = false;
 
 function showLoader(){document.getElementById('tableLoader').style.display='block'}
 function hideLoader(){document.getElementById('tableLoader').style.display='none'}
@@ -1409,6 +1444,15 @@ function applyFilters(){
   const location=document.getElementById('locationFilter').value;
   
   filteredTickets=allTickets.filter(t=>{
+    // In normal view, hide Done tickets. In Done Tickets view, show only Done tickets
+    if (showDoneTicketsOnly) {
+      // Only show Done tickets
+      if (t.status !== 'Done') return false;
+    } else {
+      // Hide Done tickets from main view
+      if (t.status === 'Done') return false;
+    }
+    
     if(status && t.status!==status) return false;
     if(user && t.created_by!==user) return false;
     if(location && t.location!==location) return false;
@@ -1454,6 +1498,24 @@ document.getElementById('loginForm').addEventListener('submit',async e=>{
 });
 
 window.logout=()=>{if(confirm('Are you sure you want to log out?')){localStorage.removeItem('helpdeskUser');location.reload()}}
+
+// Done Tickets Functionality
+window.toggleDoneTickets = function() {
+  showDoneTicketsOnly = !showDoneTicketsOnly;
+  const doneBtn = document.getElementById('doneTicketsBtn');
+  
+  if (showDoneTicketsOnly) {
+    doneBtn.classList.add('active');
+    doneBtn.innerHTML = '<i class="fas fa-check-circle"></i> All Tickets';
+    showSnackbar('Showing completed tickets', 'success');
+  } else {
+    doneBtn.classList.remove('active');
+    doneBtn.innerHTML = '<i class="fas fa-check-circle"></i> Done Tickets';
+    showSnackbar('Showing active tickets', 'success');
+  }
+  
+  applyFilters();
+}
 
 window.openModal=id=>{
   editingTicketId=id;
@@ -1539,7 +1601,7 @@ function renderTable(){
       <td><span class="status-badge ${sc}">${t.status}</span>${t.status_note?`<div class="status-note">${t.status_note}</div>`:''}</td>
       <td class="actions">
         <button class="action-btn update" onclick="openModal(${t.id})">Update</button>
-        <button class="action-btn delete" onclick="deleteTicket(${t.id})">X</button>
+        <button class="action-btn delete" onclick="deleteTicket(${t.id})">X</button>&nbsp;&nbsp;
       </td>`;
   });
   if(!filteredTickets.slice(start,end).length)tb.innerHTML='<tr><td colspan="9" style="padding:1.5rem;text-align:center;color:var(--muted);font-size:11px">No tickets found</td></tr>';
@@ -1673,6 +1735,8 @@ function handlePrint(type='all'){
 
 document.addEventListener('DOMContentLoaded',()=>{
   setupCustomLocationDropdown();setupTheme();setupDropdowns();setupSorting();checkLogin();
+  // Add event listener for Done Tickets button
+  document.getElementById('doneTicketsBtn').addEventListener('click', toggleDoneTickets);
 });
 
 supabase.channel('tickets').on('postgres_changes',{event:'*',schema:'public',table:'tickets'},()=>{loadTickets();loadUsersAndLocations()}).subscribe();
