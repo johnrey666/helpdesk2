@@ -63,7 +63,6 @@ body {
 /* Header */
 .header {
   display: flex;
-  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   padding: 0.6rem 0;
@@ -80,7 +79,6 @@ body {
   align-items: center;
   gap: 0.4rem;
   flex: 1;
-  min-width: 200px;
 }
 
 .header-logo {
@@ -94,8 +92,10 @@ body {
   gap: 0.5rem;
   align-items: center;
   font-size: 11px;
-  flex-wrap: wrap;
-  justify-content: flex-end;
+}
+
+.mobile-header-right {
+  display: none;
 }
 
 .theme-toggle {
@@ -132,7 +132,12 @@ body {
   display: flex;
   gap: 0.5rem;
   flex: 1;
-  min-width: 260px;
+  flex-wrap: wrap;
+}
+
+.right-controls {
+  display: flex;
+  gap: 0.5rem;
   flex-wrap: wrap;
 }
 
@@ -377,7 +382,7 @@ input::placeholder {
   opacity: 1;
 }
 
-/* Modal - UPDATED FOR BETTER SIZING */
+/* Modal */
 .modal {
   position: fixed;
   inset: 0;
@@ -401,9 +406,9 @@ input::placeholder {
 .modal-content {
   background: var(--surface);
   border-radius: var(--radius-lg);
-  width: 90%; /* Changed from 100% to 90% to make it smaller */
-  max-width: 650px; /* Reduced from 750px */
-  max-height: 90vh; /* Changed from 80vh to 90vh for better fitting */
+  width: 90%;
+  max-width: 650px;
+  max-height: 90vh;
   overflow: hidden;
   box-shadow: var(--shadow-lg);
   transform: scale(0.9);
@@ -447,7 +452,7 @@ input::placeholder {
 .modal-body {
   padding: 1rem;
   overflow-y: auto;
-  max-height: calc(90vh - 120px); /* Adjusted to match new modal height */
+  max-height: calc(90vh - 120px);
 }
 
 .form-grid {
@@ -473,7 +478,6 @@ input::placeholder {
   color: #ef4444;
 }
 
-/* NEW 50/50 LAYOUT FOR TITLE & DESCRIPTION AND FILE UPLOAD */
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -485,7 +489,6 @@ input::placeholder {
   grid-column: 1 / -1;
 }
 
-/* File upload section styling */
 .file-upload-section {
   display: flex;
   font-size: 11px;
@@ -601,7 +604,7 @@ input::placeholder {
 }
 
 textarea {
-  min-height: 100px; /* Reduced height for better space utilization */
+  min-height: 100px;
   resize: vertical;
   font-size: 12px;
   padding: 0.5rem;
@@ -772,7 +775,7 @@ tr:last-child td {
   border-color: #991b1b;
 }
 
-/* Actions - IMPROVED */
+/* Actions */
 .actions {
   display: flex;
   gap: 0.4rem;
@@ -1151,6 +1154,44 @@ td:nth-child(7) { /* Category column */
   color: var(--primary);
 }
 
+.mobile-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  z-index: 1000;
+  min-width: 180px;
+  margin-top: 0.5rem;
+}
+
+.mobile-menu.show {
+  display: block;
+}
+
+.mobile-menu-item {
+  padding: 0.7rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text);
+  font-size: 11px;
+  cursor: pointer;
+  transition: var(--transition);
+  border-bottom: 1px solid var(--border);
+}
+
+.mobile-menu-item:last-child {
+  border-bottom: none;
+}
+
+.mobile-menu-item:hover {
+  background: var(--hover);
+}
+
 /* Search bar specific styling */
 #searchInput {
   flex: 2;
@@ -1345,21 +1386,6 @@ td:nth-child(7) { /* Category column */
 
 /* ========== RESPONSIVE STYLES ========== */
 
-/* Large screens */
-@media (min-width: 1200px) {
-  .container {
-    padding: 1rem;
-  }
-  
-  .header {
-    padding: 0.8rem 0;
-  }
-  
-  .top-controls {
-    margin: 1rem 0;
-  }
-}
-
 /* Tablets and small desktops */
 @media (max-width: 1024px) {
   .container {
@@ -1391,45 +1417,123 @@ td:nth-child(7) { /* Category column */
   }
 }
 
-/* Tablets */
+/* Tablets and Mobile */
 @media (max-width: 768px) {
   .container {
     padding: 0.5rem;
   }
   
   .header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.6rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
   }
   
   .header h2 {
     font-size: 0.9rem;
+    min-width: auto;
   }
   
   .header-right {
-    width: 100%;
-    justify-content: space-between;
-    gap: 0.4rem;
+    display: none;
+  }
+  
+  .mobile-header-right {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+  
+  .mobile-menu-btn {
+    display: flex;
   }
   
   .top-controls {
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
     gap: 0.5rem;
+    padding-bottom: 0.5rem;
+    margin: 0.5rem 0;
+  }
+  
+  .top-controls::-webkit-scrollbar {
+    height: 3px;
+  }
+  
+  .top-controls::-webkit-scrollbar-track {
+    background: var(--border);
+  }
+  
+  .top-controls::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 2px;
   }
   
   .left-controls {
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 0.5rem;
     min-width: auto;
+    flex-shrink: 0;
+  }
+  
+  .right-controls {
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0;
   }
   
   #searchInput {
-    min-width: auto;
+    min-width: 150px;
+    flex: none;
   }
   
   #locationFilterContainer {
-    width: 100%;
+    width: 140px;
+    flex: none;
+  }
+  
+  select {
+    min-width: 120px;
+    flex: none;
+  }
+  
+  .mobile-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    z-index: 1000;
+    min-width: 180px;
+    margin-top: 0.5rem;
+  }
+  
+  .mobile-menu.show {
+    display: block;
+  }
+  
+  .mobile-menu-item {
+    padding: 0.7rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text);
+    font-size: 11px;
+    cursor: pointer;
+    transition: var(--transition);
+    border-bottom: 1px solid var(--border);
+  }
+  
+  .mobile-menu-item:last-child {
+    border-bottom: none;
+  }
+  
+  .mobile-menu-item:hover {
+    background: var(--hover);
   }
   
   .form-grid {
@@ -1437,12 +1541,12 @@ td:nth-child(7) { /* Category column */
   }
   
   .form-row {
-    grid-template-columns: 1fr; /* Stack on mobile */
+    grid-template-columns: 1fr;
   }
   
   .modal-content {
-    margin: 0.6rem;
-    max-height: calc(100vh - 1.2rem);
+    margin: 0.5rem;
+    max-height: calc(100vh - 1rem);
   }
   
   .modal-body {
@@ -1451,76 +1555,21 @@ td:nth-child(7) { /* Category column */
   
   .pagination {
     flex-direction: column;
-    gap: 0.6rem;
-    text-align: center;
+    gap: 0.5rem;
     height: auto;
     padding: 0.5rem;
   }
   
-  .pagination-controls {
-    justify-content: center;
-  }
-  
   .actions {
-    flex-direction: column;
+    flex-direction: row;
     gap: 0.3rem;
-    align-items: stretch;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .action-btn {
-    width: 100%;
-    justify-content: center;
-  }
-  
-  .mobile-menu-btn {
-    display: flex;
-  }
-  
-  .header-right .btn, .header-right .theme-toggle, .header-right .dropdown {
-    display: none;
-  }
-  
-  .header-right.mobile-open .btn, 
-  .header-right.mobile-open .theme-toggle, 
-  .header-right.mobile-open .dropdown {
-    display: flex;
-  }
-  
-  .header-right.mobile-open {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.4rem;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 0.5rem;
-    margin-top: 0.5rem;
-    width: 100%;
   }
 }
 
 /* Mobile phones */
 @media (max-width: 480px) {
-  body {
-    font-size: 11px;
-  }
-  
   .container {
     padding: 0.4rem;
-  }
-  
-  .login-container {
-    padding: 1.2rem;
-  }
-  
-  .table-wrapper {
-    border-radius: var(--radius);
-  }
-  
-  .modal-content {
-    border-radius: var(--radius);
   }
   
   .header h2 {
@@ -1528,53 +1577,33 @@ td:nth-child(7) { /* Category column */
   }
   
   .header-logo {
-    width: 40px;
-  height: 28px;
+    width: 36px;
+    height: 24px;
   }
   
-  .btn, .theme-toggle {
-    font-size: 9px;
-    padding: 0.3rem 0.5rem;
+  .top-controls {
+    gap: 0.4rem;
   }
   
-  .pagination-btn {
-    padding: 0.2rem 0.4rem;
-    font-size: 9px;
+  .left-controls {
+    gap: 0.4rem;
   }
   
-  .modal-header h2 {
-    font-size: 0.85rem;
+  #searchInput {
+    min-width: 120px;
   }
   
-  .modal-footer .btn {
+  #locationFilterContainer {
+    width: 120px;
+  }
+  
+  select {
+    min-width: 100px;
+  }
+  
+  .btn {
     font-size: 10px;
-  }
-  
-  .file-size-warning {
-    font-size: 9px;
-    padding: 0.3rem;
-  }
-  
-  td, th {
-    padding: 0.4rem 0.3rem;
-    font-size: 9px;
-  }
-  
-  .status-badge {
-    font-size: 8px;
-    padding: 0.15rem 0.4rem;
-  }
-  
-  .title-main {
-    font-size: 10px;
-  }
-  
-  .title-desc {
-    font-size: 9px;
-  }
-  
-  .status-note {
-    font-size: 8px;
+    padding: 0.3rem 0.6rem;
   }
 }
 
@@ -1584,61 +1613,29 @@ td:nth-child(7) { /* Category column */
     padding: 0.3rem;
   }
   
-  .header h2 {
-    font-size: 0.8rem;
+  .top-controls {
+    gap: 0.3rem;
   }
   
-  .header-logo {
-    width: 36px;
-    height: 24px;
+  .left-controls {
+    gap: 0.3rem;
   }
   
-  .btn, .theme-toggle {
-    font-size: 8px;
-    padding: 0.25rem 0.4rem;
+  #searchInput {
+    min-width: 100px;
   }
   
-  .modal-content {
-    margin: 0.4rem;
+  #locationFilterContainer {
+    width: 100px;
   }
   
-  .modal-body {
-    padding: 0.6rem;
+  select {
+    min-width: 80px;
   }
   
-  .modal-footer {
-    padding: 0.6rem;
-  }
-  
-  .pagination {
-    padding: 0.4rem;
-  }
-  
-  .pagination-btn {
-    padding: 0.15rem 0.3rem;
-    font-size: 8px;
-  }
-  
-  .file-size-warning {
-    font-size: 8px;
-    padding: 0.2rem;
-  }
-  
-  td, th {
-    padding: 0.3rem 0.2rem;
-    font-size: 8px;
-  }
-  
-  .status-badge {
-    font-size: 7px;
-  }
-  
-  .title-main {
+  .btn {
     font-size: 9px;
-  }
-  
-  .title-desc {
-    font-size: 8px;
+    padding: 0.25rem 0.5rem;
   }
 }
 </style>
@@ -1670,11 +1667,14 @@ td:nth-child(7) { /* Category column */
 <div id="dashboard" class="container" style="display:none">
   <div class="header">
     <h2><img src="logo.png" alt="Logo" class="header-logo"> Helpdesk Monitoring</h2>
-    <button class="mobile-menu-btn" id="mobileMenuBtn">
-      <i class="fas fa-bars"></i> Menu
-    </button>
+    <div class="mobile-header-right">
+      <span>Welcome, <strong id="currentUser"></strong></span>
+      <button class="mobile-menu-btn" id="mobileMenuBtn">
+        <i class="fas fa-bars"></i> Menu
+      </button>
+    </div>
     <div class="header-right" id="headerRight">
-      <!-- NEW: Resolved Tickets Dropdown -->
+      <!-- Resolved Tickets Dropdown -->
       <div class="dropdown" id="resolvedTicketsDropdown">
         <button class="btn btn-secondary">
           <i class="fas fa-check-circle"></i> All Tickets
@@ -1689,9 +1689,9 @@ td:nth-child(7) { /* Category column */
         </div>
       </div>
       
-      <span>Welcome, <strong id="currentUser"></strong></span>
+      <span>Welcome, <strong id="currentUserDesktop"></strong></span>
       
-      <!-- NEW: Settings Dropdown -->
+      <!-- Settings Dropdown -->
       <div class="dropdown" id="settingsDropdown">
         <button class="btn btn-secondary">
           <i class="fas fa-cog"></i>
@@ -1708,6 +1708,25 @@ td:nth-child(7) { /* Category column */
           </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-item" onclick="toggleResolvedTickets('all')">
+      <i class="fas fa-list"></i> All Tickets
+    </div>
+    <div class="mobile-menu-item" onclick="toggleResolvedTickets('resolved')">
+      <i class="fas fa-check-circle"></i> Resolved Tickets
+    </div>
+    <div class="mobile-menu-item" onclick="openChangePasswordModal()">
+      <i class="fas fa-key"></i> Change Password
+    </div>
+    <div class="mobile-menu-item" id="mobileDarkModeToggle">
+      <i class="fas fa-moon"></i> Dark Mode
+    </div>
+    <div class="mobile-menu-item" onclick="logout()">
+      <i class="fas fa-sign-out-alt"></i> Logout
     </div>
   </div>
 
@@ -1786,7 +1805,7 @@ td:nth-child(7) { /* Category column */
         </div>
       </div>
     </div>
-    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+    <div class="right-controls">
       <div class="dropdown" id="printDropdown">
         <button class="btn btn-secondary"><i class="fas fa-print"></i> Print</button>
         <div class="dropdown-menu">
@@ -2192,14 +2211,17 @@ function setupCustomLocationFilter(){
 
 function setupTheme(){
   const darkModeToggle = document.getElementById('darkModeToggle');
+  const mobileDarkModeToggle = document.getElementById('mobileDarkModeToggle');
   
   if(localStorage.getItem('darkMode')==='true'){
     document.body.classList.add('dark-mode');
     darkModeToggle.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
+    mobileDarkModeToggle.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
   }
   
-  // NEW: Add event listener for dropdown dark mode toggle
+  // Add event listeners for both desktop and mobile dark mode toggles
   darkModeToggle.addEventListener('click',()=>{toggleDarkMode()});
+  mobileDarkModeToggle.addEventListener('click',()=>{toggleDarkMode()});
 }
 
 function toggleDarkMode() {
@@ -2208,8 +2230,10 @@ function toggleDarkMode() {
   localStorage.setItem('darkMode',d);
   
   const darkModeToggle = document.getElementById('darkModeToggle');
+  const mobileDarkModeToggle = document.getElementById('mobileDarkModeToggle');
   
   darkModeToggle.innerHTML = d?'<i class="fas fa-sun"></i> Light Mode':'<i class="fas fa-moon"></i> Dark Mode';
+  mobileDarkModeToggle.innerHTML = d?'<i class="fas fa-sun"></i> Light Mode':'<i class="fas fa-moon"></i> Dark Mode';
 }
 
 function setupDropdowns(){
@@ -2220,7 +2244,7 @@ function setupDropdowns(){
   document.querySelectorAll('[data-export]').forEach(b=>b.addEventListener('click',()=>{exportToExcel(b.dataset.export)}));
   document.querySelectorAll('[data-print]').forEach(b=>b.addEventListener('click',()=>{handlePrint(b.dataset.print)}));
   
-  // NEW: Setup resolved tickets dropdown
+  // Setup resolved tickets dropdown
   document.querySelectorAll('#resolvedTicketsDropdown .dropdown-item').forEach(item => {
     item.addEventListener('click', function() {
       const view = this.getAttribute('data-view');
@@ -2285,7 +2309,7 @@ function showSnackbar(msg,type='success'){
   s.classList.add('show');setTimeout(()=>s.classList.remove('show'),3000);
 }
 
-// NEW: Custom confirmation dialog
+// Custom confirmation dialog
 function showConfirm(message, title = 'Confirmation', dangerAction = false) {
   return new Promise((resolve) => {
     const dialog = document.getElementById('confirmDialog');
@@ -2329,7 +2353,9 @@ function showConfirm(message, title = 'Confirmation', dangerAction = false) {
 
 async function checkLogin(){
   const u=localStorage.getItem('helpdeskUser');
-  if(u){currentUser=JSON.parse(u);document.getElementById('currentUser').textContent=currentUser.name;
+  if(u){currentUser=JSON.parse(u);
+    document.getElementById('currentUser').textContent=currentUser.name;
+    document.getElementById('currentUserDesktop').textContent=currentUser.name;
     document.getElementById('loginPage').style.display='none';document.getElementById('dashboard').style.display='block';
     if(currentUser.role==='admin'){
       document.getElementById('userManagementDropdown').style.display='inline-block';
@@ -2362,7 +2388,7 @@ window.logout=async()=>{
   }
 }
 
-// NEW: Resolved Tickets Functionality
+// Resolved Tickets Functionality
 window.toggleResolvedTickets = function(view) {
   showResolvedTicketsOnly = (view === 'resolved');
   const resolvedBtn = document.querySelector('#resolvedTicketsDropdown > button');
@@ -2378,13 +2404,14 @@ window.toggleResolvedTickets = function(view) {
   applyFilters();
 }
 
-// NEW: Change Password Functionality
+// Change Password Functionality
 window.openChangePasswordModal = function() {
   document.getElementById('changePasswordModal').classList.add('show');
   document.getElementById('changePasswordForm').reset();
   
-  // Close settings dropdown
+  // Close settings dropdown and mobile menu
   document.getElementById('settingsDropdown').classList.remove('active');
+  document.getElementById('mobileMenu').classList.remove('show');
 }
 
 window.closeChangePasswordModal = function() {
@@ -2595,7 +2622,7 @@ window.openModal=id=>{
   uploadedFiles = [];
   renderFileList();
   
-  // NEW: Reset submission flag when opening modal
+  // Reset submission flag when opening modal
   isSubmitting = false;
   document.getElementById('saveTicketBtn').disabled = false;
   
@@ -2637,7 +2664,7 @@ window.closeModal=()=>{
 }
 
 window.saveTicket=async()=>{
-  // NEW: Prevent multiple submissions
+  // Prevent multiple submissions
   if (isSubmitting) {
     showSnackbar('Please wait, saving in progress...', 'warning');
     return;
@@ -2645,7 +2672,7 @@ window.saveTicket=async()=>{
   
   const f=document.getElementById('ticketForm');if(!f.checkValidity()){f.reportValidity();return}
   
-  // NEW: Set submission flag and disable button
+  // Set submission flag and disable button
   isSubmitting = true;
   document.getElementById('saveTicketBtn').disabled = true;
   document.getElementById('saveBtnText').textContent = 'Saving...';
@@ -2669,7 +2696,7 @@ window.saveTicket=async()=>{
         } catch (error) {
           console.error('Error converting file to Base64:', error);
           showSnackbar('Error processing files', 'error');
-          // NEW: Reset submission flag on error
+          // Reset submission flag on error
           isSubmitting = false;
           document.getElementById('saveTicketBtn').disabled = false;
           document.getElementById('saveBtnText').textContent = editingTicketId?'Update Ticket':'Save Ticket';
@@ -2707,19 +2734,19 @@ window.saveTicket=async()=>{
     if(result.error) {
       console.error('Supabase error:', result.error);
       showSnackbar('Database error: ' + result.error.message, 'error');
-      // NEW: Reset submission flag on error
+      // Reset submission flag on error
       isSubmitting = false;
       document.getElementById('saveTicketBtn').disabled = false;
       document.getElementById('saveBtnText').textContent = editingTicketId?'Update Ticket':'Save Ticket';
       return;
     }
     
-    showSnackbar(editingTicketId?'Ticket updated successfully!':'Ticket created successfully!','success');
+  showSnackbar(editingTicketId?'Ticket updated successfully!':'Ticket created successfully!','success');
     closeModal();loadTickets();loadUsersAndLocations();
   } catch(e) {
     console.error('Unexpected error:', e);
     showSnackbar('Unexpected error: ' + e.message,'error');
-    // NEW: Reset submission flag on error
+    // Reset submission flag on error
     isSubmitting = false;
     document.getElementById('saveTicketBtn').disabled = false;
     document.getElementById('saveBtnText').textContent = editingTicketId?'Update Ticket':'Save Ticket';
@@ -2827,7 +2854,7 @@ window.openUserModal=id=>{
   document.getElementById('userModalTitle').textContent=id?'Edit User':'Add User';
   document.getElementById('saveUserBtnText').textContent=id?'Update User':'Save User';
   
-  // NEW: Reset submission flag when opening user modal
+  // Reset submission flag when opening user modal
   isSubmitting = false;
   document.getElementById('saveUserBtn').disabled = false;
   
@@ -2851,7 +2878,7 @@ window.openUserModal=id=>{
 window.closeUserModal=()=>{document.getElementById('userModal').classList.remove('show');editingUserId=null}
 
 window.saveUser=async()=>{
-  // NEW: Prevent multiple submissions for user form too
+  // Prevent multiple submissions for user form too
   if (isSubmitting) {
     showSnackbar('Please wait, saving in progress...', 'warning');
     return;
@@ -2864,7 +2891,7 @@ window.saveUser=async()=>{
   const password=document.getElementById('newPassword').value;
   const role=document.getElementById('newRole').value;
   
-  // NEW: Set submission flag and disable button
+  // Set submission flag and disable button
   isSubmitting = true;
   document.getElementById('saveUserBtn').disabled = true;
   document.getElementById('saveUserBtnText').textContent = 'Saving...';
@@ -2873,7 +2900,7 @@ window.saveUser=async()=>{
     const {data:existingUsers}=await supabase.from('users').select('username').eq('username',username);
     if(existingUsers&&existingUsers.length>0){
       showSnackbar('Username already exists','error');
-      // NEW: Reset submission flag on error
+      // Reset submission flag on error
       isSubmitting = false;
       document.getElementById('saveUserBtn').disabled = false;
       document.getElementById('saveUserBtnText').textContent = editingUserId?'Update User':'Save User';
@@ -2895,7 +2922,7 @@ window.saveUser=async()=>{
     closeUserModal();loadUsers();loadUsersAndLocations();
   }catch(e){
     showSnackbar('Error: '+e.message,'error');
-    // NEW: Reset submission flag on error
+    // Reset submission flag on error
     isSubmitting = false;
     document.getElementById('saveUserBtn').disabled = false;
     document.getElementById('saveUserBtnText').textContent = editingUserId?'Update User':'Save User';
@@ -3010,18 +3037,25 @@ function handlePrint(type='all'){
 // Mobile menu functionality
 function setupMobileMenu() {
   const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-  const headerRight = document.getElementById('headerRight');
+  const mobileMenu = document.getElementById('mobileMenu');
   
   mobileMenuBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    headerRight.classList.toggle('mobile-open');
+    mobileMenu.classList.toggle('show');
   });
   
   // Close mobile menu when clicking outside
   document.addEventListener('click', (e) => {
-    if (!mobileMenuBtn.contains(e.target) && !headerRight.contains(e.target)) {
-      headerRight.classList.remove('mobile-open');
+    if (!mobileMenuBtn.contains(e.target) && !mobileMenu.contains(e.target)) {
+      mobileMenu.classList.remove('show');
     }
+  });
+  
+  // Close mobile menu when clicking on menu items
+  document.querySelectorAll('.mobile-menu-item').forEach(item => {
+    item.addEventListener('click', () => {
+      mobileMenu.classList.remove('show');
+    });
   });
 }
 
