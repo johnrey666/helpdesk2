@@ -8,6 +8,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!-- Load Supabase from CDN instead of ES module -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 :root {
   --bg: #f8fafc;
@@ -2137,14 +2139,45 @@ td:nth-child(7) { /* Category column */
 
 <div id="snackbar" class="snackbar"></div>
 
-<script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-const supabase = createClient('https://crdevgfrptdhhgqnpqzk.supabase.co','sb_publishable_nLYTInAlXEqxy6YbMIxKpw_ZacBlomD');
-let currentUser=null,editingTicketId=null,editingUserId=null,currentPage=1;
-const itemsPerPage=6;
-let allTickets=[],filteredTickets=[],totalPages=1;
-let sortState={field:'date',direction:'desc'};
-let allUsers=[],allLocations=[];
+<!-- CHANGED: Regular script instead of module -->
+<script>
+// Initialize Supabase with proper error handling
+let supabase;
+try {
+  supabase = window.supabase.createClient(
+    'https://crdevgfrptdhhgqnpqzk.supabase.co',
+    'sb_publishable_nLYTInAlXEqxy6YbMIxKpw_ZacBlomD'
+  );
+  console.log('Supabase client initialized successfully');
+} catch (error) {
+  console.error('Failed to initialize Supabase:', error);
+  // Show error to user
+  document.getElementById('loginPage').innerHTML = `
+    <div class="login-container" style="text-align:center;">
+      <h3><i class="fas fa-exclamation-triangle"></i> System Error</h3>
+      <p style="color:var(--muted);margin:1rem 0;font-size:0.8rem;">
+        Failed to initialize database connection.<br>
+        Please refresh the page or contact support.
+      </p>
+      <button onclick="location.reload()" class="btn btn-primary">
+        <i class="fas fa-redo"></i> Refresh Page
+      </button>
+    </div>
+  `;
+}
+
+// Global variables
+let currentUser = null;
+let editingTicketId = null;
+let editingUserId = null;
+let currentPage = 1;
+const itemsPerPage = 6;
+let allTickets = [];
+let filteredTickets = [];
+let totalPages = 1;
+let sortState = { field: 'date', direction: 'desc' };
+let allUsers = [];
+let allLocations = [];
 let showResolvedTicketsOnly = false;
 let selectedLocationFilter = '';
 
@@ -2153,7 +2186,7 @@ let uploadedFiles = [];
 let currentFiles = [];
 let currentFileIndex = 0;
 
-// NEW: Form submission flag to prevent multiple submissions
+// Form submission flag to prevent multiple submissions
 let isSubmitting = false;
 
 // File to Base64 conversion function
@@ -2166,83 +2199,86 @@ function fileToBase64(file) {
   });
 }
 
-function showLoader(){document.getElementById('tableLoader').style.display='block'}
-function hideLoader(){document.getElementById('tableLoader').style.display='none'}
+function showLoader() { document.getElementById('tableLoader').style.display = 'block'; }
+function hideLoader() { document.getElementById('tableLoader').style.display = 'none'; }
 
-function setupCustomLocationDropdown(){
-  const display=document.getElementById('locationDisplay');
-  const options=document.getElementById('locationOptions');
-  const hidden=document.getElementById('location');
+function setupCustomLocationDropdown() {
+  const display = document.getElementById('locationDisplay');
+  const options = document.getElementById('locationOptions');
+  const hidden = document.getElementById('location');
   
-  display.addEventListener('click',e=>{e.stopPropagation();options.classList.toggle('show')});
-  document.addEventListener('click',e=>{if(!display.contains(e.target)&&!options.contains(e.target))options.classList.remove('show')});
+  display.addEventListener('click', e => { e.stopPropagation(); options.classList.toggle('show'); });
+  document.addEventListener('click', e => { if (!display.contains(e.target) && !options.contains(e.target)) options.classList.remove('show'); });
   
-  document.querySelectorAll('#locationOptions .category-header').forEach(h=>h.addEventListener('click',e=>{
-    e.stopPropagation();h.classList.toggle('expanded');
+  document.querySelectorAll('#locationOptions .category-header').forEach(h => h.addEventListener('click', e => {
+    e.stopPropagation();
+    h.classList.toggle('expanded');
     h.nextElementSibling.classList.toggle('expanded');
   }));
   
-  document.querySelectorAll('#locationOptions .location-item').forEach(i=>i.addEventListener('click',()=>{
-    display.querySelector('span').textContent=i.textContent;
-    hidden.value=i.dataset.value;
+  document.querySelectorAll('#locationOptions .location-item').forEach(i => i.addEventListener('click', () => {
+    display.querySelector('span').textContent = i.textContent;
+    hidden.value = i.dataset.value;
     options.classList.remove('show');
   }));
 }
 
-function setupCustomLocationFilter(){
-  const display=document.getElementById('locationFilterDisplay');
-  const options=document.getElementById('locationFilterOptions');
+function setupCustomLocationFilter() {
+  const display = document.getElementById('locationFilterDisplay');
+  const options = document.getElementById('locationFilterOptions');
   
-  display.addEventListener('click',e=>{e.stopPropagation();options.classList.toggle('show')});
-  document.addEventListener('click',e=>{if(!display.contains(e.target)&&!options.contains(e.target))options.classList.remove('show')});
+  display.addEventListener('click', e => { e.stopPropagation(); options.classList.toggle('show'); });
+  document.addEventListener('click', e => { if (!display.contains(e.target) && !options.contains(e.target)) options.classList.remove('show'); });
   
-  document.querySelectorAll('#locationFilterOptions .category-header').forEach(h=>h.addEventListener('click',e=>{
-    e.stopPropagation();h.classList.toggle('expanded');
+  document.querySelectorAll('#locationFilterOptions .category-header').forEach(h => h.addEventListener('click', e => {
+    e.stopPropagation();
+    h.classList.toggle('expanded');
     h.nextElementSibling.classList.toggle('expanded');
   }));
   
-  document.querySelectorAll('#locationFilterOptions .location-item').forEach(i=>i.addEventListener('click',()=>{
-    display.querySelector('span').textContent=i.textContent;
+  document.querySelectorAll('#locationFilterOptions .location-item').forEach(i => i.addEventListener('click', () => {
+    display.querySelector('span').textContent = i.textContent;
     selectedLocationFilter = i.dataset.value;
     options.classList.remove('show');
     applyFilters();
   }));
 }
 
-function setupTheme(){
+function setupTheme() {
   const darkModeToggle = document.getElementById('darkModeToggle');
   const mobileDarkModeToggle = document.getElementById('mobileDarkModeToggle');
   
-  if(localStorage.getItem('darkMode')==='true'){
+  if (localStorage.getItem('darkMode') === 'true') {
     document.body.classList.add('dark-mode');
     darkModeToggle.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
     mobileDarkModeToggle.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
   }
   
   // Add event listeners for both desktop and mobile dark mode toggles
-  darkModeToggle.addEventListener('click',()=>{toggleDarkMode()});
-  mobileDarkModeToggle.addEventListener('click',()=>{toggleDarkMode()});
+  darkModeToggle.addEventListener('click', () => { toggleDarkMode(); });
+  mobileDarkModeToggle.addEventListener('click', () => { toggleDarkMode(); });
 }
 
 function toggleDarkMode() {
   document.body.classList.toggle('dark-mode');
-  const d=document.body.classList.contains('dark-mode');
-  localStorage.setItem('darkMode',d);
+  const d = document.body.classList.contains('dark-mode');
+  localStorage.setItem('darkMode', d);
   
   const darkModeToggle = document.getElementById('darkModeToggle');
   const mobileDarkModeToggle = document.getElementById('mobileDarkModeToggle');
   
-  darkModeToggle.innerHTML = d?'<i class="fas fa-sun"></i> Light Mode':'<i class="fas fa-moon"></i> Dark Mode';
-  mobileDarkModeToggle.innerHTML = d?'<i class="fas fa-sun"></i> Light Mode':'<i class="fas fa-moon"></i> Dark Mode';
+  darkModeToggle.innerHTML = d ? '<i class="fas fa-sun"></i> Light Mode' : '<i class="fas fa-moon"></i> Dark Mode';
+  mobileDarkModeToggle.innerHTML = d ? '<i class="fas fa-sun"></i> Light Mode' : '<i class="fas fa-moon"></i> Dark Mode';
 }
 
-function setupDropdowns(){
-  document.querySelectorAll('.dropdown > button').forEach(b=>b.addEventListener('click',e=>{
-    e.stopPropagation();b.parentElement.classList.toggle('active');
+function setupDropdowns() {
+  document.querySelectorAll('.dropdown > button').forEach(b => b.addEventListener('click', e => {
+    e.stopPropagation();
+    b.parentElement.classList.toggle('active');
   }));
-  document.addEventListener('click',()=>{document.querySelectorAll('.dropdown').forEach(d=>d.classList.remove('active'))});
-  document.querySelectorAll('[data-export]').forEach(b=>b.addEventListener('click',()=>{exportToExcel(b.dataset.export)}));
-  document.querySelectorAll('[data-print]').forEach(b=>b.addEventListener('click',()=>{handlePrint(b.dataset.print)}));
+  document.addEventListener('click', () => { document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('active')); });
+  document.querySelectorAll('[data-export]').forEach(b => b.addEventListener('click', () => { exportToExcel(b.dataset.export); }));
+  document.querySelectorAll('[data-print]').forEach(b => b.addEventListener('click', () => { handlePrint(b.dataset.print); }));
   
   // Setup resolved tickets dropdown
   document.querySelectorAll('#resolvedTicketsDropdown .dropdown-item').forEach(item => {
@@ -2253,39 +2289,42 @@ function setupDropdowns(){
   });
 }
 
-function setupSorting(){
-  document.querySelectorAll('th.sortable').forEach(th=>th.addEventListener('click',()=>{
-    const f=th.dataset.sort;
-    sortState=sortState.field===f?{field:f,direction:sortState.direction==='asc'?'desc':'asc'}:{field:f,direction:'desc'};
+function setupSorting() {
+  document.querySelectorAll('th.sortable').forEach(th => th.addEventListener('click', () => {
+    const f = th.dataset.sort;
+    sortState = sortState.field === f ? { field: f, direction: sortState.direction === 'asc' ? 'desc' : 'asc' } : { field: f, direction: 'desc' };
     applySorting();
   }));
 }
 
-function applySorting(){
-  filteredTickets.sort((a,b)=>{
-    let A=a[sortState.field]||'',B=b[sortState.field]||'';
-    if(sortState.field==='date'){A=new Date(a.date);B=new Date(b.date)}
-    return (A<B?-1:A>B?1:0)*(sortState.direction==='asc'?1:-1);
+function applySorting() {
+  filteredTickets.sort((a, b) => {
+    let A = a[sortState.field] || '';
+    let B = b[sortState.field] || '';
+    if (sortState.field === 'date') { A = new Date(a.date); B = new Date(b.date); }
+    return (A < B ? -1 : A > B ? 1 : 0) * (sortState.direction === 'asc' ? 1 : -1);
   });
-  renderTable();updatePagination();
+  renderTable();
+  updatePagination();
 }
 
-function populateUserFilter(){
-  const sel=document.getElementById('userFilter');
-  sel.innerHTML='<option value="">All Users</option>';
-  allUsers.forEach(u=>{
-    const opt=document.createElement('option');
-    opt.value=u.username;opt.textContent=u.name;
+function populateUserFilter() {
+  const sel = document.getElementById('userFilter');
+  sel.innerHTML = '<option value="">All Users</option>';
+  allUsers.forEach(u => {
+    const opt = document.createElement('option');
+    opt.value = u.username;
+    opt.textContent = u.name;
     sel.appendChild(opt);
   });
 }
 
-function applyFilters(){
-  const search=document.getElementById('searchInput').value.toLowerCase();
-  const status=document.getElementById('statusFilter').value;
-  const user=document.getElementById('userFilter').value;
+function applyFilters() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const status = document.getElementById('statusFilter').value;
+  const user = document.getElementById('userFilter').value;
   
-  filteredTickets=allTickets.filter(t=>{
+  filteredTickets = allTickets.filter(t => {
     // In normal view, hide Done tickets. In Resolved Tickets view, show only Done tickets
     if (showResolvedTicketsOnly) {
       // Only show Resolved tickets
@@ -2295,18 +2334,22 @@ function applyFilters(){
       if (t.status === 'Done') return false;
     }
     
-    if(status && t.status!==status) return false;
-    if(user && t.created_by!==user) return false;
-    if(selectedLocationFilter && t.location!==selectedLocationFilter) return false;
-    const str=[t.date,t.location,t.ticket_id,t.title_description,t.requester,t.assigned_to,t.category,t.status,t.status_note].join(' ').toLowerCase();
-    return !search||str.includes(search);
+    if (status && t.status !== status) return false;
+    if (user && t.created_by !== user) return false;
+    if (selectedLocationFilter && t.location !== selectedLocationFilter) return false;
+    const str = [t.date, t.location, t.ticket_id, t.title_description, t.requester, t.assigned_to, t.category, t.status, t.status_note].join(' ').toLowerCase();
+    return !search || str.includes(search);
   });
-  currentPage=1;applySorting();
+  currentPage = 1;
+  applySorting();
 }
 
-function showSnackbar(msg,type='success'){
-  const s=document.getElementById('snackbar');s.textContent=msg;s.className='snackbar '+type;
-  s.classList.add('show');setTimeout(()=>s.classList.remove('show'),3000);
+function showSnackbar(msg, type = 'success') {
+  const s = document.getElementById('snackbar');
+  s.textContent = msg;
+  s.className = 'snackbar ' + type;
+  s.classList.add('show');
+  setTimeout(() => s.classList.remove('show'), 3000);
 }
 
 // Custom confirmation dialog
@@ -2351,42 +2394,87 @@ function showConfirm(message, title = 'Confirmation', dangerAction = false) {
   });
 }
 
-async function checkLogin(){
-  const u=localStorage.getItem('helpdeskUser');
-  if(u){currentUser=JSON.parse(u);
-    document.getElementById('currentUser').textContent=currentUser.name;
-    document.getElementById('currentUserDesktop').textContent=currentUser.name;
-    document.getElementById('loginPage').style.display='none';document.getElementById('dashboard').style.display='block';
-    if(currentUser.role==='admin'){
-      document.getElementById('userManagementDropdown').style.display='inline-block';
-      document.getElementById('userFilter').style.display='block';
+async function checkLogin() {
+  const u = localStorage.getItem('helpdeskUser');
+  if (u) {
+    try {
+      currentUser = JSON.parse(u);
+      document.getElementById('currentUser').textContent = currentUser.name;
+      document.getElementById('currentUserDesktop').textContent = currentUser.name;
+      document.getElementById('loginPage').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+      
+      if (currentUser.role === 'admin') {
+        document.getElementById('userManagementDropdown').style.display = 'inline-block';
+        document.getElementById('userFilter').style.display = 'block';
+      }
+      
+      await loadUsersAndLocations();
+      await loadTickets();
+      showSnackbar(`Welcome back, ${currentUser.name}!`, 'success');
+    } catch (error) {
+      console.error('Error in checkLogin:', error);
+      showSnackbar('Session expired. Please login again.', 'error');
+      localStorage.removeItem('helpdeskUser');
+      document.getElementById('loginPage').style.display = 'flex';
+      document.getElementById('dashboard').style.display = 'none';
     }
-    await loadUsersAndLocations();loadTickets();showSnackbar(`Welcome back, ${currentUser.name}!`,'success');
   }
 }
 
-async function loadUsersAndLocations(){
-  const {data:users}=await supabase.from('users').select('username,name');
-  allUsers=users||[];
-  populateUserFilter();
+async function loadUsersAndLocations() {
+  try {
+    const { data: users, error } = await supabase.from('users').select('username, name');
+    if (error) throw error;
+    allUsers = users || [];
+    populateUserFilter();
+  } catch (error) {
+    console.error('Error loading users:', error);
+    showSnackbar('Error loading user data', 'error');
+  }
 }
 
-document.getElementById('loginForm').addEventListener('submit',async e=>{
+document.getElementById('loginForm').addEventListener('submit', async e => {
   e.preventDefault();
-  const u=document.getElementById('username').value.trim();
-  const p=document.getElementById('password').value.trim();
-  const {data,error}=await supabase.from('users').select('*').eq('username',u).eq('password',p);
-  if(error|| !data||data.length===0) return showSnackbar('Invalid credentials','error');
-  currentUser=data[0];localStorage.setItem('helpdeskUser',JSON.stringify(currentUser));checkLogin();
+  const u = document.getElementById('username').value.trim();
+  const p = document.getElementById('password').value.trim();
+  
+  if (!u || !p) {
+    showSnackbar('Please enter username and password', 'error');
+    return;
+  }
+  
+  try {
+    const { data, error } = await supabase.from('users').select('*').eq('username', u).eq('password', p);
+    
+    if (error) {
+      console.error('Login error:', error);
+      showSnackbar('Database error: ' + error.message, 'error');
+      return;
+    }
+    
+    if (!data || data.length === 0) {
+      showSnackbar('Invalid credentials', 'error');
+      return;
+    }
+    
+    currentUser = data[0];
+    localStorage.setItem('helpdeskUser', JSON.stringify(currentUser));
+    await checkLogin();
+    
+  } catch (err) {
+    console.error('Login catch error:', err);
+    showSnackbar('Connection error: ' + err.message, 'error');
+  }
 });
 
-window.logout=async()=>{
+window.logout = async () => {
   const confirmed = await showConfirm('Are you sure you want to log out?', 'Logout Confirmation');
-  if(confirmed){
+  if (confirmed) {
     localStorage.removeItem('helpdeskUser');
     location.reload();
   }
-}
+};
 
 // Resolved Tickets Functionality
 window.toggleResolvedTickets = function(view) {
@@ -2402,7 +2490,7 @@ window.toggleResolvedTickets = function(view) {
   }
   
   applyFilters();
-}
+};
 
 // Change Password Functionality
 window.openChangePasswordModal = function() {
@@ -2412,11 +2500,11 @@ window.openChangePasswordModal = function() {
   // Close settings dropdown and mobile menu
   document.getElementById('settingsDropdown').classList.remove('active');
   document.getElementById('mobileMenu').classList.remove('show');
-}
+};
 
 window.closeChangePasswordModal = function() {
   document.getElementById('changePasswordModal').classList.remove('show');
-}
+};
 
 window.changePassword = async function() {
   const form = document.getElementById('changePasswordForm');
@@ -2435,27 +2523,32 @@ window.changePassword = async function() {
     return;
   }
   
-  // Verify current password
-  const { data, error } = await supabase.from('users').select('*').eq('username', currentUser.username).eq('password', currentPassword);
-  if (error || !data || data.length === 0) {
-    showSnackbar('Current password is incorrect', 'error');
-    return;
+  try {
+    // Verify current password
+    const { data, error } = await supabase.from('users').select('*').eq('username', currentUser.username).eq('password', currentPassword);
+    if (error || !data || data.length === 0) {
+      showSnackbar('Current password is incorrect', 'error');
+      return;
+    }
+    
+    // Update password
+    const { error: updateError } = await supabase
+      .from('users')
+      .update({ password: newPassword })
+      .eq('username', currentUser.username);
+    
+    if (updateError) {
+      showSnackbar('Error updating password: ' + updateError.message, 'error');
+      return;
+    }
+    
+    showSnackbar('Password updated successfully', 'success');
+    closeChangePasswordModal();
+  } catch (error) {
+    console.error('Change password error:', error);
+    showSnackbar('Error: ' + error.message, 'error');
   }
-  
-  // Update password
-  const { error: updateError } = await supabase
-    .from('users')
-    .update({ password: newPassword })
-    .eq('username', currentUser.username);
-  
-  if (updateError) {
-    showSnackbar('Error updating password: ' + updateError.message, 'error');
-    return;
-  }
-  
-  showSnackbar('Password updated successfully', 'success');
-  closeChangePasswordModal();
-}
+};
 
 // File Upload Functionality
 function setupFileUpload() {
@@ -2575,7 +2668,7 @@ function renderFileList() {
 window.removeFile = function(fileId) {
   uploadedFiles = uploadedFiles.filter(file => file.id !== fileId);
   renderFileList();
-}
+};
 
 function getFileIcon(fileType) {
   if (fileType.startsWith('image/')) return 'fa-file-image';
@@ -2610,13 +2703,13 @@ window.downloadFile = async function(filename, base64Data) {
       showSnackbar('Error downloading file', 'error');
     }
   }
-}
+};
 
-window.openModal=id=>{
-  editingTicketId=id;
+window.openModal = function(id) {
+  editingTicketId = id;
   document.getElementById('modal').classList.add('show');
-  document.getElementById('modalTitle').textContent=id?'Update Ticket':'New Ticket';
-  document.getElementById('saveBtnText').textContent=id?'Update Ticket':'Save Ticket';
+  document.getElementById('modalTitle').textContent = id ? 'Update Ticket' : 'New Ticket';
+  document.getElementById('saveBtnText').textContent = id ? 'Update Ticket' : 'Save Ticket';
   
   // Reset uploaded files when opening modal
   uploadedFiles = [];
@@ -2626,19 +2719,19 @@ window.openModal=id=>{
   isSubmitting = false;
   document.getElementById('saveTicketBtn').disabled = false;
   
-  if(id){
-    supabase.from('tickets').select('*').eq('id',id).single().then(r=>{
-      if(r.data){
-        document.getElementById('date').value=r.data.date;
-        document.getElementById('locationDisplay').querySelector('span').textContent=r.data.location||'-- Select Location --';
-        document.getElementById('location').value=r.data.location||'';
-        document.getElementById('ticketId').value=r.data.ticket_id||'';
-        document.getElementById('titleDesc').value=r.data.title_description||'';
-        document.getElementById('requester').value=r.data.requester||'';
-        document.getElementById('assigned').value=r.data.assigned_to||'';
-        document.getElementById('category').value=r.data.category||'';
-        document.getElementById('statusSelect').value=r.data.status||'Pending';
-        document.getElementById('statusNote').value=r.data.status_note||'';
+  if (id) {
+    supabase.from('tickets').select('*').eq('id', id).single().then(r => {
+      if (r.data) {
+        document.getElementById('date').value = r.data.date;
+        document.getElementById('locationDisplay').querySelector('span').textContent = r.data.location || '-- Select Location --';
+        document.getElementById('location').value = r.data.location || '';
+        document.getElementById('ticketId').value = r.data.ticket_id || '';
+        document.getElementById('titleDesc').value = r.data.title_description || '';
+        document.getElementById('requester').value = r.data.requester || '';
+        document.getElementById('assigned').value = r.data.assigned_to || '';
+        document.getElementById('category').value = r.data.category || '';
+        document.getElementById('statusSelect').value = r.data.status || 'Pending';
+        document.getElementById('statusNote').value = r.data.status_note || '';
         
         // Load existing files if any
         if (r.data.files && r.data.files.length > 0) {
@@ -2646,145 +2739,181 @@ window.openModal=id=>{
           renderFileList();
         }
       }
+    }).catch(error => {
+      console.error('Error loading ticket:', error);
+      showSnackbar('Error loading ticket data', 'error');
     });
-  }else{
+  } else {
     document.getElementById('ticketForm').reset();
-    document.getElementById('date').value=new Date().toISOString().split('T')[0];
-    document.getElementById('requester').value=currentUser.name;
-    document.getElementById('locationDisplay').querySelector('span').textContent='-- Select Location --';
-    document.getElementById('location').value='';
+    document.getElementById('date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('requester').value = currentUser ? currentUser.name : '';
+    document.getElementById('locationDisplay').querySelector('span').textContent = '-- Select Location --';
+    document.getElementById('location').value = '';
   }
-}
+};
 
-window.closeModal=()=>{
+window.closeModal = function() {
   document.getElementById('modal').classList.remove('show');
   // Reset uploaded files when closing modal
   uploadedFiles = [];
   renderFileList();
-}
+};
 
-window.saveTicket=async()=>{
+window.saveTicket = async function() {
   // Prevent multiple submissions
   if (isSubmitting) {
     showSnackbar('Please wait, saving in progress...', 'warning');
     return;
   }
   
-  const f=document.getElementById('ticketForm');if(!f.checkValidity()){f.reportValidity();return}
+  const f = document.getElementById('ticketForm');
+  if (!f.checkValidity()) {
+    f.reportValidity();
+    return;
+  }
   
   // Set submission flag and disable button
   isSubmitting = true;
   document.getElementById('saveTicketBtn').disabled = true;
   document.getElementById('saveBtnText').textContent = 'Saving...';
   
-  // Convert files to Base64 if any
-  let fileData = [];
-  if (uploadedFiles.length > 0) {
-    showSnackbar('Processing files...', 'warning');
-    
-    for (const fileObj of uploadedFiles) {
-      if (fileObj.file) {
-        // This is a new file, convert to Base64
-        try {
-          const base64Data = await fileToBase64(fileObj.file);
-          fileData.push({
-            name: fileObj.name,
-            size: fileObj.size,
-            type: fileObj.file.type,
-            data: base64Data
-          });
-        } catch (error) {
-          console.error('Error converting file to Base64:', error);
-          showSnackbar('Error processing files', 'error');
-          // Reset submission flag on error
-          isSubmitting = false;
-          document.getElementById('saveTicketBtn').disabled = false;
-          document.getElementById('saveBtnText').textContent = editingTicketId?'Update Ticket':'Save Ticket';
-          return;
+  try {
+    // Convert files to Base64 if any
+    let fileData = [];
+    if (uploadedFiles.length > 0) {
+      showSnackbar('Processing files...', 'warning');
+      
+      for (const fileObj of uploadedFiles) {
+        if (fileObj.file) {
+          // This is a new file, convert to Base64
+          try {
+            const base64Data = await fileToBase64(fileObj.file);
+            fileData.push({
+              name: fileObj.name,
+              size: fileObj.size,
+              type: fileObj.file.type,
+              data: base64Data
+            });
+          } catch (error) {
+            console.error('Error converting file to Base64:', error);
+            showSnackbar('Error processing files', 'error');
+            // Reset submission flag on error
+            isSubmitting = false;
+            document.getElementById('saveTicketBtn').disabled = false;
+            document.getElementById('saveBtnText').textContent = editingTicketId ? 'Update Ticket' : 'Save Ticket';
+            return;
+          }
+        } else {
+          // This is an existing file (from editing)
+          fileData.push(fileObj);
         }
-      } else {
-        // This is an existing file (from editing)
-        fileData.push(fileObj);
       }
     }
-  }
-  
-  const d={
-    date:document.getElementById('date').value,
-    location:document.getElementById('location').value,
-    ticket_id:document.getElementById('ticketId').value||null,
-    title_description:document.getElementById('titleDesc').value,
-    requester:document.getElementById('requester').value,
-    assigned_to:document.getElementById('assigned').value||null,
-    category:document.getElementById('category').value,
-    status:document.getElementById('statusSelect').value,
-    status_note:document.getElementById('statusNote').value||null,
-    created_by:currentUser.username,
-    files: fileData
-  };
-  
-  try{
+    
+    const d = {
+      date: document.getElementById('date').value,
+      location: document.getElementById('location').value,
+      ticket_id: document.getElementById('ticketId').value || null,
+      title_description: document.getElementById('titleDesc').value,
+      requester: document.getElementById('requester').value,
+      assigned_to: document.getElementById('assigned').value || null,
+      category: document.getElementById('category').value,
+      status: document.getElementById('statusSelect').value,
+      status_note: document.getElementById('statusNote').value || null,
+      created_by: currentUser.username,
+      files: fileData
+    };
+    
     let result;
-    if(editingTicketId){
-      result = await supabase.from('tickets').update(d).eq('id',editingTicketId);
+    if (editingTicketId) {
+      result = await supabase.from('tickets').update(d).eq('id', editingTicketId);
     } else {
       result = await supabase.from('tickets').insert([d]);
     }
     
-    if(result.error) {
+    if (result.error) {
       console.error('Supabase error:', result.error);
       showSnackbar('Database error: ' + result.error.message, 'error');
       // Reset submission flag on error
       isSubmitting = false;
       document.getElementById('saveTicketBtn').disabled = false;
-      document.getElementById('saveBtnText').textContent = editingTicketId?'Update Ticket':'Save Ticket';
+      document.getElementById('saveBtnText').textContent = editingTicketId ? 'Update Ticket' : 'Save Ticket';
       return;
     }
     
-  showSnackbar(editingTicketId?'Ticket updated successfully!':'Ticket created successfully!','success');
-    closeModal();loadTickets();loadUsersAndLocations();
-  } catch(e) {
+    showSnackbar(editingTicketId ? 'Ticket updated successfully!' : 'Ticket created successfully!', 'success');
+    closeModal();
+    await loadTickets();
+    await loadUsersAndLocations();
+  } catch (e) {
     console.error('Unexpected error:', e);
-    showSnackbar('Unexpected error: ' + e.message,'error');
+    showSnackbar('Unexpected error: ' + e.message, 'error');
     // Reset submission flag on error
     isSubmitting = false;
     document.getElementById('saveTicketBtn').disabled = false;
-    document.getElementById('saveBtnText').textContent = editingTicketId?'Update Ticket':'Save Ticket';
+    document.getElementById('saveBtnText').textContent = editingTicketId ? 'Update Ticket' : 'Save Ticket';
   }
-}
+};
 
-window.deleteTicket=async id=>{
+window.deleteTicket = async function(id) {
   const confirmed = await showConfirm(
     'Are you sure you want to delete this ticket permanently?', 
     'Delete Ticket', 
     true
   );
   
-  if(!confirmed) return;
+  if (!confirmed) return;
   
-  await supabase.from('tickets').delete().eq('id',id);
-  showSnackbar('Ticket deleted successfully','success');
-  loadTickets();loadUsersAndLocations();
-}
+  try {
+    const { error } = await supabase.from('tickets').delete().eq('id', id);
+    if (error) throw error;
+    showSnackbar('Ticket deleted successfully', 'success');
+    await loadTickets();
+    await loadUsersAndLocations();
+  } catch (error) {
+    console.error('Error deleting ticket:', error);
+    showSnackbar('Error deleting ticket: ' + error.message, 'error');
+  }
+};
 
-async function loadTickets(){
+async function loadTickets() {
   showLoader();
-  let q=supabase.from('tickets').select('*',{count:'exact'}).order('date',{ascending:false});
-  if(currentUser.role!=='admin') q=q.eq('created_by',currentUser.username);
-  const {data:tickets,count}=await q;
-  allTickets=tickets||[];filteredTickets=[...allTickets];
-  totalPages=Math.ceil(allTickets.length/itemsPerPage);
-  applyFilters();hideLoader();
+  try {
+    let q = supabase.from('tickets').select('*', { count: 'exact' }).order('date', { ascending: false });
+    if (currentUser.role !== 'admin') q = q.eq('created_by', currentUser.username);
+    
+    const { data: tickets, count, error } = await q;
+    
+    if (error) throw error;
+    
+    allTickets = tickets || [];
+    filteredTickets = [...allTickets];
+    totalPages = Math.ceil(allTickets.length / itemsPerPage);
+    applyFilters();
+  } catch (error) {
+    console.error('Error loading tickets:', error);
+    showSnackbar('Error loading tickets: ' + error.message, 'error');
+    allTickets = [];
+    filteredTickets = [];
+  } finally {
+    hideLoader();
+  }
 }
 
-function renderTable(){
-  const tb=document.getElementById('tableBody'),start=(currentPage-1)*itemsPerPage,end=start+itemsPerPage;
-  tb.innerHTML='';filteredTickets.slice(start,end).forEach(t=>{
-    const lines=(t.title_description||'').split('\n'),title=lines[0]||'(No title)',desc=lines.slice(1).join('\n');
-    const sc=`status-${t.status.toLowerCase().replace(' ','-')}`;
-    const row=tb.insertRow();
+function renderTable() {
+  const tb = document.getElementById('tableBody');
+  const start = (currentPage - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  tb.innerHTML = '';
+  
+  filteredTickets.slice(start, end).forEach(t => {
+    const lines = (t.title_description || '').split('\n');
+    const title = lines[0] || '(No title)';
+    const desc = lines.slice(1).join('\n');
+    const sc = `status-${t.status.toLowerCase().replace(' ', '-')}`;
+    const row = tb.insertRow();
     
-    // Create file links - NOW WITH DOWNLOAD CONFIRMATION
+    // Create file links
     let fileLinks = 'N/A';
     if (t.files && t.files.length > 0) {
       fileLinks = t.files.map(file => 
@@ -2794,10 +2923,10 @@ function renderTable(){
       ).join('');
     }
     
-    row.innerHTML=`<td>${t.date}</td><td>${t.location||'-'}</td><td>${t.ticket_id||'-'}</td>
-      <td><div class="title-main">${title}</div>${desc?`<div class="title-desc">${desc}</div>`:''}</td>
-      <td>${t.requester}</td><td>${t.assigned_to||'-'}</td><td>${t.category}</td>
-      <td><span class="status-badge ${sc}">${t.status}</span>${t.status_note?`<div class="status-note">${t.status_note}</div>`:''}</td>
+    row.innerHTML = `<td>${t.date}</td><td>${t.location || '-'}</td><td>${t.ticket_id || '-'}</td>
+      <td><div class="title-main">${title}</div>${desc ? `<div class="title-desc">${desc}</div>` : ''}</td>
+      <td>${t.requester}</td><td>${t.assigned_to || '-'}</td><td>${t.category}</td>
+      <td><span class="status-badge ${sc}">${t.status}</span>${t.status_note ? `<div class="status-note">${t.status_note}</div>` : ''}</td>
       <td><div class="attached-files">${fileLinks}</div></td>
       <td class="actions">
         <button class="action-btn update" onclick="openModal(${t.id})">Update</button>
@@ -2805,162 +2934,238 @@ function renderTable(){
           <i class="fa fa-trash"></i>
         </button>&nbsp;&nbsp;
       </td>`;
-
   });
-  if(!filteredTickets.slice(start,end).length)tb.innerHTML='<tr><td colspan="10" style="padding:1.5rem;text-align:center;color:var(--muted);font-size:11px">No tickets found</td></tr>';
-}
-
-function updatePagination(){
-  const start=(currentPage-1)*itemsPerPage+1,end=Math.min(currentPage*itemsPerPage,filteredTickets.length);
-  document.getElementById('paginationInfo').textContent=`Showing ${start}-${end} of ${filteredTickets.length}`;
-  document.getElementById('firstPage').disabled=currentPage===1;
-  document.getElementById('prevPage').disabled=currentPage===1;
-  document.getElementById('nextPage').disabled=currentPage===totalPages;
-  document.getElementById('lastPage').disabled=currentPage===totalPages;
-  const pn=document.getElementById('pageNumbers');pn.innerHTML='';
-  for(let i=1;i<=totalPages;i++){
-    const b=document.createElement('button');b.className='pagination-btn'+(i===currentPage?' active':'');
-    b.textContent=i;b.onclick=()=>goToPage(i);pn.appendChild(b);
+  
+  if (!filteredTickets.slice(start, end).length) {
+    tb.innerHTML = '<tr><td colspan="10" style="padding:1.5rem;text-align:center;color:var(--muted);font-size:11px">No tickets found</td></tr>';
   }
 }
 
-window.goToPage=p=>{if(p<1||p>totalPages)return;currentPage=p;renderTable();updatePagination()}
-
-document.getElementById('searchInput').addEventListener('input',()=>{currentPage=1;applyFilters()});
-document.getElementById('statusFilter').addEventListener('change',applyFilters);
-document.getElementById('userFilter').addEventListener('change',applyFilters);
-
-async function loadUsers(){
-  const {data}=await supabase.from('users').select('*').order('created_at',{ascending:false});
-  const tb=document.getElementById('usersTableBody');tb.innerHTML='';
-  data?.forEach(u=>{
-    const r=tb.insertRow();
-    r.innerHTML=`<td>${u.username}</td><td>${u.name}</td>
-      <td><span class="status-badge ${u.role==='admin'?'status-in-progress':'status-pending'}">${u.role}</span></td>
-      <td>${new Date(u.created_at).toLocaleDateString()}</td>
-      <td class="actions">
-        <button class="action-btn edit" onclick="editUser(${u.id})">Edit</button>
-        ${u.username!=='admin'?`<button class="action-btn delete" onclick="deleteUser(${u.id})">X</button>`:''}
-      </td>`;
-  });
+function updatePagination() {
+  const start = (currentPage - 1) * itemsPerPage + 1;
+  const end = Math.min(currentPage * itemsPerPage, filteredTickets.length);
+  document.getElementById('paginationInfo').textContent = `Showing ${start}-${end} of ${filteredTickets.length}`;
+  document.getElementById('firstPage').disabled = currentPage === 1;
+  document.getElementById('prevPage').disabled = currentPage === 1;
+  document.getElementById('nextPage').disabled = currentPage === totalPages;
+  document.getElementById('lastPage').disabled = currentPage === totalPages;
+  
+  const pn = document.getElementById('pageNumbers');
+  pn.innerHTML = '';
+  for (let i = 1; i <= totalPages; i++) {
+    const b = document.createElement('button');
+    b.className = 'pagination-btn' + (i === currentPage ? ' active' : '');
+    b.textContent = i;
+    b.onclick = () => goToPage(i);
+    pn.appendChild(b);
+  }
 }
 
-window.openUserManagementModal=()=>{document.getElementById('userManagementModal').classList.add('show');loadUsers()}
-window.closeUserManagementModal=()=>{document.getElementById('userManagementModal').classList.remove('show')}
+window.goToPage = function(p) {
+  if (p < 1 || p > totalPages) return;
+  currentPage = p;
+  renderTable();
+  updatePagination();
+};
 
-window.openUserModal=id=>{
-  editingUserId=id;
+document.getElementById('searchInput').addEventListener('input', () => { currentPage = 1; applyFilters(); });
+document.getElementById('statusFilter').addEventListener('change', applyFilters);
+document.getElementById('userFilter').addEventListener('change', applyFilters);
+
+async function loadUsers() {
+  try {
+    const { data, error } = await supabase.from('users').select('*').order('created_at', { ascending: false });
+    if (error) throw error;
+    
+    const tb = document.getElementById('usersTableBody');
+    tb.innerHTML = '';
+    
+    data?.forEach(u => {
+      const r = tb.insertRow();
+      r.innerHTML = `<td>${u.username}</td><td>${u.name}</td>
+        <td><span class="status-badge ${u.role === 'admin' ? 'status-in-progress' : 'status-pending'}">${u.role}</span></td>
+        <td>${new Date(u.created_at).toLocaleDateString()}</td>
+        <td class="actions">
+          <button class="action-btn edit" onclick="editUser(${u.id})">Edit</button>
+          ${u.username !== 'admin' ? `<button class="action-btn delete" onclick="deleteUser(${u.id})">X</button>` : ''}
+        </td>`;
+    });
+  } catch (error) {
+    console.error('Error loading users:', error);
+    showSnackbar('Error loading users: ' + error.message, 'error');
+  }
+}
+
+window.openUserManagementModal = function() {
+  document.getElementById('userManagementModal').classList.add('show');
+  loadUsers();
+};
+
+window.closeUserManagementModal = function() {
+  document.getElementById('userManagementModal').classList.remove('show');
+};
+
+window.openUserModal = function(id) {
+  editingUserId = id;
   document.getElementById('userModal').classList.add('show');
-  document.getElementById('userModalTitle').textContent=id?'Edit User':'Add User';
-  document.getElementById('saveUserBtnText').textContent=id?'Update User':'Save User';
+  document.getElementById('userModalTitle').textContent = id ? 'Edit User' : 'Add User';
+  document.getElementById('saveUserBtnText').textContent = id ? 'Update User' : 'Save User';
   
   // Reset submission flag when opening user modal
   isSubmitting = false;
   document.getElementById('saveUserBtn').disabled = false;
   
-  if(id){
-    supabase.from('users').select('*').eq('id',id).single().then(r=>{
-      if(r.data){
-        document.getElementById('newUsername').value=r.data.username;
-        document.getElementById('newName').value=r.data.name;
-        document.getElementById('newRole').value=r.data.role;
-        document.getElementById('newPassword').required=false;
-        document.getElementById('newPassword').placeholder='Leave blank to keep current';
+  if (id) {
+    supabase.from('users').select('*').eq('id', id).single().then(r => {
+      if (r.data) {
+        document.getElementById('newUsername').value = r.data.username;
+        document.getElementById('newName').value = r.data.name;
+        document.getElementById('newRole').value = r.data.role;
+        document.getElementById('newPassword').required = false;
+        document.getElementById('newPassword').placeholder = 'Leave blank to keep current';
       }
+    }).catch(error => {
+      console.error('Error loading user:', error);
+      showSnackbar('Error loading user data', 'error');
     });
-  }else{
+  } else {
     document.getElementById('userForm').reset();
-    document.getElementById('newPassword').required=true;
-    document.getElementById('newPassword').placeholder='';
+    document.getElementById('newPassword').required = true;
+    document.getElementById('newPassword').placeholder = '';
   }
-}
+};
 
-window.closeUserModal=()=>{document.getElementById('userModal').classList.remove('show');editingUserId=null}
+window.closeUserModal = function() {
+  document.getElementById('userModal').classList.remove('show');
+  editingUserId = null;
+};
 
-window.saveUser=async()=>{
+window.saveUser = async function() {
   // Prevent multiple submissions for user form too
   if (isSubmitting) {
     showSnackbar('Please wait, saving in progress...', 'warning');
     return;
   }
   
-  const f=document.getElementById('userForm');
-  if(!f.checkValidity()){f.reportValidity();return}
-  const username=document.getElementById('newUsername').value.trim();
-  const name=document.getElementById('newName').value.trim();
-  const password=document.getElementById('newPassword').value;
-  const role=document.getElementById('newRole').value;
+  const f = document.getElementById('userForm');
+  if (!f.checkValidity()) {
+    f.reportValidity();
+    return;
+  }
+  
+  const username = document.getElementById('newUsername').value.trim();
+  const name = document.getElementById('newName').value.trim();
+  const password = document.getElementById('newPassword').value;
+  const role = document.getElementById('newRole').value;
   
   // Set submission flag and disable button
   isSubmitting = true;
   document.getElementById('saveUserBtn').disabled = true;
   document.getElementById('saveUserBtnText').textContent = 'Saving...';
   
-  if(!editingUserId){
-    const {data:existingUsers}=await supabase.from('users').select('username').eq('username',username);
-    if(existingUsers&&existingUsers.length>0){
-      showSnackbar('Username already exists','error');
-      // Reset submission flag on error
-      isSubmitting = false;
-      document.getElementById('saveUserBtn').disabled = false;
-      document.getElementById('saveUserBtnText').textContent = editingUserId?'Update User':'Save User';
-      return;
+  try {
+    if (!editingUserId) {
+      // Check if username already exists
+      const { data: existingUsers, error: checkError } = await supabase.from('users').select('username').eq('username', username);
+      if (checkError) throw checkError;
+      
+      if (existingUsers && existingUsers.length > 0) {
+        showSnackbar('Username already exists', 'error');
+        // Reset submission flag on error
+        isSubmitting = false;
+        document.getElementById('saveUserBtn').disabled = false;
+        document.getElementById('saveUserBtnText').textContent = editingUserId ? 'Update User' : 'Save User';
+        return;
+      }
     }
-  }
-  
-  try{
+    
     let result;
-    if(editingUserId){
-      const updateData={username,name,role};
-      if(password)updateData.password=password;
-      result=await supabase.from('users').update(updateData).eq('id',editingUserId);
-    }else{
-      result=await supabase.from('users').insert([{username,name,password,role}]);
+    if (editingUserId) {
+      const updateData = { username, name, role };
+      if (password) updateData.password = password;
+      result = await supabase.from('users').update(updateData).eq('id', editingUserId);
+    } else {
+      result = await supabase.from('users').insert([{ username, name, password, role }]);
     }
-    if(result.error)throw result.error;
-    showSnackbar(editingUserId?'User updated successfully!':'User created successfully!','success');
-    closeUserModal();loadUsers();loadUsersAndLocations();
-  }catch(e){
-    showSnackbar('Error: '+e.message,'error');
+    
+    if (result.error) throw result.error;
+    
+    showSnackbar(editingUserId ? 'User updated successfully!' : 'User created successfully!', 'success');
+    closeUserModal();
+    await loadUsers();
+    await loadUsersAndLocations();
+  } catch (e) {
+    console.error('Error saving user:', e);
+    showSnackbar('Error: ' + e.message, 'error');
     // Reset submission flag on error
     isSubmitting = false;
     document.getElementById('saveUserBtn').disabled = false;
-    document.getElementById('saveUserBtnText').textContent = editingUserId?'Update User':'Save User';
+    document.getElementById('saveUserBtnText').textContent = editingUserId ? 'Update User' : 'Save User';
   }
-}
+};
 
-window.editUser=id=>openUserModal(id);
+window.editUser = function(id) {
+  openUserModal(id);
+};
 
-window.deleteUser=async id=>{
+window.deleteUser = async function(id) {
   const confirmed = await showConfirm(
     'Are you sure you want to delete this user?', 
     'Delete User', 
     true
   );
   
-  if(!confirmed) return;
+  if (!confirmed) return;
   
-  await supabase.from('users').delete().eq('id',id);
-  showSnackbar('User deleted successfully','success');
-  loadUsers();loadUsersAndLocations();
-}
+  try {
+    const { error } = await supabase.from('users').delete().eq('id', id);
+    if (error) throw error;
+    showSnackbar('User deleted successfully', 'success');
+    await loadUsers();
+    await loadUsersAndLocations();
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    showSnackbar('Error deleting user: ' + error.message, 'error');
+  }
+};
 
-function exportToExcel(type='all'){
-  let data=type==='all'?allTickets:allTickets.filter(t=>t.status.toLowerCase().includes(type.replace('-',' ')));
-  if(!data.length)return showSnackbar('No data to export','error');
-  const ws=XLSX.utils.json_to_sheet(data.map(t=>({
-    Date:t.date,Location:t.location||'',ID:t.ticket_id||'',Title:t.title_description,
-    Requester:t.requester,'Request To':t.assigned_to||'',Category:t.category,Status:t.status,Note:t.status_note||''
-  })));
-  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Tickets');
-  XLSX.writeFile(wb,`Helpdesk_${type}_${new Date().toISOString().slice(0,10)}.xlsx`);
-  showSnackbar('Data exported successfully','success');
+function exportToExcel(type = 'all') {
+  let data = type === 'all' ? allTickets : allTickets.filter(t => t.status.toLowerCase().includes(type.replace('-', ' ')));
+  if (!data.length) {
+    showSnackbar('No data to export', 'error');
+    return;
+  }
+  
+  try {
+    const ws = XLSX.utils.json_to_sheet(data.map(t => ({
+      Date: t.date,
+      Location: t.location || '',
+      ID: t.ticket_id || '',
+      Title: t.title_description,
+      Requester: t.requester,
+      'Request To': t.assigned_to || '',
+      Category: t.category,
+      Status: t.status,
+      Note: t.status_note || ''
+    })));
+    
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Tickets');
+    XLSX.writeFile(wb, `Helpdesk_${type}_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    showSnackbar('Data exported successfully', 'success');
+  } catch (error) {
+    console.error('Error exporting to Excel:', error);
+    showSnackbar('Error exporting data', 'error');
+  }
 }
 
 // FIXED: Print function now displays as a proper table
-function handlePrint(type='all'){
-  let data=type==='all'?allTickets:allTickets.filter(t=>t.status.toLowerCase().includes(type.replace('-',' ')));
-  if(!data.length)return showSnackbar('No data to print','error');
+function handlePrint(type = 'all') {
+  let data = type === 'all' ? allTickets : allTickets.filter(t => t.status.toLowerCase().includes(type.replace('-', ' ')));
+  if (!data.length) {
+    showSnackbar('No data to print', 'error');
+    return;
+  }
   
   // Create a printable HTML table
   let printContent = `
@@ -3059,13 +3264,32 @@ function setupMobileMenu() {
   });
 }
 
-document.addEventListener('DOMContentLoaded',()=>{
-  setupCustomLocationDropdown();setupCustomLocationFilter();setupTheme();setupDropdowns();setupSorting();checkLogin();
-  setupMobileMenu(); // Initialize mobile menu functionality
-  setupFileUpload(); // Initialize file upload functionality
+// Initialize everything when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  // Only initialize if Supabase is available
+  if (supabase) {
+    setupCustomLocationDropdown();
+    setupCustomLocationFilter();
+    setupTheme();
+    setupDropdowns();
+    setupSorting();
+    checkLogin();
+    setupMobileMenu();
+    setupFileUpload();
+    
+    // Subscribe to real-time updates
+    try {
+      supabase.channel('tickets')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'tickets' }, () => {
+          loadTickets();
+          loadUsersAndLocations();
+        })
+        .subscribe();
+    } catch (error) {
+      console.error('Error setting up real-time subscription:', error);
+    }
+  }
 });
-
-supabase.channel('tickets').on('postgres_changes',{event:'*',schema:'public',table:'tickets'},()=>{loadTickets();loadUsersAndLocations()}).subscribe();
 </script>
 </body>
 </html>
