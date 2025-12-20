@@ -4,13 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Helpdesk Monitoring</title>
-<!-- CSP Meta Tag to allow external resources -->
+<!-- FIXED CSP Meta Tag with WebSocket support -->
 <meta http-equiv="Content-Security-Policy" 
       content="default-src 'self' https://crdevgfrptdhhgqnpqzk.supabase.co;
                style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com https://cdnjs.cloudflare.com;
                script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com;
                font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com;
-               connect-src 'self' https://crdevgfrptdhhgqnpqzk.supabase.co https://cdn.jsdelivr.net;
+               connect-src 'self' https://crdevgfrptdhhgqnpqzk.supabase.co wss://crdevgfrptdhhgqnpqzk.supabase.co https://cdn.jsdelivr.net;
                img-src 'self' data:;">
 <link rel="icon" href="icon2.png" type="image/png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -1033,7 +1033,6 @@ tr:last-child td {
   width: 100px;
   height: 80px;
   object-fit: contain;
- 
 }
 
 .login-container h3 {
@@ -1659,8 +1658,8 @@ td:nth-child(7) { /* Category column */
     <h3><i class="fas fa-headset"></i> F.O Helpdesk Monitoring</h3>
     <form id="loginForm" class="login-form">
       <div class="form-group">
-        <label for="username">Username</label>
-        <input type="text" id="username" required placeholder="Enter your username">
+        <label for="email">Email</label>
+        <input type="email" id="email" required placeholder="Enter your email">
       </div>
       <div class="form-group">
         <label for="password">Password</label>
@@ -2039,6 +2038,7 @@ td:nth-child(7) { /* Category column */
         <table>
           <thead>
             <tr>
+              <th>Email</th>
               <th>Username</th>
               <th>Name</th>
               <th>Role</th>
@@ -2064,16 +2064,20 @@ td:nth-child(7) { /* Category column */
       <div class="modal-body">
         <div class="form-grid">
           <div class="form-field full-width">
+            <label>Email <span class="required">*</span></label>
+            <input type="email" id="newEmail" required placeholder="Enter email">
+          </div>
+          <div class="form-field full-width">
+            <label>Password <span class="required">*</span></label>
+            <input type="password" id="newPassword" required placeholder="Enter password">
+          </div>
+          <div class="form-field full-width">
             <label>Username <span class="required">*</span></label>
             <input type="text" id="newUsername" required placeholder="Enter username">
           </div>
           <div class="form-field full-width">
             <label>Name <span class="required">*</span></label>
             <input type="text" id="newName" required placeholder="Enter full name">
-          </div>
-          <div class="form-field full-width">
-            <label>Password <span class="required">*</span></label>
-            <input type="password" id="newPassword" required placeholder="Enter password">
           </div>
           <div class="form-field full-width">
             <label>Role <span class="required">*</span></label>
@@ -2147,10 +2151,24 @@ td:nth-child(7) { /* Category column */
 
 <div id="snackbar" class="snackbar"></div>
 
-<!-- FIXED: JavaScript with corrected Supabase initialization -->
 <script>
+// ============================================
+// FIXED: Supabase Client Initialization
+// ============================================
+const SUPABASE_URL = 'https://crdevgfrptdhhgqnpqzk.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_nLYTInAlXEqxy6YbMIxKpw_ZacBlomD';
+
+// Initialize Supabase client - FIXED: Use window.supabase directly
+let supabaseClient;
+
+// Initialize Supabase when the script loads
+try {
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+} catch (error) {
+    console.error('Failed to initialize Supabase client:', error);
+}
+
 // Global variables
-let supabase;
 let currentUser = null;
 let editingTicketId = null;
 let editingUserId = null;
@@ -2172,25 +2190,6 @@ let currentFileIndex = 0;
 
 // Form submission flag to prevent multiple submissions
 let isSubmitting = false;
-
-// Initialize Supabase with proper error handling
-function initializeSupabase() {
-  // Check if supabase is already initialized
-  if (window.supabase && !supabase) {
-    try {
-      supabase = window.supabase.createClient(
-        'https://crdevgfrptdhhgqnpqzk.supabase.co',
-        'sb_publishable_nLYTInAlXEqxy6YbMIxKpw_ZacBlomD'
-      );
-      console.log('Supabase client initialized successfully');
-      return true;
-    } catch (error) {
-      console.error('Failed to initialize Supabase:', error);
-      return false;
-    }
-  }
-  return !!supabase;
-}
 
 // File to Base64 conversion function
 function fileToBase64(file) {
@@ -2329,7 +2328,7 @@ function populateUserFilter() {
   sel.innerHTML = '<option value="">All Users</option>';
   allUsers.forEach(u => {
     const opt = document.createElement('option');
-    opt.value = u.username;
+    opt.value = u.id;
     opt.textContent = u.name;
     sel.appendChild(opt);
   });
@@ -2418,10 +2417,34 @@ function showConfirm(message, title = 'Confirmation', dangerAction = false) {
 }
 
 async function checkLogin() {
-  const u = localStorage.getItem('helpdeskUser');
-  if (u) {
+  if (!supabaseClient) {
+    console.error('Supabase client not initialized');
+    showSnackbar('Connection error. Please refresh the page.', 'error');
+    return;
+  }
+  
+  const { data: { session }, error } = await supabaseClient.auth.getSession();
+  
+  if (session && session.user) {
     try {
-      currentUser = JSON.parse(u);
+      // Get user profile
+      const { data: profile, error: profileError } = await supabaseClient
+        .from('profiles')
+        .select('*')
+        .eq('id', session.user.id)
+        .single();
+      
+      if (profileError) {
+        console.error('Profile error:', profileError);
+        showSnackbar('Error loading user profile', 'error');
+        return;
+      }
+      
+      currentUser = {
+        ...session.user,
+        ...profile
+      };
+      
       document.getElementById('currentUser').textContent = currentUser.name;
       document.getElementById('currentUserDesktop').textContent = currentUser.name;
       document.getElementById('loginPage').style.display = 'none';
@@ -2438,7 +2461,7 @@ async function checkLogin() {
     } catch (error) {
       console.error('Error in checkLogin:', error);
       showSnackbar('Session expired. Please login again.', 'error');
-      localStorage.removeItem('helpdeskUser');
+      await supabaseClient.auth.signOut();
       document.getElementById('loginPage').style.display = 'flex';
       document.getElementById('dashboard').style.display = 'none';
     }
@@ -2446,10 +2469,12 @@ async function checkLogin() {
 }
 
 async function loadUsersAndLocations() {
+  if (!supabaseClient) return;
+  
   try {
-    const { data: users, error } = await supabase.from('users').select('username, name');
+    const { data: profiles, error } = await supabaseClient.from('profiles').select('*');
     if (error) throw error;
-    allUsers = users || [];
+    allUsers = profiles || [];
     populateUserFilter();
   } catch (error) {
     console.error('Error loading users:', error);
@@ -2457,33 +2482,42 @@ async function loadUsersAndLocations() {
   }
 }
 
-// Login form submission
+// ============================================
+// LOGIN FUNCTIONALITY (Supabase Auth)
+// ============================================
 document.getElementById('loginForm').addEventListener('submit', async e => {
   e.preventDefault();
-  const u = document.getElementById('username').value.trim();
-  const p = document.getElementById('password').value.trim();
   
-  if (!u || !p) {
-    showSnackbar('Please enter username and password', 'error');
+  if (!supabaseClient) {
+    showSnackbar('Connection error. Please refresh the page.', 'error');
+    return;
+  }
+  
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value.trim();
+  
+  if (!email || !password) {
+    showSnackbar('Please enter email and password', 'error');
     return;
   }
   
   try {
-    const { data, error } = await supabase.from('users').select('*').eq('username', u).eq('password', p);
+    const { data, error } = await supabaseClient.auth.signInWithPassword({
+      email: email,
+      password: password
+    });
     
     if (error) {
       console.error('Login error:', error);
-      showSnackbar('Database error: ' + error.message, 'error');
+      showSnackbar('Invalid credentials: ' + error.message, 'error');
       return;
     }
     
-    if (!data || data.length === 0) {
+    if (!data.user) {
       showSnackbar('Invalid credentials', 'error');
       return;
     }
     
-    currentUser = data[0];
-    localStorage.setItem('helpdeskUser', JSON.stringify(currentUser));
     await checkLogin();
     
   } catch (err) {
@@ -2495,6 +2529,9 @@ document.getElementById('loginForm').addEventListener('submit', async e => {
 window.logout = async () => {
   const confirmed = await showConfirm('Are you sure you want to log out?', 'Logout Confirmation');
   if (confirmed) {
+    if (supabaseClient) {
+      await supabaseClient.auth.signOut();
+    }
     localStorage.removeItem('helpdeskUser');
     location.reload();
   }
@@ -2531,6 +2568,11 @@ window.closeChangePasswordModal = function() {
 };
 
 window.changePassword = async function() {
+  if (!supabaseClient) {
+    showSnackbar('Connection error. Please refresh the page.', 'error');
+    return;
+  }
+  
   const form = document.getElementById('changePasswordForm');
   if (!form.checkValidity()) {
     form.reportValidity();
@@ -2548,21 +2590,13 @@ window.changePassword = async function() {
   }
   
   try {
-    // Verify current password
-    const { data, error } = await supabase.from('users').select('*').eq('username', currentUser.username).eq('password', currentPassword);
-    if (error || !data || data.length === 0) {
-      showSnackbar('Current password is incorrect', 'error');
-      return;
-    }
+    // Update password using Supabase Auth
+    const { error } = await supabaseClient.auth.updateUser({
+      password: newPassword
+    });
     
-    // Update password
-    const { error: updateError } = await supabase
-      .from('users')
-      .update({ password: newPassword })
-      .eq('username', currentUser.username);
-    
-    if (updateError) {
-      showSnackbar('Error updating password: ' + updateError.message, 'error');
+    if (error) {
+      showSnackbar('Error updating password: ' + error.message, 'error');
       return;
     }
     
@@ -2750,8 +2784,8 @@ window.openModal = function(id) {
   const saveBtn = document.getElementById('saveTicketBtn');
   if (saveBtn) saveBtn.disabled = false;
   
-  if (id && supabase) {
-    supabase.from('tickets').select('*').eq('id', id).single().then(r => {
+  if (id && supabaseClient) {
+    supabaseClient.from('tickets').select('*').eq('id', id).single().then(r => {
       if (r.data) {
         document.getElementById('date').value = r.data.date;
         const locationDisplay = document.getElementById('locationDisplay');
@@ -2797,6 +2831,11 @@ window.closeModal = function() {
 };
 
 window.saveTicket = async function() {
+  if (!supabaseClient) {
+    showSnackbar('Connection error. Please refresh the page.', 'error');
+    return;
+  }
+  
   // Prevent multiple submissions
   if (isSubmitting) {
     showSnackbar('Please wait, saving in progress...', 'warning');
@@ -2860,15 +2899,15 @@ window.saveTicket = async function() {
       category: document.getElementById('category').value,
       status: document.getElementById('statusSelect').value,
       status_note: document.getElementById('statusNote').value || null,
-      created_by: currentUser.username,
+      created_by: currentUser.id,
       files: fileData
     };
     
     let result;
     if (editingTicketId) {
-      result = await supabase.from('tickets').update(d).eq('id', editingTicketId);
+      result = await supabaseClient.from('tickets').update(d).eq('id', editingTicketId);
     } else {
-      result = await supabase.from('tickets').insert([d]);
+      result = await supabaseClient.from('tickets').insert([d]);
     }
     
     if (result.error) {
@@ -2896,6 +2935,11 @@ window.saveTicket = async function() {
 };
 
 window.deleteTicket = async function(id) {
+  if (!supabaseClient) {
+    showSnackbar('Connection error. Please refresh the page.', 'error');
+    return;
+  }
+  
   const confirmed = await showConfirm(
     'Are you sure you want to delete this ticket permanently?', 
     'Delete Ticket', 
@@ -2905,7 +2949,7 @@ window.deleteTicket = async function(id) {
   if (!confirmed) return;
   
   try {
-    const { error } = await supabase.from('tickets').delete().eq('id', id);
+    const { error } = await supabaseClient.from('tickets').delete().eq('id', id);
     if (error) throw error;
     showSnackbar('Ticket deleted successfully', 'success');
     await loadTickets();
@@ -2917,10 +2961,12 @@ window.deleteTicket = async function(id) {
 };
 
 async function loadTickets() {
+  if (!supabaseClient) return;
+  
   showLoader();
   try {
-    let q = supabase.from('tickets').select('*', { count: 'exact' }).order('date', { ascending: false });
-    if (currentUser.role !== 'admin') q = q.eq('created_by', currentUser.username);
+    let q = supabaseClient.from('tickets').select('*', { count: 'exact' }).order('date', { ascending: false });
+    if (currentUser.role !== 'admin') q = q.eq('created_by', currentUser.id);
     
     const { data: tickets, count, error } = await q;
     
@@ -3034,8 +3080,21 @@ if (userFilter) {
 }
 
 async function loadUsers() {
+  if (!supabaseClient) return;
+  
   try {
-    const { data, error } = await supabase.from('users').select('*').order('created_at', { ascending: false });
+    // Get all profiles with their auth users data
+    const { data: profiles, error } = await supabaseClient
+      .from('profiles')
+      .select(`
+        *,
+        auth_users:auth.users (
+          email,
+          created_at
+        )
+      `)
+      .order('created_at', { ascending: false });
+    
     if (error) throw error;
     
     const tb = document.getElementById('usersTableBody');
@@ -3043,14 +3102,17 @@ async function loadUsers() {
     
     tb.innerHTML = '';
     
-    data?.forEach(u => {
+    profiles?.forEach(p => {
       const r = tb.insertRow();
-      r.innerHTML = `<td>${u.username}</td><td>${u.name}</td>
-        <td><span class="status-badge ${u.role === 'admin' ? 'status-in-progress' : 'status-pending'}">${u.role}</span></td>
-        <td>${new Date(u.created_at).toLocaleDateString()}</td>
+      const email = p.auth_users?.[0]?.email || 'N/A';
+      const createdAt = p.auth_users?.[0]?.created_at || p.created_at;
+      
+      r.innerHTML = `<td>${email}</td><td>${p.username}</td><td>${p.name}</td>
+        <td><span class="status-badge ${p.role === 'admin' ? 'status-in-progress' : 'status-pending'}">${p.role}</span></td>
+        <td>${new Date(createdAt).toLocaleDateString()}</td>
         <td class="actions">
-          <button class="action-btn edit" onclick="editUser(${u.id})">Edit</button>
-          ${u.username !== 'admin' ? `<button class="action-btn delete" onclick="deleteUser(${u.id})">X</button>` : ''}
+          <button class="action-btn edit" onclick="editUser('${p.id}')">Edit</button>
+          ${p.role !== 'admin' ? `<button class="action-btn delete" onclick="deleteUser('${p.id}')">X</button>` : ''}
         </td>`;
     });
   } catch (error) {
@@ -3079,14 +3141,17 @@ window.openUserModal = function(id) {
   const saveUserBtn = document.getElementById('saveUserBtn');
   if (saveUserBtn) saveUserBtn.disabled = false;
   
-  if (id) {
-    supabase.from('users').select('*').eq('id', id).single().then(r => {
+  if (id && supabaseClient) {
+    // Load existing user data
+    supabaseClient.from('profiles').select('*').eq('id', id).single().then(r => {
       if (r.data) {
         document.getElementById('newUsername').value = r.data.username;
         document.getElementById('newName').value = r.data.name;
         document.getElementById('newRole').value = r.data.role;
         document.getElementById('newPassword').required = false;
         document.getElementById('newPassword').placeholder = 'Leave blank to keep current';
+        document.getElementById('newEmail').required = false;
+        document.getElementById('newEmail').placeholder = 'Email cannot be changed';
       }
     }).catch(error => {
       console.error('Error loading user:', error);
@@ -3096,6 +3161,8 @@ window.openUserModal = function(id) {
     document.getElementById('userForm').reset();
     document.getElementById('newPassword').required = true;
     document.getElementById('newPassword').placeholder = '';
+    document.getElementById('newEmail').required = true;
+    document.getElementById('newEmail').placeholder = 'Enter email';
   }
 };
 
@@ -3105,6 +3172,11 @@ window.closeUserModal = function() {
 };
 
 window.saveUser = async function() {
+  if (!supabaseClient) {
+    showSnackbar('Connection error. Please refresh the page.', 'error');
+    return;
+  }
+  
   // Prevent multiple submissions for user form too
   if (isSubmitting) {
     showSnackbar('Please wait, saving in progress...', 'warning');
@@ -3117,9 +3189,10 @@ window.saveUser = async function() {
     return;
   }
   
+  const email = document.getElementById('newEmail').value.trim();
+  const password = document.getElementById('newPassword').value;
   const username = document.getElementById('newUsername').value.trim();
   const name = document.getElementById('newName').value.trim();
-  const password = document.getElementById('newPassword').value;
   const role = document.getElementById('newRole').value;
   
   // Set submission flag and disable button
@@ -3133,10 +3206,15 @@ window.saveUser = async function() {
   try {
     if (!editingUserId) {
       // Check if username already exists
-      const { data: existingUsers, error: checkError } = await supabase.from('users').select('username').eq('username', username);
+      const { data: existingProfiles, error: checkError } = await supabaseClient
+        .from('profiles')
+        .select('username')
+        .eq('username', username)
+        .maybeSingle();
+      
       if (checkError) throw checkError;
       
-      if (existingUsers && existingUsers.length > 0) {
+      if (existingProfiles) {
         showSnackbar('Username already exists', 'error');
         // Reset submission flag on error
         isSubmitting = false;
@@ -3144,20 +3222,67 @@ window.saveUser = async function() {
         if (saveUserBtnText) saveUserBtnText.textContent = editingUserId ? 'Update User' : 'Save User';
         return;
       }
-    }
-    
-    let result;
-    if (editingUserId) {
-      const updateData = { username, name, role };
-      if (password) updateData.password = password;
-      result = await supabase.from('users').update(updateData).eq('id', editingUserId);
+      
+      // Create new user using Supabase Auth
+      const { data: authData, error: authError } = await supabaseClient.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          data: {
+            username: username,
+            name: name,
+            role: role
+          }
+        }
+      });
+      
+      if (authError) throw authError;
+      
+      if (!authData.user) {
+        showSnackbar('Failed to create user', 'error');
+        isSubmitting = false;
+        if (saveUserBtn) saveUserBtn.disabled = false;
+        if (saveUserBtnText) saveUserBtnText.textContent = editingUserId ? 'Update User' : 'Save User';
+        return;
+      }
+      
+      // Create profile for the user
+      const { error: profileError } = await supabaseClient
+        .from('profiles')
+        .insert([{
+          id: authData.user.id,
+          username: username,
+          name: name,
+          role: role
+        }]);
+      
+      if (profileError) throw profileError;
+      
+      showSnackbar('User created successfully!', 'success');
     } else {
-      result = await supabase.from('users').insert([{ username, name, password, role }]);
+      // Update existing user
+      const updateData = { username, name, role };
+      
+      // Only update password if provided
+      if (password) {
+        const { error: updateError } = await supabaseClient.auth.updateUser({
+          password: password
+        });
+        
+        if (updateError) throw updateError;
+      }
+      
+      // Update profile
+      const { error: profileError } = await supabaseClient
+        .from('profiles')
+        .update(updateData)
+        .eq('id', editingUserId);
+      
+      if (profileError) throw profileError;
+      
+      showSnackbar('User updated successfully!', 'success');
     }
     
-    if (result.error) throw result.error;
-    
-    showSnackbar(editingUserId ? 'User updated successfully!' : 'User created successfully!', 'success');
     closeUserModal();
     await loadUsers();
     await loadUsersAndLocations();
@@ -3176,8 +3301,13 @@ window.editUser = function(id) {
 };
 
 window.deleteUser = async function(id) {
+  if (!supabaseClient) {
+    showSnackbar('Connection error. Please refresh the page.', 'error');
+    return;
+  }
+  
   const confirmed = await showConfirm(
-    'Are you sure you want to delete this user?', 
+    'Are you sure you want to delete this user? This action cannot be undone.', 
     'Delete User', 
     true
   );
@@ -3185,8 +3315,12 @@ window.deleteUser = async function(id) {
   if (!confirmed) return;
   
   try {
-    const { error } = await supabase.from('users').delete().eq('id', id);
+    // Delete user from auth (requires admin privileges)
+    // Note: This requires a server-side function in Supabase
+    // For now, we'll just delete from profiles
+    const { error } = await supabaseClient.from('profiles').delete().eq('id', id);
     if (error) throw error;
+    
     showSnackbar('User deleted successfully', 'success');
     await loadUsers();
     await loadUsersAndLocations();
@@ -3335,46 +3469,28 @@ function setupMobileMenu() {
 
 // Initialize everything when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-  // Check if Supabase is initialized
-  if (window.supabase && initializeSupabase()) {
-    setupCustomLocationDropdown();
-    setupCustomLocationFilter();
-    setupTheme();
-    setupDropdowns();
-    setupSorting();
-    checkLogin();
-    setupMobileMenu();
-    setupFileUpload();
-    
-    // Subscribe to real-time updates
-    try {
-      supabase.channel('tickets')
+  // Setup all components
+  setupCustomLocationDropdown();
+  setupCustomLocationFilter();
+  setupTheme();
+  setupDropdowns();
+  setupSorting();
+  checkLogin();
+  setupMobileMenu();
+  setupFileUpload();
+  
+  // Subscribe to real-time updates
+  try {
+    if (supabaseClient) {
+      supabaseClient.channel('tickets')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'tickets' }, () => {
           loadTickets();
           loadUsersAndLocations();
         })
         .subscribe();
-    } catch (error) {
-      console.error('Error setting up real-time subscription:', error);
     }
-  } else {
-    console.error('Supabase not available');
-    // Show error if Supabase fails to initialize
-    const loginPage = document.getElementById('loginPage');
-    if (loginPage) {
-      loginPage.innerHTML = `
-        <div class="login-container" style="text-align:center;">
-          <h3><i class="fas fa-exclamation-triangle"></i> System Error</h3>
-          <p style="color:var(--muted);margin:1rem 0;font-size:0.8rem;">
-            Failed to initialize database connection.<br>
-            Please refresh the page or contact support.
-          </p>
-          <button onclick="location.reload()" class="btn btn-primary">
-            <i class="fas fa-redo"></i> Refresh Page
-          </button>
-        </div>
-      `;
-    }
+  } catch (error) {
+    console.error('Error setting up real-time subscription:', error);
   }
 });
 </script>
