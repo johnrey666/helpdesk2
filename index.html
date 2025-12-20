@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Helpdesk Monitoring</title>
+<!-- CSP Meta Tag to allow external resources -->
+<meta http-equiv="Content-Security-Policy" 
+      content="default-src 'self' https://crdevgfrptdhhgqnpqzk.supabase.co;
+               style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com https://cdnjs.cloudflare.com;
+               script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com;
+               font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com;
+               connect-src 'self' https://crdevgfrptdhhgqnpqzk.supabase.co https://cdn.jsdelivr.net;
+               img-src 'self' data:;">
 <link rel="icon" href="icon2.png" type="image/png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
@@ -2139,34 +2147,10 @@ td:nth-child(7) { /* Category column */
 
 <div id="snackbar" class="snackbar"></div>
 
-<!-- CHANGED: Regular script instead of module -->
+<!-- FIXED: JavaScript with corrected Supabase initialization -->
 <script>
-// Initialize Supabase with proper error handling
-let supabase;
-try {
-  supabase = window.supabase.createClient(
-    'https://crdevgfrptdhhgqnpqzk.supabase.co',
-    'sb_publishable_nLYTInAlXEqxy6YbMIxKpw_ZacBlomD'
-  );
-  console.log('Supabase client initialized successfully');
-} catch (error) {
-  console.error('Failed to initialize Supabase:', error);
-  // Show error to user
-  document.getElementById('loginPage').innerHTML = `
-    <div class="login-container" style="text-align:center;">
-      <h3><i class="fas fa-exclamation-triangle"></i> System Error</h3>
-      <p style="color:var(--muted);margin:1rem 0;font-size:0.8rem;">
-        Failed to initialize database connection.<br>
-        Please refresh the page or contact support.
-      </p>
-      <button onclick="location.reload()" class="btn btn-primary">
-        <i class="fas fa-redo"></i> Refresh Page
-      </button>
-    </div>
-  `;
-}
-
 // Global variables
+let supabase;
 let currentUser = null;
 let editingTicketId = null;
 let editingUserId = null;
@@ -2189,6 +2173,25 @@ let currentFileIndex = 0;
 // Form submission flag to prevent multiple submissions
 let isSubmitting = false;
 
+// Initialize Supabase with proper error handling
+function initializeSupabase() {
+  // Check if supabase is already initialized
+  if (window.supabase && !supabase) {
+    try {
+      supabase = window.supabase.createClient(
+        'https://crdevgfrptdhhgqnpqzk.supabase.co',
+        'sb_publishable_nLYTInAlXEqxy6YbMIxKpw_ZacBlomD'
+      );
+      console.log('Supabase client initialized successfully');
+      return true;
+    } catch (error) {
+      console.error('Failed to initialize Supabase:', error);
+      return false;
+    }
+  }
+  return !!supabase;
+}
+
 // File to Base64 conversion function
 function fileToBase64(file) {
   return new Promise((resolve, reject) => {
@@ -2206,6 +2209,8 @@ function setupCustomLocationDropdown() {
   const display = document.getElementById('locationDisplay');
   const options = document.getElementById('locationOptions');
   const hidden = document.getElementById('location');
+  
+  if (!display || !options) return;
   
   display.addEventListener('click', e => { e.stopPropagation(); options.classList.toggle('show'); });
   document.addEventListener('click', e => { if (!display.contains(e.target) && !options.contains(e.target)) options.classList.remove('show'); });
@@ -2226,6 +2231,8 @@ function setupCustomLocationDropdown() {
 function setupCustomLocationFilter() {
   const display = document.getElementById('locationFilterDisplay');
   const options = document.getElementById('locationFilterOptions');
+  
+  if (!display || !options) return;
   
   display.addEventListener('click', e => { e.stopPropagation(); options.classList.toggle('show'); });
   document.addEventListener('click', e => { if (!display.contains(e.target) && !options.contains(e.target)) options.classList.remove('show'); });
@@ -2248,6 +2255,8 @@ function setupTheme() {
   const darkModeToggle = document.getElementById('darkModeToggle');
   const mobileDarkModeToggle = document.getElementById('mobileDarkModeToggle');
   
+  if (!darkModeToggle || !mobileDarkModeToggle) return;
+  
   if (localStorage.getItem('darkMode') === 'true') {
     document.body.classList.add('dark-mode');
     darkModeToggle.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
@@ -2267,8 +2276,13 @@ function toggleDarkMode() {
   const darkModeToggle = document.getElementById('darkModeToggle');
   const mobileDarkModeToggle = document.getElementById('mobileDarkModeToggle');
   
-  darkModeToggle.innerHTML = d ? '<i class="fas fa-sun"></i> Light Mode' : '<i class="fas fa-moon"></i> Dark Mode';
-  mobileDarkModeToggle.innerHTML = d ? '<i class="fas fa-sun"></i> Light Mode' : '<i class="fas fa-moon"></i> Dark Mode';
+  if (darkModeToggle) {
+    darkModeToggle.innerHTML = d ? '<i class="fas fa-sun"></i> Light Mode' : '<i class="fas fa-moon"></i> Dark Mode';
+  }
+  
+  if (mobileDarkModeToggle) {
+    mobileDarkModeToggle.innerHTML = d ? '<i class="fas fa-sun"></i> Light Mode' : '<i class="fas fa-moon"></i> Dark Mode';
+  }
 }
 
 function setupDropdowns() {
@@ -2310,6 +2324,8 @@ function applySorting() {
 
 function populateUserFilter() {
   const sel = document.getElementById('userFilter');
+  if (!sel) return;
+  
   sel.innerHTML = '<option value="">All Users</option>';
   allUsers.forEach(u => {
     const opt = document.createElement('option');
@@ -2346,6 +2362,8 @@ function applyFilters() {
 
 function showSnackbar(msg, type = 'success') {
   const s = document.getElementById('snackbar');
+  if (!s) return;
+  
   s.textContent = msg;
   s.className = 'snackbar ' + type;
   s.classList.add('show');
@@ -2360,6 +2378,11 @@ function showConfirm(message, title = 'Confirmation', dangerAction = false) {
     const titleEl = document.getElementById('confirmTitle');
     const okBtn = document.getElementById('confirmOk');
     const cancelBtn = document.getElementById('confirmCancel');
+    
+    if (!dialog || !messageEl || !titleEl || !okBtn || !cancelBtn) {
+      resolve(false);
+      return;
+    }
     
     messageEl.textContent = message;
     titleEl.textContent = title;
@@ -2434,6 +2457,7 @@ async function loadUsersAndLocations() {
   }
 }
 
+// Login form submission
 document.getElementById('loginForm').addEventListener('submit', async e => {
   e.preventDefault();
   const u = document.getElementById('username').value.trim();
@@ -2555,6 +2579,8 @@ function setupFileUpload() {
   const fileInput = document.getElementById('fileInput');
   const fileList = document.getElementById('fileList');
   
+  if (!fileInput || !fileList) return;
+  
   // Handle file selection
   fileInput.addEventListener('change', function(e) {
     const files = Array.from(e.target.files);
@@ -2591,55 +2617,59 @@ function setupFileUpload() {
   
   // Drag and drop functionality
   const uploadContainer = document.querySelector('.file-upload-container');
-  uploadContainer.addEventListener('dragover', function(e) {
-    e.preventDefault();
-    uploadContainer.style.borderColor = 'var(--primary)';
-    uploadContainer.style.background = 'var(--primary-light)';
-  });
-  
-  uploadContainer.addEventListener('dragleave', function(e) {
-    e.preventDefault();
-    uploadContainer.style.borderColor = 'var(--border)';
-    uploadContainer.style.background = 'var(--hover)';
-  });
-  
-  uploadContainer.addEventListener('drop', function(e) {
-    e.preventDefault();
-    uploadContainer.style.borderColor = 'var(--border)';
-    uploadContainer.style.background = 'var(--hover)';
+  if (uploadContainer) {
+    uploadContainer.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      uploadContainer.style.borderColor = 'var(--primary)';
+      uploadContainer.style.background = 'var(--primary-light)';
+    });
     
-    const files = Array.from(e.dataTransfer.files);
+    uploadContainer.addEventListener('dragleave', function(e) {
+      e.preventDefault();
+      uploadContainer.style.borderColor = 'var(--border)';
+      uploadContainer.style.background = 'var(--hover)';
+    });
     
-    // Check file size (max 5MB)
-    const oversizedFiles = files.filter(file => file.size > 5 * 1024 * 1024);
-    if (oversizedFiles.length > 0) {
-      showSnackbar('Some files exceed the 5MB size limit', 'error');
-      return;
-    }
-    
-    // Add files to the list
-    files.forEach(file => {
-      if (uploadedFiles.length >= 10) {
-        showSnackbar('Maximum 10 files allowed', 'error');
+    uploadContainer.addEventListener('drop', function(e) {
+      e.preventDefault();
+      uploadContainer.style.borderColor = 'var(--border)';
+      uploadContainer.style.background = 'var(--hover)';
+      
+      const files = Array.from(e.dataTransfer.files);
+      
+      // Check file size (max 5MB)
+      const oversizedFiles = files.filter(file => file.size > 5 * 1024 * 1024);
+      if (oversizedFiles.length > 0) {
+        showSnackbar('Some files exceed the 5MB size limit', 'error');
         return;
       }
       
-      const fileId = Date.now() + Math.random().toString(36).substr(2, 9);
-      uploadedFiles.push({
-        id: fileId,
-        file: file,
-        name: file.name,
-        size: formatFileSize(file.size),
-        type: file.type
+      // Add files to the list
+      files.forEach(file => {
+        if (uploadedFiles.length >= 10) {
+          showSnackbar('Maximum 10 files allowed', 'error');
+          return;
+        }
+        
+        const fileId = Date.now() + Math.random().toString(36).substr(2, 9);
+        uploadedFiles.push({
+          id: fileId,
+          file: file,
+          name: file.name,
+          size: formatFileSize(file.size),
+          type: file.type
+        });
       });
+      
+      renderFileList();
     });
-    
-    renderFileList();
-  });
+  }
 }
 
 function renderFileList() {
   const fileList = document.getElementById('fileList');
+  if (!fileList) return;
+  
   fileList.innerHTML = '';
   
   if (uploadedFiles.length === 0) {
@@ -2717,13 +2747,17 @@ window.openModal = function(id) {
   
   // Reset submission flag when opening modal
   isSubmitting = false;
-  document.getElementById('saveTicketBtn').disabled = false;
+  const saveBtn = document.getElementById('saveTicketBtn');
+  if (saveBtn) saveBtn.disabled = false;
   
-  if (id) {
+  if (id && supabase) {
     supabase.from('tickets').select('*').eq('id', id).single().then(r => {
       if (r.data) {
         document.getElementById('date').value = r.data.date;
-        document.getElementById('locationDisplay').querySelector('span').textContent = r.data.location || '-- Select Location --';
+        const locationDisplay = document.getElementById('locationDisplay');
+        if (locationDisplay) {
+          locationDisplay.querySelector('span').textContent = r.data.location || '-- Select Location --';
+        }
         document.getElementById('location').value = r.data.location || '';
         document.getElementById('ticketId').value = r.data.ticket_id || '';
         document.getElementById('titleDesc').value = r.data.title_description || '';
@@ -2747,7 +2781,10 @@ window.openModal = function(id) {
     document.getElementById('ticketForm').reset();
     document.getElementById('date').value = new Date().toISOString().split('T')[0];
     document.getElementById('requester').value = currentUser ? currentUser.name : '';
-    document.getElementById('locationDisplay').querySelector('span').textContent = '-- Select Location --';
+    const locationDisplay = document.getElementById('locationDisplay');
+    if (locationDisplay) {
+      locationDisplay.querySelector('span').textContent = '-- Select Location --';
+    }
     document.getElementById('location').value = '';
   }
 };
@@ -2767,15 +2804,18 @@ window.saveTicket = async function() {
   }
   
   const f = document.getElementById('ticketForm');
-  if (!f.checkValidity()) {
-    f.reportValidity();
+  if (!f || !f.checkValidity()) {
+    if (f) f.reportValidity();
     return;
   }
   
   // Set submission flag and disable button
   isSubmitting = true;
-  document.getElementById('saveTicketBtn').disabled = true;
-  document.getElementById('saveBtnText').textContent = 'Saving...';
+  const saveBtn = document.getElementById('saveTicketBtn');
+  const saveBtnText = document.getElementById('saveBtnText');
+  
+  if (saveBtn) saveBtn.disabled = true;
+  if (saveBtnText) saveBtnText.textContent = 'Saving...';
   
   try {
     // Convert files to Base64 if any
@@ -2799,8 +2839,8 @@ window.saveTicket = async function() {
             showSnackbar('Error processing files', 'error');
             // Reset submission flag on error
             isSubmitting = false;
-            document.getElementById('saveTicketBtn').disabled = false;
-            document.getElementById('saveBtnText').textContent = editingTicketId ? 'Update Ticket' : 'Save Ticket';
+            if (saveBtn) saveBtn.disabled = false;
+            if (saveBtnText) saveBtnText.textContent = editingTicketId ? 'Update Ticket' : 'Save Ticket';
             return;
           }
         } else {
@@ -2836,8 +2876,8 @@ window.saveTicket = async function() {
       showSnackbar('Database error: ' + result.error.message, 'error');
       // Reset submission flag on error
       isSubmitting = false;
-      document.getElementById('saveTicketBtn').disabled = false;
-      document.getElementById('saveBtnText').textContent = editingTicketId ? 'Update Ticket' : 'Save Ticket';
+      if (saveBtn) saveBtn.disabled = false;
+      if (saveBtnText) saveBtnText.textContent = editingTicketId ? 'Update Ticket' : 'Save Ticket';
       return;
     }
     
@@ -2850,8 +2890,8 @@ window.saveTicket = async function() {
     showSnackbar('Unexpected error: ' + e.message, 'error');
     // Reset submission flag on error
     isSubmitting = false;
-    document.getElementById('saveTicketBtn').disabled = false;
-    document.getElementById('saveBtnText').textContent = editingTicketId ? 'Update Ticket' : 'Save Ticket';
+    if (saveBtn) saveBtn.disabled = false;
+    if (saveBtnText) saveBtnText.textContent = editingTicketId ? 'Update Ticket' : 'Save Ticket';
   }
 };
 
@@ -2902,6 +2942,8 @@ async function loadTickets() {
 
 function renderTable() {
   const tb = document.getElementById('tableBody');
+  if (!tb) return;
+  
   const start = (currentPage - 1) * itemsPerPage;
   const end = start + itemsPerPage;
   tb.innerHTML = '';
@@ -2944,20 +2986,26 @@ function renderTable() {
 function updatePagination() {
   const start = (currentPage - 1) * itemsPerPage + 1;
   const end = Math.min(currentPage * itemsPerPage, filteredTickets.length);
-  document.getElementById('paginationInfo').textContent = `Showing ${start}-${end} of ${filteredTickets.length}`;
+  const paginationInfo = document.getElementById('paginationInfo');
+  if (paginationInfo) {
+    paginationInfo.textContent = `Showing ${start}-${end} of ${filteredTickets.length}`;
+  }
+  
   document.getElementById('firstPage').disabled = currentPage === 1;
   document.getElementById('prevPage').disabled = currentPage === 1;
   document.getElementById('nextPage').disabled = currentPage === totalPages;
   document.getElementById('lastPage').disabled = currentPage === totalPages;
   
   const pn = document.getElementById('pageNumbers');
-  pn.innerHTML = '';
-  for (let i = 1; i <= totalPages; i++) {
-    const b = document.createElement('button');
-    b.className = 'pagination-btn' + (i === currentPage ? ' active' : '');
-    b.textContent = i;
-    b.onclick = () => goToPage(i);
-    pn.appendChild(b);
+  if (pn) {
+    pn.innerHTML = '';
+    for (let i = 1; i <= totalPages; i++) {
+      const b = document.createElement('button');
+      b.className = 'pagination-btn' + (i === currentPage ? ' active' : '');
+      b.textContent = i;
+      b.onclick = () => goToPage(i);
+      pn.appendChild(b);
+    }
   }
 }
 
@@ -2968,9 +3016,22 @@ window.goToPage = function(p) {
   updatePagination();
 };
 
-document.getElementById('searchInput').addEventListener('input', () => { currentPage = 1; applyFilters(); });
-document.getElementById('statusFilter').addEventListener('change', applyFilters);
-document.getElementById('userFilter').addEventListener('change', applyFilters);
+// Event listeners for filters
+const searchInput = document.getElementById('searchInput');
+const statusFilter = document.getElementById('statusFilter');
+const userFilter = document.getElementById('userFilter');
+
+if (searchInput) {
+  searchInput.addEventListener('input', () => { currentPage = 1; applyFilters(); });
+}
+
+if (statusFilter) {
+  statusFilter.addEventListener('change', applyFilters);
+}
+
+if (userFilter) {
+  userFilter.addEventListener('change', applyFilters);
+}
 
 async function loadUsers() {
   try {
@@ -2978,6 +3039,8 @@ async function loadUsers() {
     if (error) throw error;
     
     const tb = document.getElementById('usersTableBody');
+    if (!tb) return;
+    
     tb.innerHTML = '';
     
     data?.forEach(u => {
@@ -3013,7 +3076,8 @@ window.openUserModal = function(id) {
   
   // Reset submission flag when opening user modal
   isSubmitting = false;
-  document.getElementById('saveUserBtn').disabled = false;
+  const saveUserBtn = document.getElementById('saveUserBtn');
+  if (saveUserBtn) saveUserBtn.disabled = false;
   
   if (id) {
     supabase.from('users').select('*').eq('id', id).single().then(r => {
@@ -3048,8 +3112,8 @@ window.saveUser = async function() {
   }
   
   const f = document.getElementById('userForm');
-  if (!f.checkValidity()) {
-    f.reportValidity();
+  if (!f || !f.checkValidity()) {
+    if (f) f.reportValidity();
     return;
   }
   
@@ -3060,8 +3124,11 @@ window.saveUser = async function() {
   
   // Set submission flag and disable button
   isSubmitting = true;
-  document.getElementById('saveUserBtn').disabled = true;
-  document.getElementById('saveUserBtnText').textContent = 'Saving...';
+  const saveUserBtn = document.getElementById('saveUserBtn');
+  const saveUserBtnText = document.getElementById('saveUserBtnText');
+  
+  if (saveUserBtn) saveUserBtn.disabled = true;
+  if (saveUserBtnText) saveUserBtnText.textContent = 'Saving...';
   
   try {
     if (!editingUserId) {
@@ -3073,8 +3140,8 @@ window.saveUser = async function() {
         showSnackbar('Username already exists', 'error');
         // Reset submission flag on error
         isSubmitting = false;
-        document.getElementById('saveUserBtn').disabled = false;
-        document.getElementById('saveUserBtnText').textContent = editingUserId ? 'Update User' : 'Save User';
+        if (saveUserBtn) saveUserBtn.disabled = false;
+        if (saveUserBtnText) saveUserBtnText.textContent = editingUserId ? 'Update User' : 'Save User';
         return;
       }
     }
@@ -3099,8 +3166,8 @@ window.saveUser = async function() {
     showSnackbar('Error: ' + e.message, 'error');
     // Reset submission flag on error
     isSubmitting = false;
-    document.getElementById('saveUserBtn').disabled = false;
-    document.getElementById('saveUserBtnText').textContent = editingUserId ? 'Update User' : 'Save User';
+    if (saveUserBtn) saveUserBtn.disabled = false;
+    if (saveUserBtnText) saveUserBtnText.textContent = editingUserId ? 'Update User' : 'Save User';
   }
 };
 
@@ -3244,6 +3311,8 @@ function setupMobileMenu() {
   const mobileMenuBtn = document.getElementById('mobileMenuBtn');
   const mobileMenu = document.getElementById('mobileMenu');
   
+  if (!mobileMenuBtn || !mobileMenu) return;
+  
   mobileMenuBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     mobileMenu.classList.toggle('show');
@@ -3265,9 +3334,9 @@ function setupMobileMenu() {
 }
 
 // Initialize everything when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-  // Only initialize if Supabase is available
-  if (supabase) {
+document.addEventListener('DOMContentLoaded', function() {
+  // Check if Supabase is initialized
+  if (window.supabase && initializeSupabase()) {
     setupCustomLocationDropdown();
     setupCustomLocationFilter();
     setupTheme();
@@ -3287,6 +3356,24 @@ document.addEventListener('DOMContentLoaded', () => {
         .subscribe();
     } catch (error) {
       console.error('Error setting up real-time subscription:', error);
+    }
+  } else {
+    console.error('Supabase not available');
+    // Show error if Supabase fails to initialize
+    const loginPage = document.getElementById('loginPage');
+    if (loginPage) {
+      loginPage.innerHTML = `
+        <div class="login-container" style="text-align:center;">
+          <h3><i class="fas fa-exclamation-triangle"></i> System Error</h3>
+          <p style="color:var(--muted);margin:1rem 0;font-size:0.8rem;">
+            Failed to initialize database connection.<br>
+            Please refresh the page or contact support.
+          </p>
+          <button onclick="location.reload()" class="btn btn-primary">
+            <i class="fas fa-redo"></i> Refresh Page
+          </button>
+        </div>
+      `;
     }
   }
 });
